@@ -1,205 +1,185 @@
-"""Scanner do subconjunto COBOL descrito na seção 2 da especificação.
+"""Scanner COBOL em formato fixo, incluindo os recursos dos exemplos ebasso."""
 
-A camada de posições de colunas fica em fixed_format.py. Este scanner
-reconhece lexemas, produz tokens e acumula erros recuperáveis.
-"""
-
-from dataclasses import dataclass, field
 import re
 
-from .fixed_format import FixedLine, read_fixed_lines
+from .fixed_format import LogicalLine, read_logical_lines
 from .model import Diagnostic, LexerResult, Token
 
 
-# Lista EXPRESSA de palavras reservadas da seção 2.2.
-# Outras palavras da gramática (por exemplo, PROGRAM-ID, PIC, VALUE) são,
-# nesta etapa, IDENTIFIER. Isso pode ser estendido após os testes oficiais.
 RESERVED_WORDS = frozenset(
     "IDENTIFICATION ENVIRONMENT DATA PROCEDURE DIVISION SECTION "
-    "DISPLAY ACCEPT PERFORM STOP RUN IF ELSE MOVE".split()
+    "DISPLAY ACCEPT PERFORM STOP RUN IF ELSE MOVE "
+    "ACCESS ADD ADVANCING AFTER ALL ALTERNATE AND ASSIGN AT AUTHOR BEFORE "
+    "BLOCK BY CHARACTERS CLOSE COMPUTE CONFIGURATION CONTAINS CONVERTING "
+    "COPY DATE-COMPILED DATE-WRITTEN DIVIDE DYNAMIC END END-EVALUATE END-IF "
+    "END-SEARCH EQUAL ERROR EVALUATE FD FILE FILE-CONTROL FIRST FOR FROM "
+    "FUNCTION GIVING I-O INDEXED INITIAL INPUT INPUT-OUTPUT INSPECT "
+    "INSTALLATION INTO INVALID IS KEY LEADING LOW-VALUE LOW-VALUES MODE "
+    "MULTIPLY NO NOT OCCURS OF ON OPEN OR ORGANIZATION OTHER OUTPUT "
+    "PIC PICTURE PROGRAM PROGRAM-ID READ RECORD RECORDS REMAINDER REMARKS "
+    "REPLACING SEARCH SECURITY SELECT SET SIZE SPACE SPACES START STATUS "
+    "STRING SUBTRACT TALLYING TIMES TO UNTIL UPPER-CASE VALUE VALUES "
+    "WHEN WITH WORKING-STORAGE WRITE ZERO ZEROES ZEROS".split()
 )
 
 PUNCTUATION = {".": "PERIOD", ",": "COMMA", ";": "SEMICOLON", "(": "LPAREN", ")": "RPAREN"}
-WORD_RE = re.compile(r"[A-Za-z0-9-]+")
+OPERATORS = {
+    "**": "POWER", "<=": "LESS_EQUAL", ">=": "GREATER_EQUAL", "<>": "NOT_EQUAL",
+    "=": "EQUAL", "<": "LESS_THAN", ">": "GREATER_THAN",
+    "+": "PLUS", "-": "MINUS", "*": "MULTIPLY", "/": "DIVIDE",
+}
+WORD_RE = re.compile(r"[A-Za-z0-9_-]+")
 SIGNED_NUMBER_RE = re.compile(r"[+-][0-9]+(?:\.[0-9]+)?")
 DECIMAL_RE = re.compile(r"[0-9]+\.[0-9]+")
-
-
-@dataclass(slots=True)
-class _OpenString:
-    quote: str
-    start_line: int
-    start_column: int
-    characters: list[str] = field(default_factory=list)
+PICTURE_RE = re.compile(r"(?:(?:CR|DB|[AX9SVPZ0B/,.+*$-])(?:\([0-9]+\))?)+", re.IGNORECASE)
+REPETITION_RE = re.compile(r"\(([0-9]+)\)")
 
 
 class CobolLexer:
-    """Lexer sem validação de gramática: separa tokens e aponta erros léxicos.
-
-    debug_lines=False ignora linhas com 'D' na coluna 7, por padrão.
-    Por não haver regra explícita de execução de debug na seção 2,
-    a política é configurável.
-    """
+    """Produz tokens e diagnósticos com posições físicas, sem validar a gramática."""
 
     def __init__(self, *, debug_lines: bool = False) -> None:
         self.debug_lines = debug_lines
 
     def tokenize(self, source: str) -> LexerResult:
         result = LexerResult()
-        pending: _OpenString | None = None
-
-        for physical in read_fixed_lines(source):
-            indicator = physical.indicator.upper()
-
-            if physical.tab_column is not None:
-                self._error(result, "TAB_IN_SOURCE", "TAB não permitido em formato fixo; use espaços.", physical.line_number, physical.tab_column)
-                continue
-
-            # Comentários e linhas de debugging desabilitadas são descartados.
-            if indicator in ("*", "/") or (indicator == "D" and not self.debug_lines):
-                continue
-
-            if indicator == "":
-                self._error(result, "INVALID_LINE", "Linha não vazia tem menos de 7 colunas.", physical.line_number, 1)
-                continue
-
-            if indicator not in (" ", "-", "D"):
-                self._error(result, "INVALID_INDICATOR", f"Indicador {physical.indicator!r} desconhecido na coluna 7.", physical.line_number, 7)
-                continue
-
-            if pending is not None and indicator != "-":
-                self._error(
-                    result, "UNTERMINATED_STRING",
-                    "Literal não terminado; a continuação exige '-' na coluna 7.",
-                    pending.start_line, pending.start_column,
-                )
-                pending = None
-
-            if indicator == "-":
-                if pending is None:
-                    self._error(result, "UNEXPECTED_CONTINUATION", "Continuação sem literal aberto na linha anterior.", physical.line_number, 7)
-                    continue
-                # Na continuação, ignoram-se a indentação e uma eventual
-                # repetição da aspa delimitadora (convenção COBOL).
-                code = physical.code
-                position = len(code) - len(code.lstrip(" "))
-                if position < len(code) and code[position] == pending.quote:
-                    position += 1
-                pending = self._scan_code(physical, position, result, pending)
-            else:
-                pending = self._scan_code(physical, 0, result, None)
-
-        if pending is not None:
-            self._error(result, "UNTERMINATED_STRING", "Literal alfanumérico não terminado até o fim do arquivo.", pending.start_line, pending.start_column)
-
+        picture_expected = False
+        for logical in read_logical_lines(source, result.diagnostics, debug_lines=self.debug_lines):
+            picture_expected = self._scan_code(logical, result, picture_expected)
+        result.diagnostics.sort(key=lambda error: (error.line, error.column))
         return result
 
     @staticmethod
-    def _error(result: LexerResult, code: str, message: str, line: int, column: int) -> None:
+    def _error(result: LexerResult, source: LogicalLine, index: int, code: str, message: str) -> None:
+        line, column = source.positions[index]
         result.diagnostics.append(Diagnostic(code, message, line, column))
 
     @staticmethod
-    def _area(column: int) -> str:
-        return "A" if 8 <= column <= 11 else "B"
+    def _emit(
+        result: LexerResult, source: LogicalLine, start: int, end: int,
+        kind: str, lexeme: str, value: str,
+    ) -> None:
+        line, column = source.positions[start]
+        end_line, end_column = source.positions[end - 1]
+        area = "A" if 8 <= column <= 11 else "B"
+        result.tokens.append(Token(kind, lexeme, value, line, column, area, end_line, end_column))
 
-    @classmethod
-    def _emit(cls, result: LexerResult, kind: str, lexeme: str, value: str, line: int, column: int, end_line: int, end_column: int) -> None:
-        result.tokens.append(Token(kind, lexeme, value, line, column, cls._area(column), end_line, end_column))
-
-    def _scan_code(
-        self, physical: FixedLine, position: int, result: LexerResult, pending: _OpenString | None
-    ) -> _OpenString | None:
-        code = physical.code
-        n = len(code)
-        i = position
-
-        while i < n:
-            current = code[i]
-            col = i + 8
-
-            if pending is not None:
-                if current == pending.quote:
-                    # Aspas duplicadas representam uma única aspa no valor.
-                    if i + 1 < n and code[i + 1] == pending.quote:
-                        pending.characters.append(current)
-                        i += 2
-                        continue
-                    value = "".join(pending.characters)
-                    canonical_lexeme = pending.quote + value.replace(pending.quote, pending.quote * 2) + pending.quote
-                    self._emit(result, "STRING", canonical_lexeme, value, pending.start_line, pending.start_column, physical.line_number, col)
-                    pending = None
-                    i += 1
-                    continue
-                pending.characters.append(current)
-                i += 1
-                continue
-
+    def _scan_code(self, source: LogicalLine, result: LexerResult, picture_expected: bool) -> bool:
+        code = source.code
+        index = 0
+        while index < len(code):
+            current = code[index]
             if current == " ":
-                i += 1
+                index += 1
                 continue
+
+            if picture_expected:
+                word = WORD_RE.match(code, index)
+                if word is not None and word.group().upper() == "IS":
+                    self._emit(result, source, index, word.end(), "KEYWORD", word.group(), "IS")
+                    index = word.end()
+                    continue
+                picture_expected = False
+                if current != ".":
+                    end = code.find(" ", index)
+                    if end == -1:
+                        end = len(code)
+                    lexeme = code[index:end].rstrip(".")
+                    end = index + len(lexeme)
+                    if PICTURE_RE.fullmatch(lexeme) and all(
+                        count.strip("0") for count in REPETITION_RE.findall(lexeme)
+                    ):
+                        self._emit(result, source, index, end, "PICTURE", lexeme, lexeme.upper())
+                    else:
+                        self._error(result, source, index, "INVALID_PICTURE", f"Máscara PIC inválida: {lexeme!r}.")
+                    index = end
+                    continue
 
             if current in ("'", '"'):
-                pending = _OpenString(current, physical.line_number, col)
-                i += 1
+                start = index
+                quote = current
+                characters: list[str] = []
+                index += 1
+                while index < len(code):
+                    if code[index] == quote:
+                        if index + 1 < len(code) and code[index + 1] == quote:
+                            characters.append(quote)
+                            index += 2
+                            continue
+                        index += 1
+                        value = "".join(characters)
+                        self._emit(result, source, start, index, "STRING", code[start:index], value)
+                        break
+                    characters.append(code[index])
+                    index += 1
+                else:
+                    self._error(
+                        result, source, start, "UNTERMINATED_STRING",
+                        "Literal não terminado; a continuação exige '-' na coluna 7.",
+                    )
                 continue
 
             if current in PUNCTUATION:
-                self._emit(result, PUNCTUATION[current], current, current, physical.line_number, col, physical.line_number, col)
-                i += 1
+                self._emit(result, source, index, index + 1, PUNCTUATION[current], current, current)
+                index += 1
                 continue
 
-            if current in ("+", "-") and i + 1 < n and code[i + 1].isdigit():
-                match = SIGNED_NUMBER_RE.match(code, i)
-                assert match is not None
-                lexeme = match.group(0)
-                # Um sinal não pode iniciar uma palavra definida pelo usuário.
-                if match.end() < n and (code[match.end()].isalpha() or code[match.end()] == "-"):
-                    end = match.end()
-                    while end < n and (code[end].isalnum() or code[end] == "-"):
+            signed_number = SIGNED_NUMBER_RE.match(code, index)
+            if signed_number is not None and (index == 0 or code[index - 1] in " (=<>*/,+-"):
+                end = signed_number.end()
+                if end < len(code) and (code[end].isalpha() or code[end] in "-_"):
+                    while end < len(code) and (code[end].isalnum() or code[end] in "-_"):
                         end += 1
-                    self._error(result, "INVALID_WORD", f"Palavra inválida: {code[i:end]!r}.", physical.line_number, col)
-                    i = end
-                    continue
-                self._emit(result, "NUMBER", lexeme, lexeme, physical.line_number, col, physical.line_number, 8 + match.end() - 1)
-                i = match.end()
+                    self._error(result, source, index, "INVALID_WORD", f"Palavra inválida: {code[index:end]!r}.")
+                else:
+                    lexeme = signed_number.group()
+                    self._emit(result, source, index, end, "NUMBER", lexeme, lexeme)
+                index = end
                 continue
 
-            if current.isascii() and current.isalnum():
-                word = WORD_RE.match(code, i)
-                assert word is not None
-                lexeme = word.group(0)
+            operator = code[index:index + 2]
+            if operator not in OPERATORS:
+                operator = current
+            if operator in OPERATORS:
+                end = index + len(operator)
+                self._emit(result, source, index, end, OPERATORS[operator], operator, operator)
+                index = end
+                continue
+
+            word = WORD_RE.match(code, index)
+            if word is not None:
+                lexeme = word.group()
                 end = word.end()
-
-                # Inteiro seguido de .dígitos constitui um único literal decimal.
-                if lexeme.isdigit() and end < n and code[end] == ".":
-                    decimal = DECIMAL_RE.match(code, i)
-                    if decimal is not None:
-                        lexeme = decimal.group(0)
-                        end = decimal.end()
-                        self._emit(result, "NUMBER", lexeme, lexeme, physical.line_number, col, physical.line_number, end + 7)
-                        i = end
-                        continue
-
-                if lexeme.isdigit():
+                decimal = DECIMAL_RE.match(code, index) if lexeme.isdigit() else None
+                if decimal is not None:
+                    lexeme = decimal.group()
+                    end = decimal.end()
                     kind, value = "NUMBER", lexeme
-                elif lexeme.startswith("-") or lexeme.endswith("-"):
-                    self._error(result, "INVALID_IDENTIFIER", f"Identificador não pode iniciar/terminar com hífen: {lexeme!r}.", physical.line_number, col)
-                    i = end
+                elif lexeme.isdigit():
+                    kind, value = "NUMBER", lexeme
+                elif lexeme.startswith(("-", "_")) or lexeme.endswith(("-", "_")):
+                    self._error(
+                        result, source, index, "INVALID_IDENTIFIER",
+                        f"Identificador não pode iniciar/terminar com hífen ou underscore: {lexeme!r}.",
+                    )
+                    index = end
                     continue
                 elif len(lexeme) > 30:
-                    self._error(result, "IDENTIFIER_TOO_LONG", f"Identificador contém {len(lexeme)} caracteres (máximo 30).", physical.line_number, col)
-                    i = end
+                    self._error(
+                        result, source, index, "IDENTIFIER_TOO_LONG",
+                        f"Identificador contém {len(lexeme)} caracteres (máximo 30).",
+                    )
+                    index = end
                     continue
-                elif lexeme.upper() in RESERVED_WORDS:
-                    kind, value = "KEYWORD", lexeme.upper()
                 else:
-                    kind, value = "IDENTIFIER", lexeme.upper()
-
-                self._emit(result, kind, lexeme, value, physical.line_number, col, physical.line_number, end + 7)
-                i = end
+                    value = lexeme.upper()
+                    kind = "KEYWORD" if value in RESERVED_WORDS else "IDENTIFIER"
+                self._emit(result, source, index, end, kind, lexeme, value)
+                picture_expected = kind == "KEYWORD" and value in ("PIC", "PICTURE")
+                index = end
                 continue
 
-            self._error(result, "INVALID_CHARACTER", f"Caractere {current!r} não reconhecido.", physical.line_number, col)
-            i += 1
+            self._error(result, source, index, "INVALID_CHARACTER", f"Caractere {current!r} não reconhecido.")
+            index += 1
 
-        return pending
+        return picture_expected
