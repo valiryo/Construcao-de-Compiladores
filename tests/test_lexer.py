@@ -37,7 +37,7 @@ class CobolLexerTests(unittest.TestCase):
     def test_identifiers_and_hyphens(self):
         result = self.scan(fixed("PROGRAM-ID TESTE-123 A--B"))
         self.assertTrue(result.success)
-        self.assertEqual([(x.kind, x.lexeme) for x in result.tokens], [("IDENTIFIER", "PROGRAM-ID"), ("IDENTIFIER", "TESTE-123"), ("IDENTIFIER", "A--B")])
+        self.assertEqual([(x.kind, x.lexeme) for x in result.tokens], [("KEYWORD", "PROGRAM-ID"), ("IDENTIFIER", "TESTE-123"), ("IDENTIFIER", "A--B")])
 
     def test_numbers_signed_decimals_and_period(self):
         result = self.scan(fixed("01 -123.45 +8 42. 1.2"))
@@ -71,6 +71,22 @@ class CobolLexerTests(unittest.TestCase):
         self.assertEqual(self.scan(source).tokens, [])
         self.assertEqual(len(self.scan(source, debug_lines=True).tokens), 3)
 
+    def test_comments_with_tabs_ignored(self):
+        for indicator in ("*", "/"):
+            with self.subTest(indicator=indicator):
+                result = self.scan(fixed("COMMENT\t@ '", indicator=indicator), fixed("STOP RUN."))
+                self.assertTrue(result.success, result.diagnostics)
+                self.assertEqual([t.value for t in result.tokens], ["STOP", "RUN", "."])
+                self.assertEqual((result.tokens[0].line, result.tokens[0].column), (2, 12))
+
+    def test_debug_lines_with_tabs(self):
+        source = fixed("DISPLAY\t'DEBUG'.", indicator="D")
+        ignored = self.scan(source)
+        self.assertTrue(ignored.success, ignored.diagnostics)
+        self.assertEqual(ignored.tokens, [])
+        enabled = self.scan(source, debug_lines=True)
+        self.assertEqual([(e.code, e.line, e.column) for e in enabled.diagnostics], [("TAB_IN_SOURCE", 1, 19)])
+
     def test_continuation_of_literal(self):
         result = self.scan(fixed('DISPLAY "OLA', area="B"), fixed('" MUNDO".', indicator="-", area="B"))
         self.assertTrue(result.success)
@@ -94,9 +110,10 @@ class CobolLexerTests(unittest.TestCase):
         result = self.scan(fixed("ABC-"))
         self.assertEqual([e.code for e in result.diagnostics], ["INVALID_IDENTIFIER"])
 
-    def test_invalid_identifier_leading_hyphen(self):
+    def test_minus_before_identifier(self):
         result = self.scan(fixed("-ABC"))
-        self.assertEqual(result.diagnostics[0].code, "INVALID_CHARACTER")
+        self.assertTrue(result.success)
+        self.assertEqual([(t.kind, t.value) for t in result.tokens], [("MINUS", "-"), ("IDENTIFIER", "ABC")])
 
     def test_invalid_unexpected_character(self):
         result = self.scan(fixed("DISPLAY @."))
@@ -130,9 +147,28 @@ class CobolLexerTests(unittest.TestCase):
         self.assertEqual(result.diagnostics[0].code, "TAB_IN_SOURCE")
         self.assertEqual(result.diagnostics[0].column, 1)
 
-    def test_nonfixed_line(self):
-        result = self.scan("MOVE")
-        self.assertEqual(result.diagnostics[0].code, "INVALID_LINE")
+    def test_sequence_only_lines_ignored(self):
+        for source in ("1", "12", "123", "1234", "12345", "000100", "MOVE", "ABCDEF"):
+            with self.subTest(source=source):
+                result = self.scan(source)
+                self.assertTrue(result.success, result.diagnostics)
+                self.assertEqual(result.tokens, [])
+
+    def test_indicator_column_is_not_ignored(self):
+        for indicator, error_code in (("?", "INVALID_INDICATOR"), ("\t", "TAB_IN_SOURCE")):
+            with self.subTest(indicator=indicator):
+                result = self.scan("000100" + indicator)
+                self.assertEqual([(e.code, e.line, e.column) for e in result.diagnostics], [(error_code, 1, 7)])
+
+    def test_ignored_lines_preserve_diagnostic_positions(self):
+        result = self.scan(fixed("COMMENT\tTEXT", indicator="*"), "000100", fixed("DISPLAY @."))
+        self.assertEqual([(e.code, e.line, e.column) for e in result.diagnostics], [("INVALID_CHARACTER", 3, 20)])
+        self.assertEqual([t.line for t in result.tokens], [3, 3])
+
+    def test_sequence_only_line_does_not_start_continuation(self):
+        result = self.scan("000100", fixed("WORD", indicator="-"))
+        self.assertEqual([(e.code, e.line, e.column) for e in result.diagnostics], [("UNEXPECTED_CONTINUATION", 2, 7)])
+        self.assertEqual(result.tokens, [])
 
     def test_empty_source(self):
         result = self.scan("", "", "      ")
