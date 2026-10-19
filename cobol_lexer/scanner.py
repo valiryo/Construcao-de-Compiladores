@@ -84,7 +84,7 @@ class CobolLexer:
                     end = code.find(" ", index)
                     if end == -1:
                         end = len(code)
-                    lexeme = code[index:end].rstrip(".")
+                    lexeme = code[index:end].rstrip(".,;")
                     end = index + len(lexeme)
                     if PICTURE_RE.fullmatch(lexeme) and all(
                         count.strip("0") for count in REPETITION_RE.findall(lexeme)

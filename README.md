@@ -14,11 +14,13 @@ Na raiz deste repositório, usando Terminal, PowerShell ou CMD:
 ```bash
 python -m cobol_lexer examples/hello.cob
 python -m cobol_lexer examples/hello.cob --json
+python -m cobol_lexer examples/hello.cob --stream
 python -m cobol_lexer examples/hello.cob --debug-lines
 python -m cobol_lexer examples/ebasso/prog003_calculadora.cob --json
+python -m cobol_lexer examples/erros/prog004_folha_pgto_erros.cob --stream
 ```
 
-O programa lista os tokens, com linha e coluna (contadas desde 1), e os diagnósticos. Em caso de erro léxico, o processo termina com código 1; erro de leitura resulta no código 2; sucesso, 0. Com `--json`, a saída é adequada para integração futura com o parser.
+O programa lista os tokens, com linha e coluna (contadas desde 1), e os diagnósticos. Em caso de erro léxico, o processo termina com código 1; erro de leitura resulta no código 2; sucesso, 0. Com `--json`, a saída é adequada para integração futura com o parser. Com `--stream`, os tokens são agrupados por linha física no formato `<TIPO, lexema>`, com os erros intercalados na linha em que ocorrem; é o formato usado no [relatório](docs/relatorio-lexer.md).
 
 ## Executar testes
 
@@ -46,7 +48,7 @@ No Windows, `py -3 -m cobol_lexer examples/hello.cob` também funciona caso `pyt
 - Identificadores com letras ASCII A-Z, números, hífen e underscore internos (até 30 caracteres).
 - Pontuação: `.`, `,`, `;`, `(` e `)`.
 - Operadores aritméticos `+`, `-`, `*`, `/`, `**` e relacionais `=`, `<`, `>`, `<=`, `>=`, `<>`, com preferência pelo operador mais longo.
-- Máscaras após `PIC` ou `PICTURE`, com `IS` opcional, reconhecidas como um único token `PICTURE`: por exemplo, `X(10)`, `S9(05)V99` e `-ZZZZZZZZZ9.99`. O ponto final da declaração permanece um token `PERIOD` separado.
+- Máscaras após `PIC` ou `PICTURE`, com `IS` opcional, reconhecidas como um único token `PICTURE`: por exemplo, `X(10)`, `S9(05)V99` e `-ZZZZZZZZZ9.99`. O ponto final da declaração permanece um token `PERIOD` separado; da mesma forma, uma vírgula ou um ponto-e-vírgula logo após a máscara é emitido como separador.
 - Diagnósticos com linha e coluna físicas; recuperação parcial após erro.
 
 Linhas com até seis caracteres ocupam apenas a área de sequência e são
@@ -65,6 +67,8 @@ Tipos (`kind`) de token: `KEYWORD`, `IDENTIFIER`, `NUMBER`, `STRING`, `PICTURE`,
 Cada token inclui `kind`, `lexeme`, `value`, `line`, `column`, `area`, `end_line` e `end_column`. Os `value` de palavras-chave, identificadores e máscaras são normalizados para maiúsculas; os valores dos números são mantidos como strings para evitar perda de precisão. O `lexeme` de tokens continuados é reconstruído sem indicadores nem quebras de linha, mas as posições de início e fim referenciam o arquivo físico original.
 
 Os sete programas importados e o exemplo inicial passam sem diagnósticos. A suíte inclui testes de integração que executam a CLI com `--json` em cada programa importado e verificações da reconstrução de identificadores divididos entre linhas.
+
+Em `examples/erros/` há cópias dos sete programas com 15 erros léxicos inseridos, que cobrem os nove códigos de diagnóstico. Um teste de regressão confere código, linha e coluna de cada um. A descrição de cada erro e a recuperação correspondente estão na seção 4 do [relatório](docs/relatorio-lexer.md).
 
 ## Decisões a validar com o professor / testes oficiais
 
@@ -96,6 +100,7 @@ docs/EspecificacaoCOBOL.pdf especificação do professor
 docs/relatorio-lexer.md relatório da entrega e resultados de validação
 examples/hello.cob  exemplo em formato fixo
 examples/ebasso/    sete programas importados, licença e resultados de validação
+examples/erros/     cópias dos programas com erros léxicos inseridos
 tests/test_lexer.py suíte de testes sem dependências
 tests/test_extended_lexer.py testes das extensões e integração pela CLI
 ```

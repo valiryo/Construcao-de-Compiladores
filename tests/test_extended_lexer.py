@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -13,6 +14,30 @@ EXAMPLE_NAMES = (
     "prog001_divisoes.cob", "prog002_operacoes.cob", "prog003_calculadora.cob",
     "prog004_folha_pgto.cob", "prog005_strings.cob", "prog006_files.cob", "prog007_loja.cob",
 )
+EXPECTED_ERRORS = {
+    "prog001_divisoes_erros.cob": [("TAB_IN_SOURCE", 55, 1), ("UNTERMINATED_STRING", 56, 21)],
+    "prog002_operacoes_erros.cob": [("INVALID_INDICATOR", 25, 7), ("INVALID_WORD", 28, 17)],
+    "prog003_calculadora_erros.cob": [("INVALID_CHARACTER", 36, 24), ("INVALID_IDENTIFIER", 70, 39)],
+    "prog004_folha_pgto_erros.cob": [
+        ("INVALID_PICTURE", 19, 37), ("INVALID_CHARACTER", 20, 20),
+        ("INVALID_CHARACTER", 53, 51), ("INVALID_CHARACTER", 53, 55),
+    ],
+    "prog005_strings_erros.cob": [("UNEXPECTED_CONTINUATION", 11, 7), ("UNTERMINATED_STRING", 25, 18)],
+    "prog006_files_erros.cob": [
+        ("INVALID_CHARACTER", 17, 37), ("INVALID_CHARACTER", 17, 47), ("IDENTIFIER_TOO_LONG", 39, 11),
+    ],
+    "prog007_loja_erros.cob": [
+        ("INVALID_PICTURE", 49, 38), ("UNTERMINATED_STRING", 117, 26), ("UNTERMINATED_STRING", 118, 39),
+    ],
+}
+
+
+def run_cli(*args: str) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        [sys.executable, "-m", "cobol_lexer", *args],
+        cwd=PROJECT_ROOT, capture_output=True, text=True, encoding="utf-8", timeout=10,
+        env={**os.environ, "PYTHONIOENCODING": "utf-8"},
+    )
 
 
 class ExtendedLexerTests(unittest.TestCase):
@@ -82,6 +107,16 @@ class ExtendedLexerTests(unittest.TestCase):
                 ])
                 token = result.tokens[1]
                 self.assertEqual((token.column, token.end_column), (16, 15 + len(picture)))
+
+    def test_separator_after_picture_is_not_part_of_mask(self):
+        for separator, kind in ((",", "COMMA"), (";", "SEMICOLON")):
+            with self.subTest(separator=separator):
+                result = self.scan(fixed(f"PIC 9(5)V99{separator} VALUE 1."))
+                self.assertTrue(result.success, result.diagnostics)
+                self.assertEqual([(t.kind, t.value) for t in result.tokens], [
+                    ("KEYWORD", "PIC"), ("PICTURE", "9(5)V99"), (kind, separator),
+                    ("KEYWORD", "VALUE"), ("NUMBER", "1"), ("PERIOD", "."),
+                ])
 
     def test_picture_is_on_next_line(self):
         result = self.scan(fixed("PICTURE"), fixed("IS"), fixed("s9(05)v99 VALUE -1."))
@@ -178,10 +213,7 @@ class ExtendedLexerTests(unittest.TestCase):
     def test_examples_via_json_cli(self):
         for name in EXAMPLE_NAMES:
             with self.subTest(name=name):
-                process = subprocess.run(
-                    [sys.executable, "-m", "cobol_lexer", str(PROJECT_ROOT / "examples" / "ebasso" / name), "--json"],
-                    cwd=PROJECT_ROOT, capture_output=True, text=True, encoding="utf-8", timeout=10,
-                )
+                process = run_cli(str(PROJECT_ROOT / "examples" / "ebasso" / name), "--json")
                 self.assertEqual(process.returncode, 0, process.stderr or process.stdout)
                 payload = json.loads(process.stdout)
                 self.assertEqual(payload["diagnostics"], [])
@@ -198,6 +230,40 @@ class ExtendedLexerTests(unittest.TestCase):
                 token = tokens[0]
                 self.assertEqual((token.kind, token.value, token.end_line, token.end_column),
                                  ("IDENTIFIER", "TAB-TRABALHADOR", end_line, 21))
+
+    def test_stream_output_groups_tokens_by_line(self):
+        process = run_cli(str(PROJECT_ROOT / "examples" / "hello.cob"), "--stream")
+        self.assertEqual(process.returncode, 0, process.stderr or process.stdout)
+        self.assertEqual(process.stdout.splitlines(), [
+            "   1 | <KEYWORD, IDENTIFICATION> <KEYWORD, DIVISION> <PERIOD>",
+            "   2 | <KEYWORD, PROGRAM-ID> <PERIOD> <IDENTIFIER, HELLO> <PERIOD>",
+            "   3 | <KEYWORD, PROCEDURE> <KEYWORD, DIVISION> <PERIOD>",
+            '   4 | <KEYWORD, DISPLAY> <STRING, "OLA, MUNDO"> <PERIOD>',
+            "   5 | <KEYWORD, STOP> <KEYWORD, RUN> <PERIOD>",
+            "",
+            "16 tokens; 0 erros léxicos.",
+        ])
+
+    def test_stream_output_wraps_and_interleaves_errors(self):
+        process = run_cli(str(PROJECT_ROOT / "examples" / "erros" / "prog001_divisoes_erros.cob"), "--stream")
+        self.assertEqual(process.returncode, 1)
+        lines = process.stdout.splitlines()
+        self.assertIn("  55 | ERRO 55:1 TAB_IN_SOURCE: TAB não permitido em formato fixo; use espaços.", lines)
+        index = lines.index("  56 | <KEYWORD, display>")
+        self.assertTrue(lines[index + 1].startswith("     | ERRO 56:21 UNTERMINATED_STRING:"))
+        self.assertEqual(lines[index + 2], "  57 | <KEYWORD, STOP> <KEYWORD, RUN> <PERIOD>")
+        self.assertTrue(all(len(line) <= 96 or "ERRO" in line for line in lines))
+
+    def test_error_examples_report_every_inserted_error(self):
+        self.assertGreaterEqual(sum(len(errors) for errors in EXPECTED_ERRORS.values()), 10)
+        for name, expected in EXPECTED_ERRORS.items():
+            with self.subTest(name=name):
+                source = (PROJECT_ROOT / "examples" / "erros" / name).read_text(encoding="utf-8-sig")
+                result = CobolLexer().tokenize(source)
+                self.assertEqual([(e.code, e.line, e.column) for e in result.diagnostics], expected)
+                process = run_cli(str(PROJECT_ROOT / "examples" / "erros" / name), "--json")
+                self.assertEqual(process.returncode, 1)
+                self.assertEqual(len(json.loads(process.stdout)["diagnostics"]), len(expected))
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ Os comentários e o conteúdo dos programas originais foram preservados integral
 
 ## Validação do lexer
 
-Data da validação: 17/10/2026. Execute a partir da raiz do projeto:
+Data da validação: 19/10/2026. Execute a partir da raiz do projeto:
 
 ```bash
 python -m cobol_lexer examples/ebasso/prog001_divisoes.cob --json
@@ -55,7 +55,7 @@ linha e o fim na coluna 21 da continuação. A linha com `WRK-VALOR2` após um
 literal fechado em `prog002_operacoes.cob` também é analisada integralmente.
 
 O exemplo existente `examples/hello.cob` passou com 16 tokens e nenhum diagnóstico.
-Os **52 testes automatizados** passaram com:
+Os **56 testes automatizados** passaram com:
 
 ```bash
 python -m unittest discover -s tests -v
