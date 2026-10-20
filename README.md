@@ -2,6 +2,12 @@
 
 Primeira etapa do trabalho de Construção de Compiladores. Implementa o **lexer** para o subconjunto COBOL em **formato fixo** definido na seção 2 da [especificação do professor](docs/EspecificacaoCOBOL.pdf), com extensões para os programas de [ebasso/cobol-exemplos](examples/ebasso/README.md).
 
+## Relatório da entrega
+
+O **relatório da Entrega 1** está na pasta `docs/`: **[abrir o relatório completo](docs/relatorio-lexer.md)**.
+
+O documento apresenta a introdução ao COBOL, a implementação e o uso de IA, os fluxos de tokens dos programas de teste e os resultados dos exemplos com erros léxicos.
+
 ## Requisitos
 
 - Python **3.11+** (sem bibliotecas externas).
@@ -82,7 +88,7 @@ A especificação não detalha todos os seguintes aspectos. Por isso adotamos **
 6. **Área A/B:** a posição é registrada como metadado. O parser futuro validará se uma declaração pode aparecer em cada área; o lexer não impõe regras sintáticas sobre divisão/seção/parágrafo.
 7. A palavra com letras/dígitos/hífen/underscore é reconhecida como unidade, inclusive após unir continuações. Identificadores inválidos ou longos geram erro, em vez de fragmentação silenciosa. `PROG007_LOJA` é um identificador único; `_NAME` e `NAME_` geram `INVALID_IDENTIFIER`.
 8. Não implementamos `COPY`/copybooks: a seção 6 os menciona, mas o pré-processamento não faz parte do escopo léxico mínimo definido na seção 2.
-9. **Sinais e operadores:** sinais adjacentes a dígitos, no início do código ou após espaço, parêntese de abertura, vírgula ou operador, pertencem ao literal numérico (`-123.45`, `+8`). Em `COUNT+1`, o `+` é um operador. Hífens internos permanecem parte do identificador; escreva `COUNT - 1` para expressar subtração. `-COUNT` produz `MINUS` seguido de `IDENTIFIER`.
+9. **Sinais e operadores:** sinais adjacentes a dígitos, no início do código ou após espaço, parêntese de abertura, vírgula ou operador, pertencem ao literal numérico (`-123.45`, `+8`). Em `COUNT+1`, o `+` é um operador. Hífens internos permanecem parte do identificador; escreva `COUNT - 1` para expressar subtração. Um hífen colado ao início de um nome (`-COUNT`) gera `INVALID_IDENTIFIER`, e a palavra inteira é descartada. Para o menos unário antes de um nome, use `- COUNT`; parênteses também podem delimitar o operador, como em `-(COUNT)` ou `(- COUNT)`.
 10. **Máscaras `PIC`:** os símbolos e as repetições entre parênteses são verificados lexicalmente; repetições devem ser positivas, aceitando zeros à esquerda. Máscaras malformadas geram `INVALID_PICTURE`. A validade semântica da combinação dos símbolos ficará a cargo das etapas seguintes.
 
 As extensões de continuação e máscaras usam como referência o [guia do GnuCOBOL](https://gnucobol.sourceforge.io/HTML/gnucobpg.html), nas seções de formato fixo e `PICTURE`. O projeto continua sendo um subconjunto, sem compatibilidade completa com esse compilador.

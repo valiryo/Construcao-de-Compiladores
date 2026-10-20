@@ -110,10 +110,31 @@ class CobolLexerTests(unittest.TestCase):
         result = self.scan(fixed("ABC-"))
         self.assertEqual([e.code for e in result.diagnostics], ["INVALID_IDENTIFIER"])
 
-    def test_minus_before_identifier(self):
-        result = self.scan(fixed("-ABC"))
-        self.assertTrue(result.success)
-        self.assertEqual([(t.kind, t.value) for t in result.tokens], [("MINUS", "-"), ("IDENTIFIER", "ABC")])
+    def test_invalid_identifier_leading_hyphen(self):
+        for word in ("-ABC", "--ABC", "-A-B", "-_NAME"):
+            with self.subTest(word=word):
+                result = self.scan(fixed(f"MOVE {word} TO TARGET."))
+                self.assertEqual([(e.code, e.line, e.column) for e in result.diagnostics],
+                                 [("INVALID_IDENTIFIER", 1, 17)])
+                self.assertEqual([t.lexeme for t in result.tokens], ["MOVE", "TO", "TARGET", "."])
+
+    def test_minus_separated_from_identifier(self):
+        for expression, expected in (
+            ("- ABC", [("MINUS", "-"), ("IDENTIFIER", "ABC")]),
+            ("-(ABC)", [("MINUS", "-"), ("LPAREN", "("), ("IDENTIFIER", "ABC"), ("RPAREN", ")")]),
+            ("(- ABC)", [("LPAREN", "("), ("MINUS", "-"), ("IDENTIFIER", "ABC"), ("RPAREN", ")")]),
+        ):
+            with self.subTest(expression=expression):
+                result = self.scan(fixed(f"COMPUTE RESULT = {expression}."))
+                self.assertTrue(result.success, result.diagnostics)
+                self.assertEqual([(t.kind, t.lexeme) for t in result.tokens[3:-1]], expected)
+
+    def test_invalid_leading_hyphen_after_continuation(self):
+        result = self.scan(fixed("MOVE -"), fixed("ABC TO TARGET.", indicator="-"))
+        self.assertEqual([(e.code, e.line, e.column) for e in result.diagnostics],
+                         [("INVALID_IDENTIFIER", 1, 17)])
+        self.assertEqual([t.lexeme for t in result.tokens], ["MOVE", "TO", "TARGET", "."])
+        self.assertEqual((result.tokens[1].line, result.tokens[1].column), (2, 16))
 
     def test_invalid_unexpected_character(self):
         result = self.scan(fixed("DISPLAY @."))

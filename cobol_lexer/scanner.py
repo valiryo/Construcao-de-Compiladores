@@ -137,16 +137,21 @@ class CobolLexer:
                 index = end
                 continue
 
+            # Preserve a palavra inteira para diagnosticar hífens iniciais em nomes.
+            word = WORD_RE.match(code, index)
+            leading_hyphen_word = (
+                current == "-" and word is not None
+                and any(character.isalpha() or character == "_" for character in word.group())
+            )
             operator = code[index:index + 2]
             if operator not in OPERATORS:
                 operator = current
-            if operator in OPERATORS:
+            if operator in OPERATORS and not leading_hyphen_word:
                 end = index + len(operator)
                 self._emit(result, source, index, end, OPERATORS[operator], operator, operator)
                 index = end
                 continue
 
-            word = WORD_RE.match(code, index)
             if word is not None:
                 lexeme = word.group()
                 end = word.end()

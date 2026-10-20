@@ -23,7 +23,11 @@ O objetivo era descrever o trabalho típico de um centro de processamento de dad
 - **Processamento de registros e arquivos.** Registros hierárquicos (níveis `01`, `02`, `03`), tabelas com `OCCURS` e arquivos sequenciais e indexados fazem parte da linguagem, como mostram `prog004_folha_pgto.cob`, `prog006_files.cob` e `prog007_loja.cob`.
 - **Compatibilidade retroativa.** O padrão evolui de forma conservadora, e programas escritos há décadas continuam compilando. Isso protege o investimento em sistemas que concentram regras de negócio acumuladas por muitos anos.
 - **Plataforma consolidada.** Boa parte desse código roda em *mainframes* IBM Z, integrado a monitores de transação (CICS) e bancos de dados (Db2), com alta disponibilidade e grande vazão em processamento em lote.
-- **Custo e risco da migração.** Reescrever sistemas grandes, críticos e pouco documentados é caro e arriscado. Estimativas divulgadas pela Reuters em 2017 indicavam cerca de 220 bilhões de linhas de COBOL em uso, presentes em 43% dos sistemas bancários e responsáveis por 95% das operações em caixas eletrônicos nos EUA. Em 2020, durante a pandemia, estados americanos como Nova Jersey pediram publicamente programadores COBOL para manter os sistemas de seguro-desemprego, sobrecarregados.
+- **Custo e risco da migração.** Reescrever sistemas grandes, críticos e pouco documentados é caro e arriscado, como descreve a reportagem de [Irrera (2017), para a Reuters](https://uk.investing.com/news/stock-market-news/banks-scramble-to-fix-old-systems-as-it-%27cowboys%27-ride-into-sunset-166527).
+
+  O infográfico [*COBOL blues*, de Hartman (2017), da Reuters Graphics](https://www.reuters.com/graphics/USA-BANKS-COBOL/010040KH18J/), reunia estimativas de cerca de 220 bilhões de linhas de COBOL em uso, 43% dos sistemas bancários construídos com a linguagem e 95% das transações com cartão em caixas eletrônicos dependentes desse código. Os três números também são reproduzidos por [Osterman (2020), da University of St. Thomas](https://news.stthomas.edu/tommie-experts-bhabani-misra-current-cobol-coding-conundrum/), e se referem ao panorama divulgado em 2017.
+
+  Em 4 de abril de 2020, durante a pandemia, o governador de Nova Jersey, Phil Murphy, pediu voluntários com conhecimentos de COBOL para apoiar os sistemas legados do estado, em uma coletiva sobre a sobrecarga do seguro-desemprego ([Nova Jersey, 2020, p. 12](https://dspace.njstatelib.org/bitstreams/23450789-1090-4acb-92c3-03a2f11afb99/download#page=12)).
 
 ### 1.3 Dificuldades para a análise léxica
 
@@ -88,7 +92,7 @@ LexerResult = tokens + diagnósticos  →  CLI (texto, --stream ou --json)
 | `cobol_lexer/scanner.py` | Classe `CobolLexer`: palavras reservadas, expressões regulares e reconhecimento dos tokens |
 | `cobol_lexer/model.py` | Estruturas `Token`, `Diagnostic` e `LexerResult` |
 | `cobol_lexer/__main__.py` | Interface de linha de comando |
-| `tests/` | 56 testes automatizados (`unittest`) |
+| `tests/` | 58 testes automatizados (`unittest`) |
 | `examples/ebasso/` | Os sete programas de teste fornecidos, sem alterações |
 | `examples/erros/` | Cópias dos programas de teste com erros inseridos (seção 4) |
 
@@ -120,7 +124,7 @@ O scanner percorre a linha lógica e, em cada posição, testa as alternativas *
 3. **Aspas:** literal alfanumérico; aspas duplicadas viram uma aspa no valor.
 4. **Pontuação:** `.`, `,`, `;`, `(` e `)`.
 5. **Número com sinal:** `+` ou `-` seguido de dígitos, desde que esteja no início da linha ou depois de espaço, `(`, vírgula ou operador. Assim, `-1` é um literal, enquanto em `COUNT+1` o `+` é operador.
-6. **Operadores, pelo maior casamento:** `**`, `<=`, `>=` e `<>` são testados antes de `*`, `<` e `>`.
+6. **Operadores, pelo maior casamento:** `**`, `<=`, `>=` e `<>` são testados antes de `*`, `<` e `>`. Antes de emitir `MINUS`, verifica se o hífen está colado ao início de um nome: nesse caso, a palavra inteira segue para a validação de identificadores e gera `INVALID_IDENTIFIER` (`-ABC`, por exemplo). Para o menos unário antes de um nome, use `- ABC`; parênteses podem delimitar o operador em `-(ABC)` ou `(- ABC)`.
 7. **Palavra** (`[A-Za-z0-9_-]+`, pelo maior casamento):
    - só dígitos (opcionalmente com parte decimal) → `NUMBER`;
    - presente na tabela de palavras reservadas → `KEYWORD`;
@@ -163,7 +167,7 @@ A lista completa, com justificativas, está no `README.md` do repositório.
 
 ### 2.6 Testes automatizados
 
-A suíte em `tests/` tem **56 testes** (`python -m unittest discover -s tests -v`). Eles cobrem:
+A suíte em `tests/` tem **58 testes** (`python -m unittest discover -s tests -v`). Eles cobrem:
 
 - palavras reservadas, identificadores, números, strings, pontuação, operadores e máscaras;
 - descarte de colunas, comentários e linhas de depuração;
@@ -172,6 +176,8 @@ A suíte em `tests/` tem **56 testes** (`python -m unittest discover -s tests -v
 - integração pela CLI com os sete programas de teste (todos sem diagnósticos);
 - integração com as sete cópias com erros (seção 4), conferindo código, linha e coluna de cada diagnóstico;
 - formato da saída `--stream`.
+
+Os testes de hífen inicial verificam o diagnóstico de `-ABC`, inclusive após unir continuações, a posição física do erro, a recuperação na palavra seguinte e as formas aceitas do menos unário (`- ABC`, `-(ABC)` e `(- ABC)`).
 
 ### 2.7 Ferramentas utilizadas
 
@@ -183,10 +189,11 @@ A suíte em `tests/` tem **56 testes** (`python -m unittest discover -s tests -v
 | Visual Studio Code | Edição do código |
 | Guia do GnuCOBOL | Consulta sobre o formato fixo e `PICTURE` (o compilador não foi usado) |
 | Claude Code (Anthropic) | Assistente de IA (seção 2.8) |
+| GPT Codex (OpenAI) | Assistente de IA (seção 2.8) |
 
 ### 2.8 Uso de ferramentas de IA
 
-Usamos o **Claude Code**, assistente de programação da Anthropic baseado nos modelos Claude. Ele roda no terminal e na extensão do VS Code e tem acesso ao repositório: lê arquivos, executa comandos e testes e propõe ou aplica alterações. O uso foi de **apoio**. As decisões de projeto e a responsabilidade pelo código são do grupo, e nenhuma alteração foi integrada sem passar pela suíte de testes.
+Usamos o **Claude Code** (Anthropic) e o **GPT Codex** (OpenAI) como assistentes de programação. Essas ferramentas podem ler arquivos do repositório, executar comandos e testes e propor ou aplicar alterações. O uso foi de **apoio**. As decisões de projeto e a responsabilidade pelo código são do grupo, e nenhuma alteração foi integrada sem passar pela suíte de testes.
 
 | Atividade | O que a IA fez | Como validamos |
 | --- | --- | --- |
@@ -1107,3 +1114,7 @@ Ficam para as próximas etapas: o parser, que validará a estrutura das divisõe
 
 - BASSO, E. *cobol-exemplos*. GitHub, 2018. Disponível em: <https://github.com/ebasso/cobol-exemplos>.
 - GNUCOBOL. *GnuCOBOL Programmer's Guide*. Disponível em: <https://gnucobol.sourceforge.io/HTML/gnucobpg.html>.
+- HARTMAN, Travis. *COBOL blues*. Reuters Graphics, 2017. Infográfico. Disponível em: <https://www.reuters.com/graphics/USA-BANKS-COBOL/010040KH18J/>. Estatísticas conferidas na reprodução de Osterman (2020), abaixo.
+- IRRERA, Anna. *Banks scramble to fix old systems as IT 'cowboys' ride into sunset*. Reuters, 10 abr. 2017. Original: <https://www.reuters.com/article/us-usa-banks-cobol-idUSKBN17C0D8/>. Republicação consultada no Investing.com: <https://uk.investing.com/news/stock-market-news/banks-scramble-to-fix-old-systems-as-it-%27cowboys%27-ride-into-sunset-166527>. Acesso em: 20 out. 2026.
+- NOVA JERSEY. Office of the Governor. *TRANSCRIPT: April 4th, 2020 Coronavirus Briefing Media*. 4 abr. 2020, p. 12. Transcrição oficial preservada pela New Jersey State Library. Disponível em: <https://dspace.njstatelib.org/bitstreams/23450789-1090-4acb-92c3-03a2f11afb99/download#page=12>. Acesso em: 20 out. 2026.
+- OSTERMAN, Jordan. *Tommie Experts: COVID-19 Spotlights COBOL Coding Issues, Programmer Shortages*. University of St. Thomas Newsroom, 16 abr. 2020. Disponível em: <https://news.stthomas.edu/tommie-experts-bhabani-misra-current-cobol-coding-conundrum/>. Acesso em: 20 out. 2026.
