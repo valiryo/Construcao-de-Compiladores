@@ -1,8 +1,9 @@
-# Front-end COBOL — Etapa 2
+# Front-end COBOL — Etapas 2 e 3
 
 Implementação em Python 3.11+, sem bibliotecas externas. O pré-processador e o
-parser utilizam o lexer existente. Não há análise semântica completa, runtime,
-geração C ou chamada ao GCC nesta etapa.
+parser utilizam o lexer existente. A Etapa 3 acrescenta análise semântica e layout
+com tabelas laterais, detalhados em [semantica.md](semantica.md). Runtime, geração C
+e chamada ao GCC continuam futuros.
 
 ## Usar a CLI
 
@@ -25,9 +26,11 @@ habilita as linhas D do formato fixo.
 
 Códigos de saída: 0 para sucesso, 1 para erro léxico/sintático/COPY ou construção
 não suportada, 2 para falha de leitura/encoding. A CLI escreve diagnósticos em
-stderr e não imprime uma AST válida quando há erros. Não resolve CALL buscando
-bibliotecas: a disponibilidade de um programa chamado será verificada na próxima
-etapa. Assim, é possível analisar sintaxe de um CALL ncurses sem ter ncurses.
+stderr e não imprime uma AST válida quando há erros. A verificação sintática
+continua independente da semântica. `--check`, `--dump-symbols` e `--dump-layout`
+ativam a semântica; `--source` fornece unidades de CALL e `--strict` exige VALUE.
+Chamadas sem assinatura disponível ficam pendentes para ligação, preservando
+a validade local; nenhuma biblioteca é carregada ou executada.
 
 O comando de auditoria lê todo o inventário da etapa léxica e faz nova execução do
 front-end. `--write` regenera [auditoria-parser.md](auditoria-parser.md) e
@@ -50,7 +53,8 @@ não exclusões. Atualizar essas expectativas exige atualizar testes e relatóri
 | `statements.py` | Rotinas por comando, delimitadores e tratadores aninhados |
 | `validation.py` | Verificação independente de spans/intervalos e cobertura dos comandos |
 | `frontend.py` | parse_file, parse_source e FrontendResult |
-| `__main__.py` | Interface de desenvolvimento, sem backend |
+| `types.py`, `symbols.py`, `layout.py`, `semantic.py` | PIC, namespaces, descritores físicos e análise semântica da AST |
+| `__main__.py` | Interfaces sintática e semântica, sem backend |
 
 ```python
 from cobol_compiler import parse_file
@@ -66,7 +70,7 @@ if result.success:
     validation = validate_ast(result.ast, result.preprocessed.tokens)
     assert validation.success
     for node in walk(result.ast):
-        pass  # visitante da futura análise semântica
+        pass  # inspeção sintática; check_file executa a semântica
 else:
     for diagnostic in result.diagnostics:
         print(diagnostic.format())
@@ -123,7 +127,7 @@ Dados preservam a lista ordenada de cláusulas e a árvore de níveis. `DataItem
 inclui o nome (None para FILLER/itens SCREEN anônimos), nível, filhos, span total
 e `declaration_span` da declaração própria. Níveis 88 são filhos do item ao qual
 pertencem. FD/SD contêm seus registros. OCCURS guarda mínimo/máximo, DEPENDING,
-índices e chaves; PIC preserva máscara e lexema, sem interpretar tipos/tamanhos.
+índices e chaves; PIC preserva máscara e lexema, sem interpretar tipos/tamanhos na fase sintática. A semântica os guarda em tabelas laterais.
 
 `ProcedureDivision.body` mantém sentenças de entrada, seções e parágrafos em ordem.
 Cada seção mantém suas sentenças e parágrafos; cada parágrafo mantém sentenças;
@@ -135,7 +139,7 @@ Expressões têm nós Literal, Reference, Unary, Binary, Group, Comparison,
 ClassCondition, FunctionCall e LengthOf. As condições abreviadas preservam operador,
 lado direito e o span do sujeito herdado, em vez de virar números booleanos C.
 O sujeito mais recente é herdado no mesmo nível; parênteses abrem contexto próprio.
-Não se resolve ainda se uma referência isolada é um condition-name declarado.
+A semântica resolve referências isoladas a condition-names e vincula sujeitos herdados.
 
 Cada comando e cláusula possui tipo próprio. Por exemplo, READ contém arquivo,
 receptor, chave e tratadores; CALL contém parâmetros com modos de passagem;
@@ -156,8 +160,9 @@ de estilo estrito podem ser adicionadas por opção, sem deslocar o fonte.
 Mensagens incluem arquivo, linha/coluna, construção inesperada, expectativa e
 pilha de inclusão. O scanner original continua emitindo seus códigos; o front-end
 os adapta com fase `lexer`. COPY usa `preprocessor`; sintaxe usa `parser`.
-Qualquer erro invalida a AST pública. As severidades atuais são E; os campos
-permitem a futura integração de I/W/S sem alterar a API antiga.
+Erros E/S invalidam a AST pública da respectiva fase. A semântica usa I para
+pendências externas e inclui notas de declarações relacionadas, com campos
+opcionais compatíveis com a API anterior.
 
 A recuperação sincroniza em pontos, rótulos e novos níveis de declaração. Blocos
 EXEC não suportados podem ser saltados até END-EXEC para continuar diagnosticando,
@@ -171,15 +176,17 @@ forma independente, se cada início de comando reconhecido nos tokens tem
 exatamente um Statement. Testes removem um comando da árvore para confirmar que
 essa verificação acusa a perda.
 
-Isso não substitui semântica: referências inexistentes, tipos incompatíveis,
-cláusulas em combinações sem significado, FILE STATUS, layouts, assinatura de
-intrínsecas, REDEFINES e alvos de controle permanecem para a próxima etapa.
+Isso não substitui semântica. A Etapa 3 verifica referências, tipos, combinações
+de cláusulas, FILE STATUS, layouts, assinaturas de intrínsecas, REDEFINES, chamadas
+e alvos de controle. A API sintática preserva sua independência dessas verificações.
 STRING/UNSTRING, SORT e tela cobrem somente as formas documentadas na EBNF;
 diretivas gerais, COPY REPLACING, programas aninhados e EXEC SQL/CICS ficam fora.
 
 ## Testes e cobertura obtida
 
-**149 testes passaram**, partindo dos 80 existentes nesta etapa:
+**245 testes passaram** ao fim da Etapa 3: os 149 da Etapa 2 abaixo mais
+96 testes semânticos descritos em [semantica.md](semantica.md). A Etapa 2 partiu
+dos 80 existentes:
 
 - `test_preprocessor.py`: 12 testes de COPY, caminhos, caixa, inclusão aninhada,
   ciclos/limite, formato fixo, origem e propagação de erros.
@@ -201,7 +208,7 @@ O [relatório de cobertura](auditoria-parser.md) separa **72 programas completos
 negativos léxicos. Os 77 aceitos anteriormente foram todos submetidos ao parser.
 Nenhum resultado exige bibliotecas externas, dados `.dat`, rede ou compilador C.
 
-## Integração com a próxima etapa
+## Integração semântica e próxima etapa
 
 Consumir `result.ast` somente após `result.success`. Usar visitantes sobre os
 nós tipados e tabelas laterais por identidade do nó para símbolos, tipos e layout.

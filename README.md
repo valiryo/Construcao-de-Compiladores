@@ -1,10 +1,30 @@
-# Compilador COBOL — Pré-processador, parser e AST
+# Compilador COBOL — Front-end, semântica e layout
 
 Trabalho de Construção de Compiladores em Python 3.11+. Implementa o **front-end** para
 COBOL em **formato fixo** definido na seção 2 da [especificação do professor](docs/EspecificacaoCOBOL.md),
 com extensões para os corpora [ebasso](examples/ebasso/README.md) e
-[COBOL Dicas](examples/README.md): COPY → lexer → parser → AST. As próximas fases
-serão análise semântica → C → GCC → executável nativo.
+[COBOL Dicas](examples/README.md): COPY → lexer → parser → AST → semântica/layout.
+As próximas fases serão runtime → C → GCC → executável nativo.
+
+## Etapa 3: semântica e memória
+
+Os sete oficiais são semanticamente válidos. Todos os 72 programas aceitos pelo
+parser foram analisados: **68 válidos**, incluindo seis com chamadas externas
+pendentes; três têm erros reais e um usa SCREEN fora do subconjunto. A suíte tem
+**245 testes aprovados**, preservando os 149 anteriores. Símbolos, tipos/PIC,
+conversões, layouts, arquivos, controle e CALL ficam vinculados à AST por tabelas
+laterais. Runtime, geração C e GCC ainda não foram implementados.
+
+```bash
+python -m cobol_compiler examples/oficiais/CALCMD01.cbl --check
+python -m cobol_compiler examples/oficiais/CAD0002A.cbl -I examples/dependencias --dump-layout
+python -m cobol_compiler examples/oficiais/PROG024A.cbl -I examples/dependencias \
+  --source examples/dependencias/PROGDATA.cbl --dump-symbols
+python -m tools.auditar_semantica --write
+```
+
+- [API semântica, arquitetura, ABI e limites](docs/semantica.md).
+- [Auditoria semântica por arquivo](docs/auditoria-semantica.md) e [JSON completo](docs/auditoria-semantica.json).
 
 ## Etapa 2: sintaxe e AST
 
@@ -12,12 +32,13 @@ Os sete oficiais produzem ASTs completas, com expansão dos copybooks necessári
 consumo integral dos tokens e verificação independente da representação de cada
 comando. Dos 77 arquivos anteriormente aceitos pelo lexer, **72 programas e dois
 copybooks passam**. Um fonte vazio e os exemplos SQL/CICS são diagnosticados
-separadamente. A suíte completa passou com **149 testes**, incluindo os 80 anteriores.
+separadamente. Ao final da Etapa 2, a suíte passou com **149 testes**, incluindo os 80 anteriores.
 
 ```bash
 python -m cobol_compiler examples/oficiais/CALCMD01.cbl --check-syntax
 python -m cobol_compiler examples/oficiais/CAD0002A.cbl -I examples/dependencias --dump-ast
 python -m tools.auditar_parser --write
+python -m tools.auditar_semantica --write
 ```
 
 - [Interface, arquitetura e testes](docs/frontend.md).
@@ -37,7 +58,7 @@ Os originais do corpus permanecem intactos; não há execução nativa nesta eta
 - [Inventário reproduzível](docs/inventario-corpus.md): tokens, máscaras,
   construções e dependências; nove arquivos externos ficam como casos negativos.
 - [Plano técnico atualizado](docs/plano-implementacao-final.md): distingue o
-  front-end concluído das etapas futuras de semântica, runtime e geração C.
+  front-end e semântica implementados das etapas futuras de runtime e geração C.
 
 Para os testes positivos, use `examples/corrigidos/CAD0005A.cbl`.
 `examples/oficiais/CAD0005A.cbl` preserva o conflito upstream como teste negativo.
@@ -76,6 +97,7 @@ O programa lista os tokens, com linha e coluna (contadas desde 1), e os diagnós
 python -m unittest discover -s tests -v
 python -m tools.auditar_corpus
 python -m tools.auditar_parser --write
+python -m tools.auditar_semantica --write
 ```
 
 No Windows, `py -3 -m cobol_lexer examples/hello.cob` também funciona caso `python` não esteja no PATH.
@@ -135,11 +157,11 @@ A especificação não detalha todos os seguintes aspectos. Por isso adotamos **
 3. **Continuação:** o indicador `-` une o conteúdo à linha de código anterior, descartando espaços finais e a indentação da continuação. Em strings abertas, aceita a aspa de abertura repetida. Comentários e linhas de debugging desabilitadas podem aparecer entre as partes. Uma continuação sem linha de código anterior gera `UNEXPECTED_CONTINUATION`.
 4. **Aspas duplicadas** geram uma aspa no valor da string.
 5. **Vocabulário ampliado:** palavras como `PROGRAM-ID`, `PIC`, `VALUE` e `COPY` agora são emitidas como `KEYWORD`. Essa extensão e os novos tipos de token atendem aos exemplos importados e vão além da lista explícita da seção 2.2.
-6. **Área A/B:** a posição é registrada como metadado. O parser futuro validará se uma declaração pode aparecer em cada área; o lexer não impõe regras sintáticas sobre divisão/seção/parágrafo.
+6. **Área A/B:** a posição é registrada como metadado. O parser verifica cabeçalhos e rótulos na área A; o lexer não impõe regras sintáticas sobre divisão/seção/parágrafo.
 7. A palavra com letras/dígitos/hífen/underscore é reconhecida como unidade, inclusive após unir continuações. Identificadores inválidos ou longos geram erro, em vez de fragmentação silenciosa. `PROG007_LOJA` é um identificador único; `_NAME` e `NAME_` geram `INVALID_IDENTIFIER`.
 8. O lexer isolado reconhece `COPY`, sem expandi-lo. A Etapa 2 implementa a expansão no pré-processador de `cobol_compiler`, preservando a API léxica. COPY REPLACING não ocorre no corpus e recebe diagnóstico explícito de recurso não implementado.
 9. **Sinais e operadores:** sinais adjacentes a dígitos, no início do código ou após espaço, parêntese de abertura, vírgula ou operador, pertencem ao literal numérico (`-123.45`, `+8`). Em `COUNT+1`, o `+` é um operador. Hífens internos permanecem parte do identificador; escreva `COUNT - 1` para expressar subtração. Um hífen colado ao início de um nome (`-COUNT`) gera `INVALID_IDENTIFIER`, e a palavra inteira é descartada. Para o menos unário antes de um nome, use `- COUNT`; parênteses também podem delimitar o operador, como em `-(COUNT)` ou `(- COUNT)`.
-10. **Máscaras `PIC`:** os símbolos e as repetições entre parênteses são verificados lexicalmente; repetições devem ser positivas, aceitando zeros à esquerda. Máscaras malformadas geram `INVALID_PICTURE`. A validade semântica da combinação dos símbolos ficará a cargo das etapas seguintes.
+10. **Máscaras `PIC`:** os símbolos e as repetições entre parênteses são verificados lexicalmente; repetições devem ser positivas, aceitando zeros à esquerda. Máscaras malformadas geram `INVALID_PICTURE`. A Etapa 3 verifica combinações e interpreta tipos/layout em `cobol_compiler.types`.
 
 As extensões de continuação e máscaras usam como referência o [guia do GnuCOBOL](https://gnucobol.sourceforge.io/HTML/gnucobpg.html), nas seções de formato fixo e `PICTURE`. O projeto continua sendo um subconjunto, sem compatibilidade completa com esse compilador.
 
@@ -161,7 +183,11 @@ cobol_compiler/
   statements.py     rotinas específicas de comandos
   validation.py     invariantes e cobertura dos comandos na AST
   frontend.py       parse_file e parse_source
-  __main__.py       --check-syntax e --dump-ast
+  types.py          PIC e tipos lógicos/representações
+  symbols.py        namespaces e qualificação
+  layout.py         descritores de grupos, tabelas, aliases e linkage
+  semantic.py       passagens semânticas e vínculos com a AST
+  __main__.py       sintaxe, --check, --dump-symbols e --dump-layout
 docs/EspecificacaoCOBOL.pdf especificação do professor
 docs/relatorio-lexer.md relatório da entrega e resultados de validação
 examples/hello.cob  exemplo em formato fixo
@@ -174,7 +200,9 @@ tests/test_preprocessor.py testes unitários de COPY
 tests/test_parser.py gramática, negativos, AST e CLI
 tests/test_parser_corpus.py sete oficiais e toda a coorte léxica
 tools/auditar_corpus.py inventário offline reproduzível
-tools/auditar_parser.py auditoria do front-end completo
+tools/auditar_parser.py auditoria sintática
+tools/auditar_semantica.py auditoria semântica e de layout
+tests/test_semantic*.py tipos, resolução, layout, operações, arquivos, CALL e corpus
 examples/oficiais/ sete fontes originais COBOL Dicas
 examples/corrigidos/ cópia de CAD0005A usada nos testes positivos
 examples/dependencias/ copybooks e PROGDATA
@@ -185,9 +213,11 @@ docs/plano-implementacao-final.md arquitetura das próximas fases
 
 ## Limites da entrega
 
-**Ainda não há análise semântica completa, gerador C ou invocação do GCC.**
-Sintaxe válida não garante tipos, símbolos, layouts ou comportamento corretos.
+**Ainda não há runtime, gerador C ou invocação do GCC.**
+A análise semântica valida o subconjunto documentado; validade estática não garante
+comportamento executável. SCREEN, ALTER, SORT, START, arquivos indexados e usos
+listados no [contrato semântico](docs/semantica.md) recebem erros explícitos.
 Formato livre, diretivas gerais, COPY REPLACING, programas aninhados e EXEC SQL/CICS
 permanecem fora da gramática atual. CALL para bibliotecas C/ncurses é analisado,
 mas sua execução depende de infraestrutura futura. As limitações individuais
-estão na [auditoria do parser](docs/auditoria-parser.md).
+estão nas auditorias do [parser](docs/auditoria-parser.md) e da [semântica](docs/auditoria-semantica.md).

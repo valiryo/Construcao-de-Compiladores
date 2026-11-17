@@ -1,6 +1,6 @@
 # Plano técnico do compilador COBOL final
 
-## Objetivo e estado após a Etapa 2
+## Objetivo e estado após a Etapa 3
 
 Implementar em Python 3.11+ um compilador com pipeline:
 
@@ -19,15 +19,21 @@ COPY, parser descendente recursivo, AST tipada e CLI de sintaxe**, com **149 tes
 passando** e os sete oficiais completos. Todos os 77 arquivos anteriormente
 aceitos pelo lexer foram submetidos ao parser: 72 programas e dois copybooks
 passam; um arquivo vazio e dois exemplos SQL/CICS ficam separados. Os nove
-negativos léxicos também foram revisitados. Não há análise semântica completa,
+negativos léxicos também foram revisitados. A **Etapa 3 implementa semântica e
+layout**, com **245 testes passando**. Os sete
+oficiais foram validados; todos os 72 programas parseáveis foram analisados, com
+68 válidos (seis com pendências externas), três erros reais e um caso de tela
+parcialmente suportado. Os copybooks são verificados no contexto de COPY. Não há
 runtime C, invocação GCC ou geração executável. Os
 [inventários por fonte](inventario-corpus.md) e
 [dados completos](auditoria-lexer-depois.json) fixam o escopo conhecido ao commit
 `1ffb3bf279bbb1e596b1091f1dda1cf7ddf51295` do COBOL Dicas.
 
 Os resultados reproduzíveis estão em [auditoria-parser.md](auditoria-parser.md),
+a semântica em [auditoria-semantica.md](auditoria-semantica.md),
 a gramática em [gramatica-cobol.ebnf](gramatica-cobol.ebnf) e a API/CLI em
-[frontend.md](frontend.md). Os fontes originais permanecem intactos.
+[frontend.md](frontend.md) e [semantica.md](semantica.md). Os fontes originais
+permanecem intactos.
 
 ## Inventário que orienta a arquitetura
 
@@ -61,23 +67,24 @@ diagnosticar claramente recursos fora do subconjunto.
 
 | Componente | Estado, responsabilidade e saída |
 |---|---|
-| `frontend.py`, `__main__.py` | Implementados: API/CLI de sintaxe, diagnóstico e JSON da AST |
+| `frontend.py`, `__main__.py` | Implementados: API/CLI sintática e semântica, diagnósticos, JSON de AST/símbolos/layout |
 | `compiler.py`, `cobol_compiler/driver.py` | Futuro: driver de compilação e invocação GCC |
 | `source.py`, `preprocessor.py` | Implementados: COPY, caminhos, origem física e detecção de ciclos |
 | `cobol_lexer/` existente | Colunas/continuação, tokens e diagnósticos léxicos, API preservada |
 | `source.py`, `diagnostics.py` | Implementados: LocatedToken e diagnósticos por fase/severidade/inclusão |
 | `ast.py`, `parser.py`, `expressions.py`, `statements.py` | Implementados: AST tipada, descendente recursivo, expressões e comandos |
 | `validation.py`, `tools/auditar_parser.py` | Implementados: invariantes da AST e auditoria integral |
-| `symbols.py`, `semantic.py`, `layout.py` | Resolução, tipos, layout de armazenamento e vínculos em tabelas laterais da AST |
-| `c_codegen.py` | Visitante da AST validada, C e mapeamento de diagnósticos para o fonte |
-| `runtime/cobol_runtime.h`, `.c` | Campos, números decimais, MOVE, formatação, arquivos e chamadas |
+| `symbols.py`, `types.py`, `semantic.py`, `layout.py` | Implementados: resolução, PIC/tipos, layout e vínculos em tabelas laterais da AST |
+| `c_codegen.py` | Futuro: visitante da AST validada, C e mapeamento de diagnósticos para o fonte |
+| `runtime/cobol_runtime.h`, `.c` | Futuro: campos, números decimais, MOVE, formatação, arquivos e chamadas |
 | `tests/test_preprocessor.py`, `test_parser.py`, `test_parser_corpus.py` | Implementados: unitários, oficiais e corpus completo |
-| Testes semânticos, runtime e integração executável | Futuros: tipos, layouts, C e cenários completos |
+| Testes semânticos e auditoria | Implementados: 96 testes novos, sete oficiais e todos os 72 programas parseáveis |
+| Runtime e integração executável | Futuros: C e cenários completos |
 
 Os módulos implementados estão em `cobol_compiler/`; os componentes marcados como
 futuros ainda são proposta. Os comandos não são representados por tokens de texto
-concatenados. Os nós mantêm SourceSpan; o analisador semântico deverá vincular referências a
-símbolos e layouts, e o gerador não deve repetir resolução por nomes.
+concatenados. Os nós mantêm SourceSpan; o analisador semântico vincula referências a
+símbolos e layouts; o futuro gerador consumirá essas anotações sem repetir resolução.
 
 ### Origem e COPY — implementados
 
@@ -130,7 +137,7 @@ de argumentos, alternativas de READ e condições abreviadas requerem regras
 explícitas. Distinguir subscrito de referência modificada ao encontrar `:` dentro
 dos parênteses e permitir uma referência de tabela seguida de refmod. Nomes de
 programa/arquivo/parágrafo são tokens IDENTIFIER; funções contextuais não precisam
-virar palavras reservadas globais. O parser deverá reconhecer frases por tokens
+virar palavras reservadas globais. O parser reconhece frases por tokens
 e contexto, sem comparar trechos de código por regex.
 
 Precedência: potência, sinal unário (fixar sua interação com potência em testes),
@@ -151,7 +158,7 @@ Validar ordem das divisões e requisitos de área A/B nesta fase.
 - Dados: `DataItem(level, name, clauses, children)`, `PictureClause`, `ValueClause`,
   `OccursClause`, `RedefinesClause`, `UsageClause`, `FileDescriptor`, `CallParameter`.
   Níveis 88 são DataItem associados ao item anterior. A máscara original é
-  preservada; a interpretação de tipo/layout ainda será implementada.
+  preservada; tipos e layouts são interpretados pela semântica em tabelas laterais.
 - Expressões: `Literal` (inclui constantes figurativas), `Reference(qualifiers,
   subscripts, refmod)`, `Unary`, `Binary`, `FunctionCall`, `LengthOf`,
   `Comparison`, `ClassCondition`, `AbbreviatedCondition`, `Group`. Operadores
@@ -167,7 +174,13 @@ fonte afeta fall-through e PERFORM. Os filhos de dados são construídos pela pi
 de níveis, sem transformar 77/88 em filhos regulares. Não usar dicionário simples
 por nome para armazenar todos os campos, pois FILLER se repete e há qualificações.
 
-## Análise semântica e layout
+## Análise semântica e layout — implementados
+
+A [API e ABI documentadas](semantica.md) detalham os contratos atuais, inclusive
+comprimentos em bytes ISO-8859-1, COMP/COMP-3, inicialização, chamadas pendentes e
+limites explícitos. O [relatório por fonte](auditoria-semantica.md) separa validade
+local, dependências externas, erros do corpus e recursos bloqueados.
+
 
 Analisar primeiro declarações, depois referências, permitindo destinos de PERFORM
 declarados posteriormente. Separar namespaces de dados, arquivos, seções,
@@ -193,14 +206,14 @@ de preenchimento/truncamento; acessos elementares interpretam a fatia apropriada
 
 Há duas divergências da especificação com o corpus que precisam ficar explícitas:
 campos oficiais frequentemente omitem VALUE, e nomes iguais podem ocorrer em
-hierarquia qualificável. O modo de compatibilidade com o corpus deverá permitir
-VALUE ausente, com inicialização documentada/testada; um modo estrito pode emitir
+hierarquia qualificável. O modo de compatibilidade com o corpus permite
+VALUE ausente, com inicialização documentada/testada; o modo `--strict` emite
 o diagnóstico exigido pelo texto da disciplina. Não exigir VALUE em todo item
 para conseguir executar os oficiais sem alterar seus fontes. O resolvedor deve
 tratar a ambiguidade do nome TAB-ENT-LINHA em dois níveis do PROG024A pela
 hierarquia, diagnosticando apenas referências realmente ambíguas.
 
-Diagnósticos futuros terão fase, severidade I/W/E/S, caminho e span, com notas
+Diagnósticos semânticos têm fase, severidade I/W/E/S, caminho e span, com notas
 para declarações relacionadas e inclusão COPY. Qualquer E/S bloqueia GCC e
 linkedição. Evoluir o modelo por adaptador/campos opcionais com defaults, mantendo
 a integração atual do lexer e seus códigos testados.
@@ -246,7 +259,7 @@ os mesmos limites; GO TO transfere a posição e a pilha controla retorno no lim
 performado. STOP RUN encerra a unidade de execução inteira; GOBACK retorna ao
 chamador ou ao host quando principal. Testar esse contrato antes de emitir menus.
 ALTER já tem nó tipado e teste baseado no PROG018A. Fica fora da primeira versão
-executável e precisará de diagnóstico semântico/backend claro se selecionado.
+executável; a semântica já emite diagnóstico explícito quando ele é selecionado.
 
 ## Driver e CLI planejados
 
@@ -256,6 +269,11 @@ Já disponíveis nesta etapa:
 python -m cobol_compiler examples/oficiais/CALCMD01.cbl --check-syntax
 python -m cobol_compiler examples/oficiais/CAD0002A.cbl -I examples/dependencias --dump-ast
 python -m tools.auditar_parser --write
+python -m cobol_compiler examples/oficiais/CALCMD01.cbl --check
+python -m cobol_compiler examples/oficiais/CAD0002A.cbl -I examples/dependencias --dump-layout
+python -m cobol_compiler examples/oficiais/PROG024A.cbl -I examples/dependencias \
+    --source examples/dependencias/PROGDATA.cbl --dump-symbols
+python -m tools.auditar_semantica --write
 ```
 
 Os comandos abaixo continuam futuros, para a etapa do backend:
@@ -270,8 +288,9 @@ python compiler.py examples/oficiais/PROG024A.cbl \
     -o biblioteca --emit-c build/biblioteca.c
 ```
 
-São comandos futuros. Oferecer `--check` para front-end, `--emit-c` e `--keep-c`
-para inspeção e compilação, diretório temporário para C/objetos e saída explícita.
+Os comandos de compilação são futuros. `--check` já verifica o front-end. O driver
+oferecerá `--emit-c` e `--keep-c` para inspeção, diretório temporário para C/objetos
+e saída explícita.
 COPY e fontes de CALL devem ser resolvidos por caminhos configurados; jamais
 baixar dependências ou executar programas COBOL no processo de compilação.
 Invocar GCC com `subprocess.run([...])`, sem shell; capturar stderr e manter mapa
@@ -290,10 +309,16 @@ como requisito apenas quando o backend existir.
    os fontes são exercitados; vazio e SQL/CICS têm classificação individual.
    A suíte total tem 149 testes. A validação confere cada comando, spans,
    hierarquia e ausência de tokens descartados; não atesta execução.
-3. **Semântica/layout:** resolver todos os símbolos oficiais e layouts; negativos
-   para variável/arquivo/parágrafo ausentes, duplicatas, MOVE A→9, tipos,
-   subscritos/refmod e CALL incompatível. Conferir tamanho/offset dos registros e
-   dos 50 elementos de COPY002A. Separar problemas reais no fonte de recurso ausente.
+3. **Semântica/layout — concluído no subconjunto documentado:** símbolos e
+   operações dos sete oficiais resolvidos; 245 testes totais. Todos os 72
+   programas parseáveis analisados; 68 válidos, com seis pendências externas,
+   três fontes inválidos e um caso SCREEN parcialmente suportado. COPY002A tem
+   registro de 10552 bytes, contador de 2 e 50 ocorrências de stride 211; LINKAGE
+   é externo, REDEFINES compartilha storage e 88 não recebe bytes. CALL PROGDATA
+   valida a ABI das folhas do COD001A. A auditoria registra 2480 símbolos, 4257
+   referências e 1490 layouts. SCREEN, ALTER, SORT, START, arquivos indexados e
+   usos listados na documentação permanecem bloqueados explicitamente. Isso
+   comprova análise estática, sem geração ou execução.
 4. **Runtime e C:** validar primeiro strings, decimal e controle com programas
    pequenos; depois interação, tabelas, READ/WRITE e CALL. Gerar C dos sete,
    compilar com GCC e executar em diretórios temporários. Recursos não suportados
