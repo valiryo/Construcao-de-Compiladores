@@ -2,5 +2,8 @@
 
 from .preprocessor import Preprocessor, PreprocessResult
 from .source import LocatedToken, SourceLocation, SourceSpan
+from .frontend import FrontendResult, parse_file, parse_source
+from .parser import Parser, ParseResult
 
-__all__ = ["Preprocessor", "PreprocessResult", "LocatedToken", "SourceLocation", "SourceSpan"]
+__all__ = ["Preprocessor", "PreprocessResult", "LocatedToken", "SourceLocation", "SourceSpan",
+           "Parser", "ParseResult", "FrontendResult", "parse_file", "parse_source"]
