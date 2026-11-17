@@ -9,7 +9,7 @@ from .frontend import parse_file
 from .semantic import check_file
 
 
-def main():
+def main(*, compile_default=False):
     parser = argparse.ArgumentParser(description="Pré-processador e parser COBOL em formato fixo")
     parser.add_argument("file")
     parser.add_argument("-I", "--include-dir", action="append", default=[], dest="include_dirs")
@@ -19,11 +19,29 @@ def main():
     output.add_argument("--check", action="store_true", help="verificar semântica e layout")
     output.add_argument("--dump-symbols", action="store_true", help="símbolos e vínculos semânticos em JSON")
     output.add_argument("--dump-layout", action="store_true", help="layout físico em JSON")
+    output.add_argument("--check-backend", action="store_true", help="verificar geração C e ligação sem invocar GCC")
+    parser.add_argument("-o", "--output", help="executável ou objeto de saída")
+    parser.add_argument("--emit-c", help="preservar C gerado neste caminho")
+    parser.add_argument("--keep-c", action="store_true", help="preservar C junto à saída")
+    parser.add_argument("--module", action="store_true", help="produzir objeto chamável, sem main")
     parser.add_argument("--source", action="append", default=[], help="fonte de programa chamado; pode se repetir")
     parser.add_argument("--strict", action="store_true", help="exigir VALUE em itens elementares")
     parser.add_argument("--copybook", action="store_true", default=None, help="analisar fragmento de dados (automático em .cpy)")
     parser.add_argument("--debug-lines", action="store_true")
     args = parser.parse_args()
+    static = args.check or args.dump_symbols or args.dump_layout or args.check_syntax or args.dump_ast
+    if args.check_backend or args.output or args.emit_c or args.keep_c or args.module or compile_default and not static:
+        from .driver import compile_file
+        result = compile_file(args.file, args.output, include_dirs=args.include_dirs,
+            source_paths=args.source, strict=args.strict, debug_lines=args.debug_lines,
+            emit_c=args.emit_c, keep_c=args.keep_c, module=args.module, check_backend=args.check_backend)
+        for diagnostic in result.diagnostics:
+            print(diagnostic.format(), file=sys.stderr)
+        if result.gcc_stderr:
+            print(result.gcc_stderr, file=sys.stderr, end="")
+        if result.success:
+            print("Backend válido." if args.check_backend else f"{'Objeto' if args.module else 'Executável'} gerado: {result.output}")
+        return 0 if result.success else 1
     if args.check or args.dump_symbols or args.dump_layout:
         result = check_file(args.file, include_dirs=args.include_dirs, source_paths=args.source,
                             strict=args.strict, debug_lines=args.debug_lines)
