@@ -6,6 +6,7 @@ import sys
 
 from .ast import to_dict, walk
 from .frontend import parse_file
+from .semantic import check_file
 
 
 def main():
@@ -15,9 +16,26 @@ def main():
     output = parser.add_mutually_exclusive_group()
     output.add_argument("--check-syntax", action="store_true")
     output.add_argument("--dump-ast", action="store_true", help="AST tipada em JSON, somente em caso de sucesso")
+    output.add_argument("--check", action="store_true", help="verificar semântica e layout")
+    output.add_argument("--dump-symbols", action="store_true", help="símbolos e vínculos semânticos em JSON")
+    output.add_argument("--dump-layout", action="store_true", help="layout físico em JSON")
+    parser.add_argument("--source", action="append", default=[], help="fonte de programa chamado; pode se repetir")
+    parser.add_argument("--strict", action="store_true", help="exigir VALUE em itens elementares")
     parser.add_argument("--copybook", action="store_true", default=None, help="analisar fragmento de dados (automático em .cpy)")
     parser.add_argument("--debug-lines", action="store_true")
     args = parser.parse_args()
+    if args.check or args.dump_symbols or args.dump_layout:
+        result = check_file(args.file, include_dirs=args.include_dirs, source_paths=args.source,
+                            strict=args.strict, debug_lines=args.debug_lines)
+        for diagnostic in result.diagnostics:
+            print(diagnostic.format(), file=sys.stderr)
+        if args.dump_symbols or args.dump_layout:
+            payload = result.dump_symbols() if args.dump_symbols else result.dump_layout()
+            print(json.dumps({"success":result.success, "backend_ready":result.backend_ready, **payload}, ensure_ascii=False, indent=2))
+        elif result.success:
+            pending = f"; {len(result.pending_externals)} chamada(s) pendente(s) de ligação" if result.pending_externals else ""
+            print(f"Semântica válida: {args.file} ({len(result.table.symbols)} símbolos{pending}).")
+        return 0 if result.success else 2 if any(d.code == "SOURCE_READ_ERROR" for d in result.diagnostics) else 1
     result = parse_file(args.file, include_dirs=args.include_dirs, copybook=args.copybook, debug_lines=args.debug_lines)
     for diagnostic in result.diagnostics:
         print(diagnostic.format(), file=sys.stderr)

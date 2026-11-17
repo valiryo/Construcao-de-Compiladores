@@ -64,7 +64,7 @@ def audit_corpus():
             "consumed_tokens": result.parsed.consumed_tokens if result.parsed else 0,
             "skipped_tokens": result.parsed.skipped_tokens if result.parsed else 0,
             "error_count": len(result.diagnostics),
-            "diagnostics": [asdict(d) for d in result.diagnostics],
+            "diagnostics": [{k: v for k, v in asdict(d).items() if k != "related" or v} for d in result.diagnostics],
             "unsupported_constructions": sorted({d.code for d in result.diagnostics if d.code.startswith("UNSUPPORTED_")}),
             "dependencies": [asdict(d) for d in result.preprocessed.dependencies],
             "structural_validation": asdict(validation) if validation else None,

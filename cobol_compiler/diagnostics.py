@@ -6,6 +6,12 @@ from .source import SourceSpan
 
 
 @dataclass(frozen=True, slots=True)
+class RelatedLocation:
+    span: SourceSpan
+    message: str
+
+
+@dataclass(frozen=True, slots=True)
 class Diagnostic:
     code: str
     message: str
@@ -14,6 +20,7 @@ class Diagnostic:
     expected: str | None = None
     unexpected: str | None = None
     severity: str = "E"
+    related: tuple[RelatedLocation, ...] = ()
 
     def format(self) -> str:
         p = self.span.start
@@ -22,4 +29,7 @@ class Diagnostic:
             text += f" (esperado: {self.expected}; encontrado: {self.unexpected})"
         for site in reversed(p.inclusion_stack):
             text += f"\n  incluído de {site.file}:{site.line}:{site.column}"
+        for note in self.related:
+            point = note.span.start
+            text += f"\n  {point.file}:{point.line}:{point.column}: {note.message}"
         return text

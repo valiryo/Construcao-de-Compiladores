@@ -77,6 +77,8 @@ def parse_picture(mask, usage="DISPLAY", *, decimal_comma=False):
     if pic.count(decimal) > 1 or ("V" in pic and decimal in pic):
         raise PictureError("Mais de um ponto decimal em PIC.")
     edited = bool(set(pic) - {"S", "9", "V"})
+    if pic.count("+") + pic.count("-") > 1 or pic.count("$") > 1:
+        raise PictureError("Edição flutuante com sinais/moedas repetidos fora do subconjunto.")
     if "S" in pic and edited:
         raise PictureError("S não pode combinar com edição numérica.")
     point = pic.find("V") if "V" in pic else pic.find(decimal)
