@@ -17,6 +17,7 @@ class PreprocessorTests(unittest.TestCase):
             self.assertTrue(result.success, result.diagnostics)
             field = next(t for t in result.tokens if t.value == "FIELD")
             self.assertEqual((Path(field.span.start.file).name, field.span.start.line, field.span.start.column), ("INNER-BOOK.cpy", 1, 15))
+            self.assertEqual((field.token.line, field.token.column), (1, 15))
             self.assertEqual([Path(s.file).name for s in field.span.start.inclusion_stack], ["p.cbl", "outer-book.cpy"])
             self.assertEqual([d.name for d in result.dependencies], ["OUTER-BOOK", "INNER-BOOK"])
 
@@ -98,6 +99,37 @@ class PreprocessorTests(unittest.TestCase):
             self.assertTrue(result.success, result.diagnostics)
             self.assertNotIn("COPY", [t.value for t in result.tokens])
             self.assertTrue(any(Path(t.span.start.file).name == book for t in result.tokens))
+
+    def test_invalid_character_inside_copy_is_not_erased(self):
+        with TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "p.cbl").write_text(fixed("COPY BOOK @."))
+            (root / "BOOK.cpy").write_text(fixed("01 FIELD PIC X."))
+            result = Preprocessor().process(root / "p.cbl")
+            self.assertFalse(result.success)
+            self.assertEqual([(x.code, x.span.start.line, x.span.start.column) for x in result.diagnostics], [("INVALID_CHARACTER", 1, 22)])
+
+    def test_continued_copy_name_and_depth_limit(self):
+        with TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "p.cbl").write_text(fixed("COPY BO") + "\n" + fixed("OK.", indicator="-"))
+            (root / "BOOK.cpy").write_text(fixed("01 FIELD PIC X."))
+            result = Preprocessor().process(root / "p.cbl")
+            self.assertTrue(result.success, result.diagnostics)
+            self.assertEqual(result.dependencies[0].name, "BOOK")
+            result = Preprocessor(max_depth=0).process(root / "p.cbl")
+            self.assertEqual([d.code for d in result.diagnostics], ["COPY_DEPTH"])
+
+    def test_copybook_can_supply_picture_in_enclosing_context(self):
+        with TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "p.cbl").write_text(fixed("01 FIELD PIC") + "\n" + fixed("COPY MASK."))
+            (root / "MASK.cpy").write_text(fixed("X(10)."))
+            result = Preprocessor().process(root / "p.cbl")
+            self.assertTrue(result.success, result.diagnostics)
+            self.assertEqual([(t.kind, t.value) for t in result.tokens], [
+                ("NUMBER", "01"), ("IDENTIFIER", "FIELD"), ("KEYWORD", "PIC"), ("PICTURE", "X(10)"), ("PERIOD", "."),
+            ])
 
 
 if __name__ == "__main__":

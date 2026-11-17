@@ -4,7 +4,7 @@ Uma passagem preliminar identifica diretivas; o texto expandido é tokenizado um
 única vez no contexto do programa (PIC e convenção decimal inclusive).
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from cobol_lexer import CobolLexer
@@ -107,6 +107,8 @@ class Preprocessor:
                 result.diagnostics.append(Diagnostic("COPY_SYNTAX", "COPY requer nome de copybook e ponto.", span, "preprocessor", "nome de copybook", scan.tokens[i].value if i < len(scan.tokens) else "EOF"))
                 continue
             name = scan.tokens[i].value
+            if not name:
+                result.diagnostics.append(Diagnostic("COPY_SYNTAX", "Nome de copybook vazio.", span, "preprocessor", "nome não vazio", "literal vazio"))
             i += 1
             unsupported = i < len(scan.tokens) and scan.tokens[i].value == "REPLACING"
             if unsupported:
@@ -118,6 +120,10 @@ class Preprocessor:
                 continue
             end = scan.tokens[i]
             i += 1
+            for error in scan.diagnostics:
+                if (start.line, start.column) <= (error.line, error.column) <= (end.end_line, end.end_column):
+                    point = self._point(file, error.line, error.column, stack)
+                    result.diagnostics.append(Diagnostic(error.code, error.message, point, "lexer"))
             target = None if unsupported else self._resolve(name, path.parent.resolve())
             result.dependencies.append(CopyDependency(name, str(target) if target else None, span))
             included = []
@@ -164,7 +170,10 @@ class Preprocessor:
             row = result.lines[line - 1]
             return SourceLocation(row.file, row.line, column, row.inclusion_stack)
         for t in scan.tokens:
-            result.tokens.append(LocatedToken(t, SourceSpan(location(t.line, t.column), location(t.end_line, t.end_column))))
+            span = SourceSpan(location(t.line, t.column), location(t.end_line, t.end_column))
+            physical = replace(t, line=span.start.line, column=span.start.column,
+                               end_line=span.end.line, end_column=span.end.column)
+            result.tokens.append(LocatedToken(physical, span))
         for error in scan.diagnostics:
             p = location(error.line, error.column)
             result.diagnostics.append(Diagnostic(error.code, error.message, SourceSpan(p, p), "lexer"))

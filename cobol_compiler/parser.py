@@ -7,6 +7,7 @@ from .diagnostics import Diagnostic
 from .expressions import ExpressionParser
 from .source import SourceLocation, SourceSpan
 from .statements import StatementParser
+from .validation import validate_ast
 
 
 class ParseError(Exception):
@@ -159,7 +160,7 @@ class Parser(ExpressionParser, StatementParser):
             token = self.current()
             self.diagnostics.append(Diagnostic("PARSER_DEPTH", "Aninhamento excede a capacidade do parser.",
                                                token.span if token else self.eof_span(), "parser"))
-        structural = A.validate_structure(root, len(self.tokens)) if root is not None and not self.diagnostics else []
+        structural = validate_ast(root, self.tokens).errors if root is not None and not self.diagnostics else []
         valid = not self.diagnostics and not structural and self.i == len(self.tokens) and not self.skipped
         return ParseResult(root if valid else None, self.diagnostics, self.i, len(self.tokens), self.skipped,
                            structural, root if not valid else None)
@@ -276,9 +277,9 @@ class Parser(ExpressionParser, StatementParser):
                 clauses.append(self.node(A.FileStatusClause, begin, target=self.reference(suffixes=False)))
             else:
                 self.fail("ASSIGN, ORGANIZATION, ACCESS, RECORD KEY ou FILE STATUS")
-        self.expect(".")
         if not any(isinstance(c, A.AssignClause) for c in clauses):
             self.fail("ASSIGN no SELECT")
+        self.expect(".")
         return self.node(A.FileControlEntry, start, name=name, optional=optional, clauses=clauses)
 
     def data(self):
@@ -293,16 +294,22 @@ class Parser(ExpressionParser, StatementParser):
                     if self.at("EXEC"):
                         self.fail("declaração COBOL", code="UNSUPPORTED_EXEC", message="SQL/CICS embutido ainda não é suportado.")
                     if self.at("FD", "SD"):
+                        if name != "FILE":
+                            self.fail("FD/SD somente na FILE SECTION")
                         fd_start = self.i; sort = self.take().value == "SD"; fd_name = self.reference(suffixes=False); clauses = []
                         if self.match("RECORD"):
-                            c_start = self.i - 1; self.match("CONTAINS"); low = self.literal()
-                            high = self.literal() if self.match("TO") else None
+                            c_start = self.i - 1; self.match("CONTAINS"); low = self.integer_literal()
+                            high = self.integer_literal() if self.match("TO") else None
                             unit = self.expect("CHARACTERS").value
                             clauses.append(self.node(A.RecordSizeClause, c_start, minimum=low, maximum=high, unit=unit))
                         self.expect(".")
                         records = self.data_entries()
+                        if not records:
+                            self.fail("registro de nível 01 após FD/SD")
                         entries.append(self.node(A.FileDescriptor, fd_start, name=fd_name, sort=sort, clauses=clauses, records=records))
                     elif self.kind() == "NUMBER":
+                        if name == "FILE":
+                            self.fail("FD/SD antes de registros na FILE SECTION")
                         entries.extend(self.data_entries(screen=name == "SCREEN"))
                     else:
                         self.fail("nível de dados, FD ou seção")
@@ -316,9 +323,10 @@ class Parser(ExpressionParser, StatementParser):
         while self.kind() == "NUMBER":
             begin = self.i
             try:
-                t = self.take()
+                t = self.current()
                 if not t.value.isdigit() or int(t.value) not in (*range(1, 50), 66, 77, 88):
                     self.fail("nível 01–49, 66, 77 ou 88", code="INVALID_DATA_LEVEL")
+                self.take()
                 level = int(t.value)
                 if self.match("FILLER"):
                     name = None
@@ -352,6 +360,11 @@ class Parser(ExpressionParser, StatementParser):
                 self.recover(begin, declaration=True)
         return roots
 
+    def integer_literal(self):
+        if self.kind() != "NUMBER" or not self.current().value.isdigit():
+            self.fail("inteiro sem sinal")
+        return self.literal()
+
     def data_clause(self):
         begin = self.i
         if self.match("PIC", "PICTURE"):
@@ -376,7 +389,7 @@ class Parser(ExpressionParser, StatementParser):
                 self.fail("tipo USAGE")
             return self.node(A.UsageClause, begin, usage=self.take().value)
         if self.match("OCCURS"):
-            low = self.literal(); high = self.literal() if self.match("TO") else None
+            low = self.integer_literal(); high = self.integer_literal() if self.match("TO") else None
             self.match("TIMES"); depending = None; keys = []; indexes = []
             if self.match("DEPENDING"):
                 self.expect("ON"); depending = self.reference(suffixes=False)

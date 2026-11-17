@@ -130,6 +130,14 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(condition.right.right.operator, "<")
         self.assertEqual(condition.right.left.inherited_subject, condition.left.left.span)
 
+    def test_abbreviation_uses_latest_explicit_subject(self):
+        result = self.good("IF A = 1 OR B > 2 OR 3 CONTINUE END-IF.")
+        comparisons = self.nodes(result, A.Comparison)
+        abbreviated = self.nodes(result, A.AbbreviatedCondition)[0]
+        self.assertEqual(comparisons[1].left.name, "B")
+        self.assertEqual(abbreviated.operator, ">")
+        self.assertEqual(abbreviated.inherited_subject, comparisons[1].left.span)
+
     def test_not_and_class_conditions(self):
         result = self.good("IF NOT (FIELD IS NOT NUMERIC) CONTINUE END-IF.")
         cond = self.nodes(result, A.If)[0].condition
@@ -387,6 +395,77 @@ class ParserTests(unittest.TestCase):
     def test_sql_extension_is_explicitly_unsupported(self):
         result = self.bad("EXEC SQL CONNECT END-EXEC.")
         self.assertEqual(result.diagnostics[0].code, "UNSUPPORTED_EXEC")
+
+    def test_computer_and_special_names_clauses(self):
+        result = self.good("STOP RUN.", environment=(
+            fixed("CONFIGURATION SECTION.", area="A"),
+            fixed("SOURCE-COMPUTER. PC WITH DEBUGGING MODE.", area="A"),
+            fixed("OBJECT-COMPUTER. PC.", area="A"),
+            fixed("SPECIAL-NAMES.", area="A"), fixed("CURSOR IS CURSOR-FIELD CRT STATUS IS KEY-FIELD."),
+        ))
+        self.assertEqual([n.debugging for n in self.nodes(result, A.ComputerClause)], [True, False])
+        self.assertEqual([n.setting for n in self.nodes(result, A.SpecialName)], ["CURSOR", "CRT STATUS"])
+
+    def test_sort_has_typed_keys_and_file_operands(self):
+        result = self.good("SORT SORT-FILE ON ASCENDING KEY FIELD",
+                           "USING INPUT-FILE GIVING OUTPUT-FILE.")
+        node = self.nodes(result, A.Sort)[0]
+        self.assertEqual(node.keys[0].role, "ASCENDING")
+        self.assertEqual(node.using[0].name, "INPUT-FILE")
+        self.assertEqual(node.giving[0].name, "OUTPUT-FILE")
+
+    def test_go_depending_next_sentence_and_scope_exits(self):
+        result = self.good("GO TO FIRST-PARA SECOND-PARA DEPENDING ON CHOICE",
+                           "NEXT SENTENCE EXIT SECTION EXIT PROGRAM.")
+        node = self.nodes(result, A.GoTo)[0]
+        self.assertEqual(len(node.targets), 2)
+        self.assertEqual(node.depending.name, "CHOICE")
+        self.assertTrue(self.nodes(result, A.NextSentence))
+        self.assertEqual([n.scope for n in self.nodes(result, A.Exit)], ["SECTION", "PROGRAM"])
+
+    def test_start_write_advancing_and_call_exception_handlers(self):
+        result = self.good("START FILE-NAME KEY IS NOT LESS THAN CODE",
+                           "INVALID KEY CONTINUE END-START",
+                           "WRITE REC AFTER ADVANCING 2 LINES",
+                           "CALL 'P' ON EXCEPTION CONTINUE",
+                           "NOT ON EXCEPTION CONTINUE END-CALL.")
+        self.assertEqual(self.nodes(result, A.Start)[0].condition.operator, ">=")
+        self.assertEqual(self.nodes(result, A.Write)[0].timing, "AFTER")
+        self.assertEqual(len(self.nodes(result, A.Call)[0].handlers), 2)
+
+    def test_non_integer_occurs_and_invalid_verb_clauses(self):
+        invalid_level = self.bad("STOP RUN.", data=("99 FIELD PIC X.",))
+        self.assertEqual(invalid_level.diagnostics[0].unexpected, "'99'")
+        self.assertEqual(invalid_level.diagnostics[0].span.start.column, 12)
+        self.bad("STOP RUN.", data=("01 TABLE-FIELD OCCURS 'X' TIMES PIC X.",))
+        self.bad("STOP RUN.", data=("01 TABLE-FIELD OCCURS 1.5 TIMES PIC X.",))
+        for statement in ("COMPUTE X = 1 GIVING Y.", "ADD 1 TO X REMAINDER Y.",
+                          "DIVIDE 1 INTO X REMAINDER Y.", "GO TO PARA OTHER-PARA.",
+                          "STRING INTO FIELD END-STRING.",
+                          "DISPLAY 'X' WITH NO ADVANCING WITH NO ADVANCING.",
+                          "DISPLAY 'X' UPON CONSOLE UPON CONSOLE."):
+            with self.subTest(statement=statement):
+                self.bad(statement)
+
+    def test_fd_is_rejected_outside_file_section(self):
+        self.bad("STOP RUN.", data=("FD FILE-NAME.", "01 REC PIC X.",))
+
+    def test_known_unimplemented_statement_has_specific_code(self):
+        result = self.bad("REWRITE REC.")
+        self.assertEqual(result.diagnostics[0].code, "UNSUPPORTED_STATEMENT")
+
+    def test_deleting_tokens_never_crashes_recovery(self):
+        # Mutações determinísticas de entrada localizada, sem supor que excluir
+        # um token opcional deva tornar a sentença inválida.
+        from cobol_compiler import Parser
+        result = self.good("IF A > 1 DISPLAY 'YES' ELSE CONTINUE END-IF.")
+        tokens = result.preprocessed.tokens
+        for i in range(len(tokens)):
+            with self.subTest(index=i):
+                parsed = Parser(tokens[:i] + tokens[i + 1:]).parse()
+                if parsed.diagnostics:
+                    self.assertFalse(parsed.success)
+                    self.assertIsNone(parsed.ast)
 
     def test_cli_check_dump_and_failure_codes(self):
         good = subprocess.run([sys.executable, "-m", "cobol_compiler", "examples/oficiais/CALCMD01.cbl", "--check-syntax"],

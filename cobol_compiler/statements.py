@@ -101,8 +101,12 @@ class StatementParser:
             elif self.at("LINE", "COLUMN"):
                 operands.append(self.screen_position())
             elif self.match("WITH"):
+                if no_advancing:
+                    self.fail("cláusula WITH NO ADVANCING não repetida")
                 self.expect("NO"); self.expect("ADVANCING"); no_advancing = True
             elif self.match("UPON"):
+                if upon is not None:
+                    self.fail("cláusula UPON não repetida")
                 if self.kind() not in ("IDENTIFIER", "KEYWORD"):
                     self.fail("dispositivo de saída")
                 upon = self.take().value
@@ -164,7 +168,8 @@ class StatementParser:
         return handlers
 
     def arithmetic(self):
-        start = self.i; operation = self.take().value; corresponding = bool(self.match("CORR", "CORRESPONDING"))
+        start = self.i; operation = self.take().value
+        corresponding = operation in ("ADD", "SUBTRACT") and bool(self.match("CORR", "CORRESPONDING"))
         sources = []; targets = []; giving = []; remainder = None; form = operation
         if operation == "COMPUTE":
             targets = self.arithmetic_targets(); self.expect("="); sources = [self.expression()]
@@ -193,13 +198,17 @@ class StatementParser:
                     targets = self.arithmetic_targets()
                 else:
                     sources.append(self.primary())
-        if self.match("GIVING"):
+        if operation != "COMPUTE" and self.match("GIVING"):
             giving = self.arithmetic_targets()
         if operation == "DIVIDE" and form == "BY" and not giving:
             self.fail("GIVING após DIVIDE BY")
         if operation in ("MULTIPLY", "DIVIDE") and len(sources) > 1 and not giving:
             self.fail("GIVING quando ambos os operandos são de entrada")
+        if operation in ("MULTIPLY", "DIVIDE") and giving and len(targets) > 1:
+            self.fail("um único segundo operando na forma GIVING")
         if self.match("REMAINDER"):
+            if operation != "DIVIDE" or not giving:
+                self.fail("REMAINDER somente em DIVIDE com GIVING")
             remainder = self.reference()
         end_word = "END-" + operation
         handlers = self.handlers({"SIZE ERROR"}, end_word)
@@ -297,6 +306,8 @@ class StatementParser:
         start = self.i; self.expect("GO"); self.match("TO"); targets = self.references(); depending = None
         if self.match("DEPENDING"):
             self.match("ON"); depending = self.reference()
+        if len(targets) > 1 and depending is None:
+            self.fail("DEPENDING ON após lista de destinos GO TO")
         return self.node(A.GoTo, start, targets=targets, depending=depending)
 
     def exit_statement(self):
@@ -400,6 +411,8 @@ class StatementParser:
             while self.at("ALL", "LEADING", "FIRST", "CHARACTERS", "TRAILING"):
                 replacements.append(self.inspect_pattern(replacing=True))
         if self.match("CONVERTING"):
+            if tallies or replacements:
+                self.fail("CONVERTING separado de TALLYING/REPLACING")
             first = self.primary(); self.expect("TO"); converting = (first, self.primary())
         if not tallies and not replacements and converting is None:
             self.fail("TALLYING, REPLACING ou CONVERTING")
@@ -415,6 +428,8 @@ class StatementParser:
         while not self.at("INTO"):
             begin = self.i; values = self.operands(); self.expect("DELIMITED"); self.match("BY")
             delimiter = self.delimiter(); parts.append(self.node(A.StringPart, begin, values=values, delimiter=delimiter))
+        if not parts:
+            self.fail("origem e DELIMITED antes de INTO")
         self.expect("INTO"); target = self.reference(); pointer = None
         if self.match("WITH"):
             self.expect("POINTER"); pointer = self.reference()

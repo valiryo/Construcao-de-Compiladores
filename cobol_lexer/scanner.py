@@ -92,6 +92,11 @@ class CobolLexer:
 
             if state.picture_expected:
                 word = WORD_RE.match(code, index)
+                if word is not None and word.group().upper() == "COPY":
+                    # O copybook pode fornecer a própria máscara. A expansão
+                    # ocorre antes da tokenização definitiva do programa.
+                    state.picture_expected = False
+                    continue
                 if word is not None and word.group().upper() == "IS":
                     self._emit(result, source, index, word.end(), "KEYWORD", word.group(), "IS")
                     index = word.end()

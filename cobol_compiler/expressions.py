@@ -170,7 +170,17 @@ class ExpressionParser:
             op = self.take().value
             right = self.condition(priority + 1, context)
             left = self.node(A.Binary, start, operator=op, left=left, right=right)
+            context = self.last_comparison(right) or context
         return left
+
+    def last_comparison(self, value):
+        if isinstance(value, A.Comparison):
+            return value
+        if isinstance(value, A.Binary) and value.operator in ("AND", "OR"):
+            return self.last_comparison(value.right) or self.last_comparison(value.left)
+        if isinstance(value, A.Unary) and value.operator == "NOT":
+            return self.last_comparison(value.operand)
+        return None
 
     def relative_condition(self, inherited=None):
         start = self.i
