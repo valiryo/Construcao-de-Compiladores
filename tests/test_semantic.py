@@ -61,6 +61,8 @@ class SemanticTests(unittest.TestCase):
         self.assertNotEqual(left.id,right.id)
         self.assertEqual(left.original_name,'field-a')
         self.assertEqual(r.table.symbols[left.parent].name,'LEFT-GROUP')
+        r=check_source(unit(name='mixed-Name'))
+        self.assertEqual(r.table.candidates('MIXED-NAME',['program'])[0].original_name,'mixed-Name')
 
     def test_ambiguous_reference_has_related_declarations(self):
         r=self.bad('AMBIGUOUS_REFERENCE','DISPLAY FIELD-A.',data=(
@@ -289,6 +291,12 @@ class SemanticTests(unittest.TestCase):
         binding=r.annotation(search).details['search_all']
         self.assertEqual(binding['keys'][0]['symbols'],[self.symbol(r,'CODE').id])
         self.assertEqual(r.annotation(search).details['indexes'],[self.symbol(r,'IDX','index').id])
+        r=self.good('SET IDX OF TAB-A TO 1.',data=(
+            '01 TAB-A OCCURS 3 ASCENDING KEY CODE INDEXED BY IDX.',
+            '05 CODE PIC 9.','01 TAB-B OCCURS 3',
+            'ASCENDING KEY CODE INDEXED BY IDX.','05 CODE PIC 9.'))
+        self.assertEqual(len(r.table.candidates('IDX',['index'])),2)
+        self.assertEqual(len(r.table.candidates('CODE',['data'])),2)
 
     def test_string_unstring_inspect_validate_destinations(self):
         self.good('STRING "AB" DELIMITED BY SIZE INTO TEXT-A END-STRING',
@@ -327,7 +335,7 @@ class SemanticTests(unittest.TestCase):
     def test_index_cannot_address_a_different_table(self):
         self.bad('INDEX_TABLE_MISMATCH','DISPLAY FIELD-B(IDX-A).',data=(
             '01 TAB-A OCCURS 3 INDEXED BY IDX-A.','05 FIELD-A PIC X.',
-            '01 TAB-B OCCURS 3 INDEXED BY IDX-B.','05 FIELD-B PIC X.'))
+            '01 TAB-B OCCURS 3 INDEXED BY IDX-B.','05 FIELD-B PIC X(2).'))
 
     def test_initialize_replacement_rejects_text_for_numeric_category(self):
         self.bad('INVALID_INITIALIZE_REPLACEMENT','INITIALIZE NUM-A REPLACING NUMERIC BY "A".',data=('01 NUM-A PIC 9.',))
@@ -355,3 +363,17 @@ class SemanticTests(unittest.TestCase):
         r=analyze(frontend)
         self.assertFalse(r.success)
         self.assertIn('UNSUPPORTED_STATEMENT',[d.code for d in r.diagnostics])
+
+    def test_length_of_table_is_one_occurrence(self):
+        r=self.good('DISPLAY LENGTH OF ROW-A.',data=('01 GRP.','05 ROW-A OCCURS 3.','10 FIELD-A PIC X(4).'))
+        length=self.nodes(r,A.LengthOf)[0]
+        self.assertEqual(r.annotation(length).details['constant_length'],4)
+        self.assertEqual(r.layout.for_symbol(self.symbol(r,'ROW-A')).total_size,12)
+
+    def test_length_of_variable_group_is_deferred(self):
+        r=self.good('DISPLAY LENGTH OF GRP.',data=('01 N PIC 9.','01 GRP.',
+            '05 ROW-A OCCURS 1 TO 3 DEPENDING ON N.','10 FIELD-A PIC X(4).'))
+        length=self.nodes(r,A.LengthOf)[0]
+        self.assertIsNone(r.annotation(length).details['constant_length'])
+        self.assertEqual(r.annotation(length).details['maximum_length'],12)
+        self.assertEqual(r.annotation(length).details['dynamic_dimensions'][0]['depending_id'],self.symbol(r,'N').id)

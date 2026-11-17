@@ -4,9 +4,8 @@ A AST permanece sintática. IDs em pré-ordem são determinísticos para a mesma
 árvore; Annotation/Binding guardam tudo que a próxima fase pode consumir.
 """
 
-from dataclasses import dataclass, field, asdict, replace, fields
+from dataclasses import dataclass, field, asdict, replace
 from decimal import Decimal, InvalidOperation
-from pathlib import Path
 
 from . import ast as A
 from .diagnostics import Diagnostic, RelatedLocation
@@ -120,6 +119,11 @@ class Analyzer:
                 original = tokens[node.token_start+1].token.lexeme
         elif isinstance(node, (A.Paragraph, A.ProcedureSection, A.Reference)):
             original = self.r.frontend.preprocessed.tokens[node.token_start].token.lexeme
+        elif isinstance(node,(A.FileControlEntry,A.FileDescriptor)):
+            original = self.r.frontend.preprocessed.tokens[node.name.token_start].token.lexeme
+        elif isinstance(node,A.IdentificationDivision):
+            tokens = self.r.frontend.preprocessed.tokens[node.token_start:node.token_end]
+            original = next((token.token.lexeme if token.token.kind=="IDENTIFIER" else token.token.value for token in tokens if token.token.kind in {"IDENTIFIER","STRING"} and token.token.value.upper()==name.upper()),name)
         symbol = Symbol(sid, (name or f"<FILLER:{sid}>").upper(), original or "FILLER", namespace,
                         self.nid(node), node.declaration_span if isinstance(node, A.DataItem) else node.span,
                         parent, section, level=level, file_id=file_id, table_id=table_id)
@@ -182,7 +186,7 @@ class Analyzer:
         for clause in item.clauses:
             if isinstance(clause, A.OccursClause):
                 for ref in clause.indexes:
-                    index = self.add(ref.name, "index", ref, section=section, table_id=symbol.id)
+                    index = self.add(ref.name, "index", ref, parent=symbol.id, section=section, table_id=symbol.id)
                     index.type = INDEX
                     self.declaration_ref(ref, index)
         for child in item.children:
@@ -242,7 +246,7 @@ class Analyzer:
             if symbol.namespace == "index":
                 area = "INDEXES"
                 offset = self.r.layout.areas.get(area, 0)
-                self.r.layout.items[symbol.id] = StorageLayout(symbol.id, area, offset, 8, 8, None, True, initial={"policy":"index-base-one", "value":1})
+                self.r.layout.items[symbol.id] = StorageLayout(symbol.id, area, offset, 8, 8, symbol.parent, True, initial={"policy":"index-base-one", "value":1})
                 self.r.layout.areas[area] = offset+8
         # Segunda passagem: resolve DEPENDING, chaves e valores após todos os tipos.
         for node in self.nodes.values():
@@ -384,11 +388,17 @@ class Analyzer:
                 if clause.depending:
                     self.require_integer(clause.depending)
                     sid=self.ann(clause.depending).symbol_id
+                    counter = self.table.symbols.get(sid)
+                    if counter and (counter.namespace != "data" or counter.id==symbol.id or symbol.id in [s.id for s in self.table.ancestors(counter)]):
+                        self.diagnostic("INVALID_DEPENDING_COUNTER", "DEPENDING exige campo inteiro externo à própria tabela.",clause.depending)
                     if layout and layout.dimensions:
                         layout.dimensions[-1].depending_id=sid
                     self.ann(clause).checks.append({"kind":"occurs-depending", "symbol_id":sid,"minimum":layout.dimensions[-1].minimum if layout and layout.dimensions else None,"maximum":layout.dimensions[-1].maximum if layout and layout.dimensions else None})
                 for key in clause.keys:
                     for ref in key.keys:
+                        local = [candidate for candidate in self.table.candidates(ref.name,["data"],ref.qualifiers) if symbol.id in [s.id for s in self.table.ancestors(candidate)]]
+                        if len(local)==1:
+                            self.bind(ref,local[0],"table-key")
                         self.expr(ref,whole=True)
                         key_sid=self.ann(ref).symbol_id
                         if key_sid and symbol.id not in [s.id for s in self.table.ancestors(self.table.symbols[key_sid])]:
@@ -491,7 +501,10 @@ class Analyzer:
                         index_sid = self.ann(sub).symbol_id
                         index_symbol = self.table.symbols.get(index_sid)
                         if index_symbol and index_symbol.namespace == "index" and index_symbol.table_id != dim.symbol_id:
-                            self.diagnostic("INDEX_TABLE_MISMATCH", "Índice associado a outra tabela OCCURS.", sub, related=[index_symbol])
+                            other = self.r.layout.items.get(index_symbol.table_id)
+                            compatible = other and other.dimensions and (other.dimensions[-1].maximum,other.dimensions[-1].stride)==(dim.maximum,dim.stride)
+                            if not compatible:
+                                self.diagnostic("INDEX_TABLE_MISMATCH", "Índice de tabela com quantidade/stride incompatíveis.", sub, related=[index_symbol])
                         value=self.integer_constant(sub)
                         if value is not None and not 1<=value<=dim.maximum:
                             self.diagnostic("SUBSCRIPT_BOUNDS", f"Subscrito {value} fora de 1..{dim.maximum}.",sub)
@@ -541,8 +554,13 @@ class Analyzer:
             target=self.expr(node.operand,whole=True)
             if target.category in {"boolean","screen","index"}:
                 self.diagnostic("LENGTH_REQUIRES_STORAGE", "LENGTH OF exige campo com armazenamento de dados.",node.operand)
-            typ=numeric_type(len(str(target.length)) if target.length is not None else None)
-            ann.details["constant_length"]=target.length
+            sid = self.ann(node.operand).symbol_id
+            layout = self.r.layout.items.get(sid)
+            length = target.length if node.operand.modification or not layout else layout.size
+            dynamic = self.variable_length_dimensions(sid) if sid else []
+            typ=numeric_type(len(str(length)) if length is not None else None)
+            ann.details.update({"constant_length":None if dynamic else length,"maximum_length":length,
+                                "dynamic_dimensions":dynamic,"unit":"one-occurrence"})
         elif isinstance(node,A.FunctionCall): typ=self.function(node)
         elif isinstance(node,A.Unary):
             if node.operator=="NOT":
@@ -592,6 +610,18 @@ class Analyzer:
         if "boolean" in {left.category,right.category} and left.category!=right.category:
             self.diagnostic("INCOMPARABLE_TYPES", "Booleano não é comparável a campo numérico/textual.",node)
         self.ann(node).details["comparison_mode"]="numeric" if left.numeric and right.numeric else "padded-bytes"
+
+    def variable_length_dimensions(self,sid):
+        symbol = self.table.symbols.get(sid)
+        if not symbol:
+            return []
+        result = []
+        for child_id in symbol.children:
+            layout = self.r.layout.items.get(child_id)
+            if layout:
+                result.extend(asdict(d) for d in layout.dimensions if d.symbol_id==child_id and d.depending_id)
+                result.extend(self.variable_length_dimensions(child_id))
+        return result
 
     def compatible(self, source, target, node, *, initial=False, target_id=None):
         if "error" in {source.category,target.category}: return
@@ -678,6 +708,9 @@ class Analyzer:
                             self.diagnostic("INVALID_FILE_STATUS", "FILE STATUS exige dois bytes DISPLAY numéricos ou alfanuméricos.",clause)
                     elif isinstance(clause,A.KeyClause):
                         for ref in clause.keys:
+                            local = [candidate for candidate in self.table.candidates(ref.name,["data"],ref.qualifiers) if candidate.file_id==symbol.id]
+                            if len(local)==1:
+                                self.bind(ref,local[0],"file-key")
                             self.expr(ref,whole=True)
                             sid=self.ann(ref).symbol_id
                             keys.append({"symbol_id":sid,"role":clause.role,"duplicates":clause.duplicates})
@@ -1149,8 +1182,10 @@ class Analyzer:
         base = layout.offset
         result = []
         def visit(symbol):
+            if symbol.namespace not in {"data","filler"}:
+                return
             item = self.r.layout.items.get(symbol.id)
-            if not item or item.redefines:
+            if not item or item.redefines and symbol.id != sid:
                 return
             if symbol.type.category == "group":
                 for child in symbol.children:

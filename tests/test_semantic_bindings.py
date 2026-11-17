@@ -203,6 +203,10 @@ class BindingTests(unittest.TestCase):
         r=self.caller(data=('01 ARG-A.','05 TEXT-A PIC X(4).'),
             callee=self.callee(data=('01 ARG-A.','05 OTHER-NAME PIC X(4).')))
         self.assertTrue(r.success,[d.format() for d in r.diagnostics])
+        r=self.caller(body=('CALL "SUB-A" USING VIEW-A.',),
+            data=('01 ARG-A PIC X(4).','01 VIEW-A REDEFINES ARG-A.','05 TEXT-A PIC X(4).'),
+            callee=self.callee(data=('01 ARG-A.','05 OTHER-NAME PIC X(4).')))
+        self.assertTrue(r.success,[d.format() for d in r.diagnostics])
 
     def test_table_occurrence_argument_matches_scalar_formal(self):
         r=self.caller(body=('CALL "SUB-A" USING ARG-A(2).',),
