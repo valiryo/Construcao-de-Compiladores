@@ -35,7 +35,7 @@ houve uma análise sintática, semântica ou de estilo sem avisos.
 | BUSCA01A | 208 → 208 | 0 → 0 | LINE SEQUENTIAL, FD, READ INTO, AT END/NOT AT END, END-READ, PERFORM de seção UNTIL, EXIT |
 | CAD0002A | 864 → 868 | 4 → 0 | COPY, LINKAGE, USING, GOBACK, OCCURS no copybook, subscritos, referência modificada, VARYING, INITIALIZE REPLACING, NUMERIC, GO TO, INSPECT TALLYING, FUNCTION REVERSE e LENGTH OF |
 | CAD0004A | 133 → 133 | 0 → 0 | Parágrafos sem SECTION, PERFORM UNTIL, OPEN OUTPUT, WRITE, registros de grupo, campos sem VALUE |
-| CAD0005A corrigido | 516 → 516 | 0 → 0 | Agenda persistente, tabela de 50 registros, EVALUATE, CONTINUE, VARYING, END-PERFORM, leitura/regravação |
+| CAD0005A corrigido | 516 → 516 | 0 → 0 | Agenda persistente, tabela de 10 registros, EVALUATE, CONTINUE, VARYING, END-PERFORM, leitura/regravação |
 | CAIXAREG | 390 → 390 | 0 → 0 | Decimais implícitos V, COMPUTE com parênteses/subtração, MOVE para máscara editada ZZZ.ZZZ.ZZZ,ZZ, interação e validação |
 | CALCMD01 | 285 → 285 | 0 → 0 | Soma/divisão, escala de quatro casas, comparações, PERFORM que volta à seção para repetir entrada |
 | PROG024A | 1397 → 1397 | 0 → 0 | Dois FD, log com delimitadores, OPEN EXTEND, tabela, grupos/FILLER, COMP, CALL USING, RETURN-CODE, data via PROGDATA, DISPLAY WITH NO ADVANCING |

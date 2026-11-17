@@ -1,0 +1,252 @@
+(* Gramática do front-end implementado, Etapa 2. Terminais case-insensitive.
+   NUMBER, STRING, PICTURE e IDENTIFIER vêm do lexer existente. Não há regra
+   catch-all para comandos ou cláusulas. COPY é expandido antes desta gramática.
+
+   Notação: [] opcional; {} zero ou mais; | alternativa; ?... ? predicado/lexema.
+   Listas podem ter vírgula separadora. Vírgula dentro de NUMBER depende de
+   DECIMAL-POINT IS COMMA. Pontuação dentro de STRING/PICTURE não é separador.
+
+   Restrições de contexto:
+   - cabeçalhos de divisão, PROGRAM-ID e seções do ambiente/dados ficam na área A;
+     rótulos de seções/parágrafos de procedimentos são reconhecidos na área A;
+   - nível 88 é associado ao último item, não ao grupo como irmão regular;
+   - num bloco, PERIOD fecha todos os escopos implícitos sem ser consumido por
+     cada comando. ELSE/WHEN/tratadores/END-* delimitam seus blocos e os externos;
+   - PERFORM inline exige END-PERFORM; nomes/assinaturas/tipos são da semântica;
+   - comandos desconhecidos e extensões não implementadas geram erro explícito;
+   - esta gramática descreve o subconjunto/dialeto do projeto, não todo COBOL.
+*)
+
+compilation-unit = program | data-fragment ;
+program = identification, [environment], [data], procedure, [end-program], EOF ;
+identification = "IDENTIFICATION", "DIVISION", ".",
+                 "PROGRAM-ID", ".", program-name, ".", {metadata} ;
+program-name = IDENTIFIER | STRING ;
+metadata = metadata-name, ".", {metadata-word}, "." ;
+metadata-name = "AUTHOR" | "INSTALLATION" | "DATE-WRITTEN" | "DATE-COMPILED"
+              | "SECURITY" | "REMARKS" ;
+metadata-word = ? token descritivo diferente de PERIOD; não é um comando ? ;
+end-program = "END", "PROGRAM", IDENTIFIER, "." ;
+
+environment = "ENVIRONMENT", "DIVISION", ".", {environment-section} ;
+environment-section = environment-section-name, "SECTION", ".", {environment-entry} ;
+environment-section-name = "CONFIGURATION" | "INPUT-OUTPUT" ;
+environment-entry = computer | special-names | "FILE-CONTROL", "." | select ;
+computer = ("SOURCE-COMPUTER" | "OBJECT-COMPUTER"), ".", computer-name,
+           ["WITH", "DEBUGGING", "MODE"], "." ;
+computer-name = ? palavra de nome de computador ? ;
+special-names = "SPECIAL-NAMES", ".", {special-setting}, "." ;
+special-setting = "DECIMAL-POINT", "IS", "COMMA"
+                | "CURSOR", ["IS"], reference
+                | "CRT", "STATUS", ["IS"], reference ;
+select = "SELECT", ["OPTIONAL"], reference, {select-clause}, "." ;
+(* SELECT exige pelo menos uma cláusula ASSIGN. *)
+select-clause = "ASSIGN", ["TO"], primary
+              | "ORGANIZATION", ["IS"], ["LINE"], organization
+              | "ACCESS", "MODE", ["IS"], access-mode
+              | ["ALTERNATE"], "RECORD", "KEY", ["IS"], reference,
+                ["WITH", "DUPLICATES"]
+              | "FILE", "STATUS", ["IS"], reference ;
+organization = "SEQUENTIAL" | "INDEXED" | "RELATIVE" ;
+access-mode = "SEQUENTIAL" | "DYNAMIC" | "RANDOM" ;
+
+data = "DATA", "DIVISION", ".", {data-section} ;
+data-section = "FILE", "SECTION", ".", {file-descriptor}
+              | storage-section, "SECTION", ".", {data-item}
+              | "SCREEN", "SECTION", ".", {screen-item} ;
+storage-section = "WORKING-STORAGE" | "LOCAL-STORAGE" | "LINKAGE" ;
+data-fragment = data-item, {data-item}, EOF ;
+file-descriptor = ("FD" | "SD"), reference, [record-size], ".",
+                  data-item, {data-item} ;
+record-size = "RECORD", ["CONTAINS"], unsigned-integer,
+              ["TO", unsigned-integer], "CHARACTERS" ;
+data-item = level, (IDENTIFIER | "FILLER"), {data-clause}, "." ;
+screen-item = level, [IDENTIFIER | "FILLER"], {data-clause}, "." ;
+level = ? inteiro representando 1..49, 66, 77 ou 88 ? ;
+(* RENAMES do nível 66 não implementado: UNSUPPORTED_RENAMES. Níveis não
+   garantem layout válido; grupos/PIC/compatibilidade serão validados depois. *)
+data-clause = picture-clause | value-clause | occurs-clause | usage-clause
+             | "REDEFINES", reference | screen-position
+             | "USING", reference | "BLANK", "SCREEN" ;
+picture-clause = ("PIC" | "PICTURE"), ["IS"], PICTURE ;
+value-clause = ("VALUE" | "VALUES"), ["IS" | "ARE"],
+               value-range, {[","], value-range} ;
+value-range = literal, [("THRU" | "THROUGH"), literal] ;
+occurs-clause = "OCCURS", unsigned-integer, ["TO", unsigned-integer], ["TIMES"],
+                ["DEPENDING", "ON", reference], {table-key},
+                ["INDEXED", "BY", reference-list] ;
+table-key = ("ASCENDING" | "DESCENDING"), ["KEY"], ["IS"], reference-list ;
+usage-clause = "USAGE", ["IS"], usage | usage ;
+usage = "DISPLAY" | "COMP" | "COMP-1" | "COMP-2" | "COMP-3" | "COMP-4"
+       | "COMP-5" | "COMPUTATIONAL" | "BINARY" | "PACKED-DECIMAL" | "INDEX"
+       | "POINTER" ;
+unsigned-integer = ? NUMBER com apenas dígitos ASCII, sem sinal nem decimal ? ;
+
+procedure = "PROCEDURE", "DIVISION", ["USING", formal-parameters], ".",
+            {sentence | paragraph | procedure-section} ;
+formal-parameters = formal-parameter, {[","], formal-parameter} ;
+formal-parameter = [passing-mode], reference ;
+procedure-section = IDENTIFIER, "SECTION", ".", {sentence | paragraph} ;
+paragraph = IDENTIFIER, ".", {sentence} ;
+sentence = {statement}, "." ;
+body = statement, {statement} ;
+(* body pára antes de PERIOD, cabeçalho ou delimitador do escopo atual/externo.
+   Não consome esses delimitadores; nem todo body requer END-* explícito. *)
+
+statement = move | initialize | display | accept | arithmetic | if | evaluate
+           | perform | go | exit | "CONTINUE" | "STOP", "RUN" | "GOBACK"
+           | "NEXT", "SENTENCE" | open | close | read | write | start | call
+           | inspect | string | unstring | search | set | alter | sort ;
+move = "MOVE", ["CORR" | "CORRESPONDING"], primary, "TO", reference-list ;
+initialize = "INITIALIZE", reference-list,
+             ["REPLACING", initialize-replacement, {initialize-replacement}],
+             ["END-INITIALIZE"] ;
+initialize-replacement = category, "BY", primary ;
+category = "ALPHANUMERIC" | "NUMERIC" | "ALPHABETIC" | "NUMERIC-EDITED"
+          | "ALPHANUMERIC-EDITED" ;
+display = "DISPLAY", display-part, {display-part}, ["END-DISPLAY"] ;
+display-part = primary | ["AT"], screen-position
+              | "WITH", "NO", "ADVANCING" | "UPON", device-name ;
+(* DISPLAY exige ao menos um primary; UPON e NO ADVANCING não se repetem.
+   Posições e operandos permanecem intercalados na mesma ordem na AST. *)
+screen-position = ("LINE" | "COLUMN"), ["NUMBER"], ["IS"], expression ;
+device-name = ? palavra identificando dispositivo ? ;
+accept = "ACCEPT", reference, ["FROM", accept-source, [date-format]],
+         ["AT", screen-position, {screen-position}], ["END-ACCEPT"] ;
+accept-source = "DATE" | "DAY" | "DAY-OF-WEEK" | "TIME" | "CONSOLE"
+               | "COMMAND-LINE" | "ARGUMENT-VALUE" | "ENVIRONMENT-VALUE" ;
+date-format = "YYYYMMDD" | "YYYYDDD" ;
+
+arithmetic = compute | add | subtract | multiply | divide ;
+compute = "COMPUTE", arithmetic-targets, "=", expression,
+          {size-handler}, ["END-COMPUTE"] ;
+add = "ADD", [corresponding], primary-list,
+      (("TO", arithmetic-targets, [giving]) | giving),
+      {size-handler}, ["END-ADD"] ;
+subtract = "SUBTRACT", [corresponding], primary-list, "FROM", arithmetic-targets,
+           [giving], {size-handler}, ["END-SUBTRACT"] ;
+multiply = "MULTIPLY", primary, "BY",
+           (arithmetic-targets, [giving] | primary, giving),
+           {size-handler}, ["END-MULTIPLY"] ;
+divide = "DIVIDE", primary,
+         ("INTO", (arithmetic-targets, [giving] | primary, giving)
+          | "BY", primary, giving),
+         ["REMAINDER", reference], {size-handler}, ["END-DIVIDE"] ;
+(* REMAINDER exige GIVING; forma GIVING de MULTIPLY/DIVIDE tem um único
+   segundo operando. Receptores individuais preservam ROUNDED. *)
+corresponding = "CORR" | "CORRESPONDING" ;
+giving = "GIVING", arithmetic-targets ;
+arithmetic-targets = arithmetic-target, {[","], arithmetic-target} ;
+arithmetic-target = reference, ["ROUNDED"] ;
+size-handler = ["NOT"], ["ON"], "SIZE", "ERROR", body ;
+
+if = "IF", condition, ["THEN"], body, ["ELSE", body], ["END-IF"] ;
+evaluate = "EVALUATE", condition, {"ALSO", condition}, when, {when},
+           ["END-EVALUATE"] ;
+when = when-selection, {when-selection}, body | "WHEN", "OTHER", body ;
+when-selection = "WHEN", selection, {"ALSO", selection} ;
+selection = "ANY" | condition | relative-condition
+            | expression, ("THRU" | "THROUGH"), expression ;
+(* Quantidade de seletores ALSO deve corresponder à de sujeitos.
+   WHEN OTHER é único e último, não agrupado a outros seletores. *)
+perform = "PERFORM", [perform-target], [test-mode], [perform-control],
+          [body, "END-PERFORM"] ;
+(* Se perform-target não existe, body e END-PERFORM são obrigatórios.
+   Com alvo não há corpo inline nem END-PERFORM. *)
+perform-target = reference, [("THRU" | "THROUGH"), reference] ;
+test-mode = ["WITH"], "TEST", ("BEFORE" | "AFTER") ;
+perform-control = "UNTIL", condition | expression, "TIMES"
+                 | "VARYING", varying, {"AFTER", varying} ;
+varying = reference, "FROM", expression, "BY", expression, "UNTIL", condition ;
+go = "GO", ["TO"], reference-list, ["DEPENDING", ["ON"], reference] ;
+(* Mais de um destino GO exige DEPENDING. *)
+exit = "EXIT", ["PERFORM" | "PARAGRAPH" | "SECTION" | "PROGRAM"] ;
+
+open = "OPEN", open-group, {open-group} ;
+open-group = ("INPUT" | "OUTPUT" | "I-O" | "EXTEND"), reference-list ;
+close = "CLOSE", reference-list ;
+read = "READ", reference, ["NEXT"], ["RECORD"], ["INTO", reference],
+       ["KEY", ["IS"], reference], {end-handler | key-handler}, ["END-READ"] ;
+write = "WRITE", reference, ["FROM", primary],
+        [("BEFORE" | "AFTER"), "ADVANCING", primary, ["LINE" | "LINES"]],
+        {key-handler}, ["END-WRITE"] ;
+start = "START", reference, "KEY", relation, expression,
+        {key-handler}, ["END-START"] ;
+end-handler = ["NOT"], "AT", "END", body ;
+key-handler = ["NOT"], "INVALID", "KEY", body ;
+call = "CALL", primary, ["USING", parameters],
+       [("RETURNING" | "GIVING"), reference], {exception-handler}, ["END-CALL"] ;
+parameters = parameter, {[","], parameter} ;
+parameter = [passing-mode], primary ;
+passing-mode = "BY", ("REFERENCE" | "VALUE" | "CONTENT") ;
+(* O modo é herdado pelos parâmetros seguintes até outro BY; default REFERENCE. *)
+exception-handler = ["NOT"], "ON", "EXCEPTION", body ;
+
+inspect = "INSPECT", primary,
+          ("TALLYING", tally, {tally}, ["REPLACING", replacements]
+           | "REPLACING", replacements | "CONVERTING", primary, "TO", primary) ;
+tally = reference, "FOR", inspect-pattern, {inspect-pattern} ;
+inspect-pattern = ("ALL" | "LEADING" | "FIRST" | "TRAILING"), primary | "CHARACTERS" ;
+replacements = inspect-pattern, "BY", primary,
+               {inspect-pattern, "BY", primary} ;
+string = "STRING", string-part, {string-part}, "INTO", reference,
+         ["WITH", "POINTER", reference], {overflow-handler}, ["END-STRING"] ;
+string-part = primary-list, "DELIMITED", ["BY"], delimiter ;
+delimiter = ["ALL"], ("SIZE" | primary) ;
+unstring = "UNSTRING", primary,
+           ["DELIMITED", ["BY"], delimiter, {"OR", delimiter}],
+           "INTO", unstring-target, {[","], unstring-target},
+           ["WITH", "POINTER", reference], ["TALLYING", ["IN"], reference],
+           {overflow-handler}, ["END-UNSTRING"] ;
+unstring-target = reference, ["DELIMITER", "IN", reference], ["COUNT", "IN", reference] ;
+overflow-handler = ["NOT"], "ON", "OVERFLOW", body ;
+search = "SEARCH", ["ALL"], reference, ["VARYING", reference],
+         ["AT", "END", body], search-when, {search-when}, ["END-SEARCH"] ;
+search-when = "WHEN", condition, body ;
+set = "SET", reference-list, ("TO", primary | ("UP" | "DOWN"), "BY", primary) ;
+alter = "ALTER", alter-pair, {alter-pair} ;
+alter-pair = reference, "TO", "PROCEED", "TO", reference ;
+sort = "SORT", reference, { ["ON"], table-key },
+       "USING", reference-list, "GIVING", reference-list ;
+(* SORT INPUT/OUTPUT PROCEDURE não está implementado. *)
+
+reference-list = reference, {[","], reference} ;
+primary-list = primary, {[","], primary} ;
+reference = data-name, {("OF" | "IN"), data-name}, [subscripts], [refmod] ;
+data-name = IDENTIFIER | "RETURN-CODE" | "SORT-RETURN" ;
+subscripts = "(", expression, {[","], expression}, ")" ;
+refmod = "(", expression, ":", [expression], ")" ;
+primary = literal | reference | "LENGTH", "OF", reference
+         | "FUNCTION", function-name, ["(", expression-list, ")"]
+         | "(", condition, ")" ;
+function-name = IDENTIFIER | ? palavra contextual de nome de função ? ;
+expression-list = [expression, {[","], expression}] ;
+literal = ["ALL"], (NUMBER | STRING | figurative) ;
+figurative = "ZERO" | "ZEROS" | "ZEROES" | "SPACE" | "SPACES"
+            | "LOW-VALUE" | "LOW-VALUES" | "HIGH-VALUE" | "HIGH-VALUES"
+            | "QUOTE" | "QUOTES" | "TRUE" | "FALSE" ;
+
+expression = sum ;
+sum = product, {("+" | "-"), product} ;
+product = signed-power, {("*" | "/"), signed-power} ;
+signed-power = ("+" | "-"), signed-power | power ;
+power = primary, ["**", signed-power] ;
+(* Potência é associativa à direita, com precedência maior que sinal unário.
+   NUMBER com sinal é interpretado neste contexto como sinal + coeficiente.
+   Ex.: -2 ** 2 = -(2 ** 2); em DISPLAY, -2 continua um literal único. *)
+condition = conjunction, {"OR", conjunction} ;
+conjunction = negation, {"AND", negation} ;
+negation = "NOT", negation | comparison ;
+comparison = expression, [relation, expression | ["IS" | "ARE"], ["NOT"], class]
+            | relative-condition ;
+relative-condition = relation, expression | ["IS"], ["NOT"], class ;
+(* Forma relativa só é admitida em WHEN ou após AND/OR com relação antecedente.
+   Sujeito/operador omitidos apontam à última comparação explícita no mesmo
+   nível. Grupos parentizados possuem contexto interno próprio. *)
+relation = ["IS" | "ARE"], ["NOT"], relation-base ;
+relation-base = "=" | "<>" | "<" | ">" | "<=" | ">="
+               | ("EQUAL" | "EQUALS"), ["TO" | "THAN"]
+               | ("LESS" | "GREATER"), ["THAN" | "TO"], ["OR", "EQUAL", ["TO"]] ;
+class = "NUMERIC" | "ALPHABETIC" | "ALPHABETIC-LOWER" | "ALPHABETIC-UPPER"
+        | "POSITIVE" | "NEGATIVE" | "ZERO" ;
+EOF = ? fim do fluxo de tokens ? ;

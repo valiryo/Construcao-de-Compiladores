@@ -80,10 +80,15 @@ SQLCA/DB2 e recursos CICS/BMS também exigem infraestrutura externa.
 
 ```bash
 python -m tools.auditar_corpus
+python -m tools.auditar_parser --write
 python -m unittest discover -s tests -v
 python -m cobol_lexer examples/corrigidos/CAD0005A.cbl --json
+python -m cobol_compiler examples/oficiais/CAD0002A.cbl -I examples/dependencias --check-syntax
 ```
 
-O primeiro comando regenera os relatórios atuais, preservando a auditoria anterior
-às alterações. Os testes conferem hashes, diferença exata do patch, corpus inteiro,
-fluxos oficiais, CLI, posições físicas e casos negativos sem acessar a rede.
+Os comandos de auditoria regeneram os relatórios atuais, preservando a auditoria
+anterior às alterações. Os testes conferem hashes, diferença exata do patch,
+corpus inteiro, fluxos oficiais, AST/CLI, posições físicas e casos negativos sem
+acessar a rede. Na Etapa 2, todos os 77 aceitos pelo lexer foram submetidos ao
+parser: 72 programas e dois copybooks passam; fonte vazio e SQL/CICS ficam
+separados. O [relatório sintático](../docs/auditoria-parser.md) detalha cada arquivo.

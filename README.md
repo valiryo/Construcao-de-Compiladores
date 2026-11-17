@@ -1,12 +1,34 @@
-# Compilador COBOL — Lexer consolidado para a entrega final
+# Compilador COBOL — Pré-processador, parser e AST
 
-Trabalho de Construção de Compiladores em Python 3.11+. Implementa o **lexer** para
+Trabalho de Construção de Compiladores em Python 3.11+. Implementa o **front-end** para
 COBOL em **formato fixo** definido na seção 2 da [especificação do professor](docs/EspecificacaoCOBOL.md),
 com extensões para os corpora [ebasso](examples/ebasso/README.md) e
-[COBOL Dicas](examples/README.md). O pipeline futuro será COPY → lexer → parser/AST
-→ semântica → C → GCC → executável nativo.
+[COBOL Dicas](examples/README.md): COPY → lexer → parser → AST. As próximas fases
+serão análise semântica → C → GCC → executável nativo.
 
-## Preparação da implementação final
+## Etapa 2: sintaxe e AST
+
+Os sete oficiais produzem ASTs completas, com expansão dos copybooks necessários,
+consumo integral dos tokens e verificação independente da representação de cada
+comando. Dos 77 arquivos anteriormente aceitos pelo lexer, **72 programas e dois
+copybooks passam**. Um fonte vazio e os exemplos SQL/CICS são diagnosticados
+separadamente. A suíte completa passou com **149 testes**, incluindo os 80 anteriores.
+
+```bash
+python -m cobol_compiler examples/oficiais/CALCMD01.cbl --check-syntax
+python -m cobol_compiler examples/oficiais/CAD0002A.cbl -I examples/dependencias --dump-ast
+python -m tools.auditar_parser --write
+```
+
+- [Interface, arquitetura e testes](docs/frontend.md).
+- [Auditoria sintática por arquivo](docs/auditoria-parser.md) e [dados JSON](docs/auditoria-parser.json).
+- [Gramática implementada em EBNF](docs/gramatica-cobol.ebnf).
+
+A AST usa nós tipados com origem física e pilha de inclusão. Não há comandos
+armazenados como texto bruto nem aceitação genérica de tokens desconhecidos.
+Os originais do corpus permanecem intactos; não há execução nativa nesta etapa.
+
+## Consolidação léxica da Etapa 1
 
 - [Auditoria léxica e resultados](docs/auditoria-lexer.md): **58 testes antes,
   80 depois**, com os sete programas oficiais sem erros léxicos indevidos.
@@ -14,8 +36,8 @@ com extensões para os corpora [ebasso](examples/ebasso/README.md) e
   CAD0005A corrigido e todos os 75 fontes complementares do commit fixado.
 - [Inventário reproduzível](docs/inventario-corpus.md): tokens, máscaras,
   construções e dependências; nove arquivos externos ficam como casos negativos.
-- [Plano técnico das próximas etapas](docs/plano-implementacao-final.md): gramática,
-  AST, semântica, runtime e geração C. Essas fases ainda não foram implementadas.
+- [Plano técnico atualizado](docs/plano-implementacao-final.md): distingue o
+  front-end concluído das etapas futuras de semântica, runtime e geração C.
 
 Para os testes positivos, use `examples/corrigidos/CAD0005A.cbl`.
 `examples/oficiais/CAD0005A.cbl` preserva o conflito upstream como teste negativo.
@@ -31,7 +53,7 @@ O documento apresenta a introdução ao COBOL, a implementação e o uso de IA, 
 - Python **3.11+** (sem bibliotecas externas).
 - Arquivos-fonte usando o **COBOL Fixed Format**, não o formato livre.
 
-## Executar
+## Executar o lexer isoladamente
 
 Na raiz deste repositório, usando Terminal, PowerShell ou CMD:
 
@@ -53,6 +75,7 @@ O programa lista os tokens, com linha e coluna (contadas desde 1), e os diagnós
 ```bash
 python -m unittest discover -s tests -v
 python -m tools.auditar_corpus
+python -m tools.auditar_parser --write
 ```
 
 No Windows, `py -3 -m cobol_lexer examples/hello.cob` também funciona caso `python` não esteja no PATH.
@@ -114,7 +137,7 @@ A especificação não detalha todos os seguintes aspectos. Por isso adotamos **
 5. **Vocabulário ampliado:** palavras como `PROGRAM-ID`, `PIC`, `VALUE` e `COPY` agora são emitidas como `KEYWORD`. Essa extensão e os novos tipos de token atendem aos exemplos importados e vão além da lista explícita da seção 2.2.
 6. **Área A/B:** a posição é registrada como metadado. O parser futuro validará se uma declaração pode aparecer em cada área; o lexer não impõe regras sintáticas sobre divisão/seção/parágrafo.
 7. A palavra com letras/dígitos/hífen/underscore é reconhecida como unidade, inclusive após unir continuações. Identificadores inválidos ou longos geram erro, em vez de fragmentação silenciosa. `PROG007_LOJA` é um identificador único; `_NAME` e `NAME_` geram `INVALID_IDENTIFIER`.
-8. Não implementamos `COPY`/copybooks: a seção 6 os menciona, mas o pré-processamento não faz parte do escopo léxico mínimo definido na seção 2.
+8. O lexer isolado reconhece `COPY`, sem expandi-lo. A Etapa 2 implementa a expansão no pré-processador de `cobol_compiler`, preservando a API léxica. COPY REPLACING não ocorre no corpus e recebe diagnóstico explícito de recurso não implementado.
 9. **Sinais e operadores:** sinais adjacentes a dígitos, no início do código ou após espaço, parêntese de abertura, vírgula ou operador, pertencem ao literal numérico (`-123.45`, `+8`). Em `COUNT+1`, o `+` é um operador. Hífens internos permanecem parte do identificador; escreva `COUNT - 1` para expressar subtração. Um hífen colado ao início de um nome (`-COUNT`) gera `INVALID_IDENTIFIER`, e a palavra inteira é descartada. Para o menos unário antes de um nome, use `- COUNT`; parênteses também podem delimitar o operador, como em `-(COUNT)` ou `(- COUNT)`.
 10. **Máscaras `PIC`:** os símbolos e as repetições entre parênteses são verificados lexicalmente; repetições devem ser positivas, aceitando zeros à esquerda. Máscaras malformadas geram `INVALID_PICTURE`. A validade semântica da combinação dos símbolos ficará a cargo das etapas seguintes.
 
@@ -129,6 +152,16 @@ cobol_lexer/
   model.py          Token, Diagnostic e LexerResult
   fixed_format.py   leitor de colunas, indicadores e continuações com mapa de posições
   scanner.py        reconhecimento de lexemas
+cobol_compiler/
+  source.py         origem física e tokens localizados
+  preprocessor.py   COPY, busca local/-I, ciclos e pilha de inclusão
+  ast.py            nós tipados, visitante e serialização
+  parser.py         divisões, declarações e recuperação
+  expressions.py    referências, precedência e condições
+  statements.py     rotinas específicas de comandos
+  validation.py     invariantes e cobertura dos comandos na AST
+  frontend.py       parse_file e parse_source
+  __main__.py       --check-syntax e --dump-ast
 docs/EspecificacaoCOBOL.pdf especificação do professor
 docs/relatorio-lexer.md relatório da entrega e resultados de validação
 examples/hello.cob  exemplo em formato fixo
@@ -137,7 +170,11 @@ examples/erros/     cópias dos programas com erros léxicos inseridos
 tests/test_lexer.py suíte de testes sem dependências
 tests/test_extended_lexer.py testes das extensões e integração pela CLI
 tests/test_coboldicas_corpus.py corpus oficial/complementar, hashes e regressões
+tests/test_preprocessor.py testes unitários de COPY
+tests/test_parser.py gramática, negativos, AST e CLI
+tests/test_parser_corpus.py sete oficiais e toda a coorte léxica
 tools/auditar_corpus.py inventário offline reproduzível
+tools/auditar_parser.py auditoria do front-end completo
 examples/oficiais/ sete fontes originais COBOL Dicas
 examples/corrigidos/ cópia de CAD0005A usada nos testes positivos
 examples/dependencias/ copybooks e PROGDATA
@@ -148,8 +185,9 @@ docs/plano-implementacao-final.md arquitetura das próximas fases
 
 ## Limites da entrega
 
-**Não há parser, análise semântica, gerador C ou invocação do GCC.** Um conjunto
-de tokens bem formado não garante um programa COBOL válido. Formato livre,
-diretivas gerais, expansão de COPY, SQL/CICS e integração ncurses permanecem fora
-da implementação atual. O suporte léxico e os problemas reais dos fontes estão
-separados na [auditoria](docs/auditoria-lexer.md).
+**Ainda não há análise semântica completa, gerador C ou invocação do GCC.**
+Sintaxe válida não garante tipos, símbolos, layouts ou comportamento corretos.
+Formato livre, diretivas gerais, COPY REPLACING, programas aninhados e EXEC SQL/CICS
+permanecem fora da gramática atual. CALL para bibliotecas C/ncurses é analisado,
+mas sua execução depende de infraestrutura futura. As limitações individuais
+estão na [auditoria do parser](docs/auditoria-parser.md).

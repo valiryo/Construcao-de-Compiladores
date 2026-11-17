@@ -5,6 +5,9 @@
 > atuais estão em [auditoria-lexer.md](auditoria-lexer.md). As próximas fases estão
 > em [plano-implementacao-final.md](plano-implementacao-final.md).
 
+> O pré-processador, parser e AST da Etapa 2 estão documentados em
+> [frontend.md](frontend.md) e [auditoria-parser.md](auditoria-parser.md).
+
 **Disciplina:** Construção de Compiladores\
 **Integrantes:** Filipe Valeriano Batista de Oliveira - 14570701\
 Felipe Teixeira Rodrigues - 13672213\

@@ -1,6 +1,6 @@
 # Plano técnico do compilador COBOL final
 
-## Objetivo e estado da primeira etapa
+## Objetivo e estado após a Etapa 2
 
 Implementar em Python 3.11+ um compilador com pipeline:
 
@@ -13,13 +13,21 @@ A AST será a entrada direta do gerador C. Não se planeja MIPS, LLVM nem uma IR
 separada. GCC compilará o C produzido por este projeto. GnuCOBOL poderá comparar
 resultados, exclusivamente como oráculo de testes, nunca como backend.
 
-Esta execução conclui corpus, auditoria e consolidação do lexer. **Não implementa
-parser, análise semântica, runtime C, driver ou geração executável.** A validação
-atual está em [auditoria-lexer.md](auditoria-lexer.md): 58 testes iniciais, 80 após
-as melhorias, sete oficiais sem erros léxicos usando CAD0005A corrigido. Os
+Corpus e lexer foram concluídos na Etapa 1: 58 testes iniciais e 80 após as
+melhorias, conforme [auditoria-lexer.md](auditoria-lexer.md). A **Etapa 2 implementa
+COPY, parser descendente recursivo, AST tipada e CLI de sintaxe**, com **149 testes
+passando** e os sete oficiais completos. Todos os 77 arquivos anteriormente
+aceitos pelo lexer foram submetidos ao parser: 72 programas e dois copybooks
+passam; um arquivo vazio e dois exemplos SQL/CICS ficam separados. Os nove
+negativos léxicos também foram revisitados. Não há análise semântica completa,
+runtime C, invocação GCC ou geração executável. Os
 [inventários por fonte](inventario-corpus.md) e
 [dados completos](auditoria-lexer-depois.json) fixam o escopo conhecido ao commit
 `1ffb3bf279bbb1e596b1091f1dda1cf7ddf51295` do COBOL Dicas.
+
+Os resultados reproduzíveis estão em [auditoria-parser.md](auditoria-parser.md),
+a gramática em [gramatica-cobol.ebnf](gramatica-cobol.ebnf) e a API/CLI em
+[frontend.md](frontend.md). Os fontes originais permanecem intactos.
 
 ## Inventário que orienta a arquitetura
 
@@ -37,37 +45,41 @@ as melhorias, sete oficiais sem erros léxicos usando CAD0005A corrigido. Os
 | Arquivos | SELECT/ASSIGN, FD, LINE SEQUENTIAL, OPEN INPUT/OUTPUT/EXTEND, READ INTO, AT END/NOT AT END, END-READ, WRITE/CLOSE | INDEXED/DYNAMIC, RECORD KEY/ALTERNATE KEY, DUPLICATES, FILE STATUS, START/INVALID KEY |
 | Modularização | COPY002A, COD001A; CALL PROGDATA USING, RETURN-CODE | CALL entre outros fontes, BY REFERENCE/BY VALUE e bibliotecas externas |
 
-O inventário detalhado prevalece sobre esta síntese. O parser precisa reconhecer
-essa família de construções desde o início; a implementação de cada nó pode ser
-entregue em etapas. Uma construção conhecida ainda sem backend deve produzir
+O inventário detalhado prevalece sobre esta síntese. O parser reconhece as
+construções batch/tela nas formas documentadas na EBNF. Uma construção conhecida
+ainda sem backend deve produzir
 diagnóstico explícito com posição, em vez de ser ignorada ou traduzida parcialmente.
 
-EXEC SQL/CICS, macros BMS/JCL, wrappers C/ncurses, ALTER e arquivos indexados
-merecem trilhas separadas. Os três adicionais serão **semelhantes aos oficiais**;
+EXEC SQL/CICS, macros BMS/JCL e wrappers C/ncurses merecem trilhas separadas.
+ALTER e cláusulas de arquivos indexados já têm AST, mas sua execução não foi
+implementada. Os três adicionais serão **semelhantes aos oficiais**;
 não há garantia de suporte a toda extensão do repositório. Priorizar os adicionais
 batch interativos, tabelas e arquivos sequenciais, mantendo a capacidade de
 diagnosticar claramente recursos fora do subconjunto.
 
-## Componentes e contratos futuros
+## Componentes existentes e futuros
 
-| Componente proposto | Responsabilidade e saída |
+| Componente | Estado, responsabilidade e saída |
 |---|---|
-| `compiler.py`, `cobol_compiler/driver.py` | CLI, opções, seleção de fontes, pipeline, diagnósticos e GCC |
-| `source.py`, `preprocessor.py` | Arquivos/encoding, COPY, caminhos de busca, mapa de origem e detecção de ciclos |
+| `frontend.py`, `__main__.py` | Implementados: API/CLI de sintaxe, diagnóstico e JSON da AST |
+| `compiler.py`, `cobol_compiler/driver.py` | Futuro: driver de compilação e invocação GCC |
+| `source.py`, `preprocessor.py` | Implementados: COPY, caminhos, origem física e detecção de ciclos |
 | `cobol_lexer/` existente | Colunas/continuação, tokens e diagnósticos léxicos, API preservada |
-| `tokens.py`, `diagnostics.py` | Adaptador de tokens localizados e diagnósticos unificados por fase/severidade |
-| `ast.py`, `parser.py` | Descendente recursivo para estrutura/comandos e precedência de expressões |
+| `source.py`, `diagnostics.py` | Implementados: LocatedToken e diagnósticos por fase/severidade/inclusão |
+| `ast.py`, `parser.py`, `expressions.py`, `statements.py` | Implementados: AST tipada, descendente recursivo, expressões e comandos |
+| `validation.py`, `tools/auditar_parser.py` | Implementados: invariantes da AST e auditoria integral |
 | `symbols.py`, `semantic.py`, `layout.py` | Resolução, tipos, layout de armazenamento e vínculos em tabelas laterais da AST |
 | `c_codegen.py` | Visitante da AST validada, C e mapeamento de diagnósticos para o fonte |
 | `runtime/cobol_runtime.h`, `.c` | Campos, números decimais, MOVE, formatação, arquivos e chamadas |
-| `tests/parser/`, `semantic/`, `codegen/`, `integration/` | Gramática, erros, runtime e execução de cenários completos |
+| `tests/test_preprocessor.py`, `test_parser.py`, `test_parser_corpus.py` | Implementados: unitários, oficiais e corpus completo |
+| Testes semânticos, runtime e integração executável | Futuros: tipos, layouts, C e cenários completos |
 
-Esses caminhos são proposta, não arquivos já implementados. Evitar um arquivo
-monolítico ou tokens de texto concatenados como representação dos comandos.
-Os nós devem manter SourceSpan; o analisador semântico vincula referências a
+Os módulos implementados estão em `cobol_compiler/`; os componentes marcados como
+futuros ainda são proposta. Os comandos não são representados por tokens de texto
+concatenados. Os nós mantêm SourceSpan; o analisador semântico deverá vincular referências a
 símbolos e layouts, e o gerador não deve repetir resolução por nomes.
 
-### Origem e COPY
+### Origem e COPY — implementados
 
 1. Resolver COPY sem aspas ou com literal usando diretório do fonte e opções `-I`,
    extensões .cpy/.cbl e política explícita para caixa. Não usar busca arbitrária
@@ -75,19 +87,20 @@ símbolos e layouts, e o gerador não deve repetir resolução por nomes.
    substituição de tokens/pseudotexto e testes próprios.
 2. Preservar stack de inclusão, caminhos, linhas e colunas originais. Detectar
    ciclos e copybooks ausentes, com diagnóstico na diretiva e trilha de inclusão.
-3. Introduzir um adaptador `LocatedToken(token, source_span, inclusion_stack)` ou
-   mapa externo equivalente; os consumidores antigos de Token não precisam mudar.
+3. O adaptador `LocatedToken(token, span)` preserva caminhos, posições físicas e
+   pilha de inclusão em SourceLocation; consumidores antigos de Token não mudam.
    Não perder a origem ao concatenar virtualmente linhas expandidas. A convenção
    decimal do programa deve valer também no texto incluído.
 4. Manter tratamento de formato fixo em um único leitor. Não converter todo
    exemplo para formato livre nem deslocar código mal indentado automaticamente.
    As áreas A/B serão verificadas com contexto sintático, usando os metadados.
 
-### Gramática inicial
+### Gramática e parser implementados
 
-O descendente recursivo deverá ter rotinas por divisão, declaração e comando;
-precedência de expressões pode usar Pratt/precedence climbing. Esboço de contrato,
-a ser refinado em uma EBNF de referência antes da implementação:
+O descendente recursivo tem rotinas por divisão, declaração e comando, com
+precedência de expressões e potência associativa à direita. A referência completa
+é [gramatica-cobol.ebnf](gramatica-cobol.ebnf); o esboço abaixo resume a arquitetura,
+sem substituir a gramática das formas efetivamente implementadas:
 
 ```ebnf
 program       = identification, [environment], [data], procedure, [end_program] ;
@@ -135,12 +148,14 @@ Validar ordem das divisões e requisitos de área A/B nesta fase.
 
 - Estrutura: `Program`, `EnvironmentDivision`, `FileControlEntry`, `DataDivision`,
   `DataSection`, `ProcedureDivision`, `ProcedureSection`, `Paragraph`, `Sentence`.
-- Dados: `DataItem(level, name, clauses, children)`, `PictureSpec`, `ValueClause`,
-  `OccursClause`, `RedefinesClause`, `UsageClause`, `ConditionName`, `FileDescriptor`,
-  `Parameter`. Manter máscara original além de sua interpretação.
-- Expressões: `Literal`, `FigurativeConstant`, `DataReference(qualifiers,
+- Dados: `DataItem(level, name, clauses, children)`, `PictureClause`, `ValueClause`,
+  `OccursClause`, `RedefinesClause`, `UsageClause`, `FileDescriptor`, `CallParameter`.
+  Níveis 88 são DataItem associados ao item anterior. A máscara original é
+  preservada; a interpretação de tipo/layout ainda será implementada.
+- Expressões: `Literal` (inclui constantes figurativas), `Reference(qualifiers,
   subscripts, refmod)`, `Unary`, `Binary`, `FunctionCall`, `LengthOf`,
-  `Comparison`, `ClassCondition`, `BooleanCondition`, `ConditionNameReference`.
+  `Comparison`, `ClassCondition`, `AbbreviatedCondition`, `Group`. Operadores
+  booleanos usam Binary/Unary; condition-names serão resolvidos pela semântica.
 - Comandos: `Move`, `Initialize`, `Accept`, `Display`, `Arithmetic` (operação e
   destinos explícitos), `Inspect`, `If`, `Evaluate`/`When`, `Perform` (alvo ou corpo,
   TIMES/UNTIL/VARYING/TEST BEFORE/AFTER), `GoTo`, `Exit`, `Continue`, `StopRun`,
@@ -230,10 +245,20 @@ instruções separada. Estruturas inline podem gerar blocos/loops C quando prese
 os mesmos limites; GO TO transfere a posição e a pilha controla retorno no limite
 performado. STOP RUN encerra a unidade de execução inteira; GOBACK retorna ao
 chamador ou ao host quando principal. Testar esse contrato antes de emitir menus.
-ALTER fica fora da primeira versão executável e precisa de diagnóstico claro se
-selecionado, apesar de o lexer reconhecê-lo.
+ALTER já tem nó tipado e teste baseado no PROG018A. Fica fora da primeira versão
+executável e precisará de diagnóstico semântico/backend claro se selecionado.
 
 ## Driver e CLI planejados
+
+Já disponíveis nesta etapa:
+
+```bash
+python -m cobol_compiler examples/oficiais/CALCMD01.cbl --check-syntax
+python -m cobol_compiler examples/oficiais/CAD0002A.cbl -I examples/dependencias --dump-ast
+python -m tools.auditar_parser --write
+```
+
+Os comandos abaixo continuam futuros, para a etapa do backend:
 
 ```bash
 python compiler.py examples/oficiais/CALCMD01.cbl -o calcmd01
@@ -256,12 +281,15 @@ como requisito apenas quando o backend existir.
 
 ## Entregas incrementais e critérios
 
-1. **COPY e fonte localizado:** incluir ambos copybooks, testar ciclos/ausência,
-   diagnósticos com origem e decimal herdado. Manter os 80 testes léxicos.
-2. **Gramática/AST:** escrever EBNF completa do subconjunto conhecido; analisar
-   todos os sete oficiais e dependências, com assertivas estruturais dos nós,
-   término por ponto e erros recuperáveis. Acrescentar testes para exemplos
-   complementares de cada família, sem alegar execução.
+1. **COPY e fonte localizado — concluído:** ambos copybooks, ciclos/ausência,
+   pilha de inclusão, coordenadas físicas, decimal e PIC herdados. Os 80 testes
+   léxicos foram preservados; COPY REPLACING não ocorre no corpus e é rejeitado
+   explicitamente, sem implementação parcial.
+2. **Gramática/AST — concluído no subconjunto documentado:** sete oficiais e
+   dependências completos, 74 sucessos entre os 77 anteriormente aceitos. Todos
+   os fontes são exercitados; vazio e SQL/CICS têm classificação individual.
+   A suíte total tem 149 testes. A validação confere cada comando, spans,
+   hierarquia e ausência de tokens descartados; não atesta execução.
 3. **Semântica/layout:** resolver todos os símbolos oficiais e layouts; negativos
    para variável/arquivo/parágrafo ausentes, duplicatas, MOVE A→9, tipos,
    subscritos/refmod e CALL incompatível. Conferir tamanho/offset dos registros e
