@@ -1,6 +1,24 @@
-# Compilador COBOL — Entrega 1: Analisador léxico
+# Compilador COBOL — Lexer consolidado para a entrega final
 
-Primeira etapa do trabalho de Construção de Compiladores. Implementa o **lexer** para o subconjunto COBOL em **formato fixo** definido na seção 2 da [especificação do professor](docs/EspecificacaoCOBOL.pdf), com extensões para os programas de [ebasso/cobol-exemplos](examples/ebasso/README.md).
+Trabalho de Construção de Compiladores em Python 3.11+. Implementa o **lexer** para
+COBOL em **formato fixo** definido na seção 2 da [especificação do professor](docs/EspecificacaoCOBOL.md),
+com extensões para os corpora [ebasso](examples/ebasso/README.md) e
+[COBOL Dicas](examples/README.md). O pipeline futuro será COPY → lexer → parser/AST
+→ semântica → C → GCC → executável nativo.
+
+## Preparação da implementação final
+
+- [Auditoria léxica e resultados](docs/auditoria-lexer.md): **58 testes antes,
+  80 depois**, com os sete programas oficiais sem erros léxicos indevidos.
+- [Corpus e proveniência](examples/README.md): sete originais, dependências,
+  CAD0005A corrigido e todos os 75 fontes complementares do commit fixado.
+- [Inventário reproduzível](docs/inventario-corpus.md): tokens, máscaras,
+  construções e dependências; nove arquivos externos ficam como casos negativos.
+- [Plano técnico das próximas etapas](docs/plano-implementacao-final.md): gramática,
+  AST, semântica, runtime e geração C. Essas fases ainda não foram implementadas.
+
+Para os testes positivos, use `examples/corrigidos/CAD0005A.cbl`.
+`examples/oficiais/CAD0005A.cbl` preserva o conflito upstream como teste negativo.
 
 ## Relatório da entrega
 
@@ -24,6 +42,8 @@ python -m cobol_lexer examples/hello.cob --stream
 python -m cobol_lexer examples/hello.cob --debug-lines
 python -m cobol_lexer examples/ebasso/prog003_calculadora.cob --json
 python -m cobol_lexer examples/erros/prog004_folha_pgto_erros.cob --stream
+python -m cobol_lexer examples/oficiais/CALCMD01.cbl --json
+python -m cobol_lexer examples/corrigidos/CAD0005A.cbl --json
 ```
 
 O programa lista os tokens, com linha e coluna (contadas desde 1), e os diagnósticos. Em caso de erro léxico, o processo termina com código 1; erro de leitura resulta no código 2; sucesso, 0. Com `--json`, a saída é adequada para integração futura com o parser. Com `--stream`, os tokens são agrupados por linha física no formato `<TIPO, lexema>`, com os erros intercalados na linha em que ocorrem; é o formato usado no [relatório](docs/relatorio-lexer.md).
@@ -32,6 +52,7 @@ O programa lista os tokens, com linha e coluna (contadas desde 1), e os diagnós
 
 ```bash
 python -m unittest discover -s tests -v
+python -m tools.auditar_corpus
 ```
 
 No Windows, `py -3 -m cobol_lexer examples/hello.cob` também funciona caso `python` não esteja no PATH.
@@ -46,16 +67,17 @@ No Windows, `py -3 -m cobol_lexer examples/hello.cob` também funciona caso `pyt
 > no início ou no fim do identificador continuam válidos.
 
 - **Colunas 1-6:** ignoradas; **7:** indicador; **8-11:** área A; **12-72:** área B; **73 em diante:** ignoradas.
-- Comentários em linhas com `*` ou `/` na coluna 7; continuação de strings, palavras, números e máscaras `PIC` com `-` na coluna 7.
+- Comentários em linhas com `*` ou `/` na coluna 7 e inline `*>` fora de strings; continuação de strings, palavras, números e máscaras `PIC` com `-` na coluna 7.
 - Linha `D` de debugging: ignorada normalmente; opcionalmente analisada com `--debug-lines`.
 - As **14 palavras reservadas** da seção 2.2 e palavras adicionais usadas nos exemplos, como `PROGRAM-ID`, `PIC`, `VALUE`, `COMPUTE`, `INSPECT`, `READ` e `END-IF`, sem diferenciar maiúsculas de minúsculas. A lista implementada está em `RESERVED_WORDS`, no módulo `scanner.py`.
-- Números inteiros, decimais com ponto, sinais `+` e `-`.
+- Números inteiros, decimais com ponto, sinais `+` e `-`; após `DECIMAL-POINT IS COMMA`, vírgula decimal, preservando o lexema e normalizando `value` para ponto.
 - Strings entre aspas simples ou duplas; aspas duplicadas dentro do texto. Em continuação, aceitamos repetir a aspa de abertura no início da próxima linha.
 - Identificadores com letras ASCII A-Z, números, hífen e underscore internos (até 30 caracteres).
-- Pontuação: `.`, `,`, `;`, `(` e `)`.
+- Pontuação: `.`, `,`, `;`, `(`, `)` e `:` (`COLON`, em referências modificadas).
 - Operadores aritméticos `+`, `-`, `*`, `/`, `**` e relacionais `=`, `<`, `>`, `<=`, `>=`, `<>`, com preferência pelo operador mais longo.
 - Máscaras após `PIC` ou `PICTURE`, com `IS` opcional, reconhecidas como um único token `PICTURE`: por exemplo, `X(10)`, `S9(05)V99` e `-ZZZZZZZZZ9.99`. O ponto final da declaração permanece um token `PERIOD` separado; da mesma forma, uma vírgula ou um ponto-e-vírgula logo após a máscara é emitido como separador.
 - Diagnósticos com linha e coluna físicas; recuperação parcial após erro.
+- Diagnóstico `MERGE_CONFLICT` para marcadores Git no código, inclusive antes do descarte da área de sequência.
 
 Linhas com até seis caracteres ocupam apenas a área de sequência e são
 ignoradas, preservando a numeração física das linhas seguintes. Isso inclui
@@ -68,11 +90,16 @@ desabilitado; com `--debug-lines`, seu conteúdo é validado como código. TAB e
 linhas analisadas continua gerando erro. Linhas ignoradas não interrompem
 continuações de tokens.
 
-Tipos (`kind`) de token: `KEYWORD`, `IDENTIFIER`, `NUMBER`, `STRING`, `PICTURE`, `PERIOD`, `COMMA`, `SEMICOLON`, `LPAREN`, `RPAREN`, `PLUS`, `MINUS`, `MULTIPLY`, `DIVIDE`, `POWER`, `EQUAL`, `LESS_THAN`, `GREATER_THAN`, `LESS_EQUAL`, `GREATER_EQUAL` e `NOT_EQUAL`.
+Tipos (`kind`) de token: `KEYWORD`, `IDENTIFIER`, `NUMBER`, `STRING`, `PICTURE`, `PERIOD`, `COMMA`, `SEMICOLON`, `LPAREN`, `RPAREN`, `COLON`, `PLUS`, `MINUS`, `MULTIPLY`, `DIVIDE`, `POWER`, `EQUAL`, `LESS_THAN`, `GREATER_THAN`, `LESS_EQUAL`, `GREATER_EQUAL` e `NOT_EQUAL`.
 
 Cada token inclui `kind`, `lexeme`, `value`, `line`, `column`, `area`, `end_line` e `end_column`. Os `value` de palavras-chave, identificadores e máscaras são normalizados para maiúsculas; os valores dos números são mantidos como strings para evitar perda de precisão. O `lexeme` de tokens continuados é reconstruído sem indicadores nem quebras de linha, mas as posições de início e fim referenciam o arquivo físico original.
 
-Os sete programas importados e o exemplo inicial passam sem diagnósticos. A suíte inclui testes de integração que executam a CLI com `--json` em cada programa importado e verificações da reconstrução de identificadores divididos entre linhas.
+Os sete programas ebasso, o exemplo inicial e os sete oficiais COBOL Dicas (com
+CAD0005A corrigido) passam sem diagnósticos. A suíte executa a CLI com `--json`
+para ambos os conjuntos, verifica posições e identificadores continuados e analisa
+todos os fontes complementares. O inventário atual abrange 86 arquivos COBOL Dicas:
+77 sem erros léxicos e nove negativos documentados. Zero erros léxicos não garante
+validade sintática, semântica ou disponibilidade de dependências externas.
 
 Em `examples/erros/` há cópias dos sete programas com 15 erros léxicos inseridos, que cobrem os nove códigos de diagnóstico. Um teste de regressão confere código, linha e coluna de cada um. A descrição de cada erro e a recuperação correspondente estão na seção 4 do [relatório](docs/relatorio-lexer.md).
 
@@ -109,8 +136,20 @@ examples/ebasso/    sete programas importados, licença e resultados de validaç
 examples/erros/     cópias dos programas com erros léxicos inseridos
 tests/test_lexer.py suíte de testes sem dependências
 tests/test_extended_lexer.py testes das extensões e integração pela CLI
+tests/test_coboldicas_corpus.py corpus oficial/complementar, hashes e regressões
+tools/auditar_corpus.py inventário offline reproduzível
+examples/oficiais/ sete fontes originais COBOL Dicas
+examples/corrigidos/ cópia de CAD0005A usada nos testes positivos
+examples/dependencias/ copybooks e PROGDATA
+examples/complementares/ demais fontes COBOL Dicas
+docs/auditoria-lexer.md consolidação e limitações do corpus real
+docs/plano-implementacao-final.md arquitetura das próximas fases
 ```
 
 ## Limites da entrega
 
-**Não há parser nem análise semântica.** Um conjunto de tokens bem formado não garante que seja um programa COBOL sintaticamente válido. O lexer aceita o subconjunto da seção 2 com as extensões documentadas para os exemplos importados. Outros recursos, como formato livre, comentários inline, diretivas de compilação e expansão de `COPY`, ainda não são implementados.
+**Não há parser, análise semântica, gerador C ou invocação do GCC.** Um conjunto
+de tokens bem formado não garante um programa COBOL válido. Formato livre,
+diretivas gerais, expansão de COPY, SQL/CICS e integração ncurses permanecem fora
+da implementação atual. O suporte léxico e os problemas reais dos fontes estão
+separados na [auditoria](docs/auditoria-lexer.md).

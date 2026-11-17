@@ -1,6 +1,7 @@
 """Leitura de linhas físicas COBOL em formato fixo (colunas 1 a 80)."""
 
 from dataclasses import dataclass
+import re
 from typing import Iterator
 
 from .model import Diagnostic
@@ -12,6 +13,10 @@ class FixedLine:
     indicator: str
     code: str
     tab_column: int | None = None
+    conflict_column: int | None = None
+
+
+CONFLICT_RE = re.compile(r"^(?:<{7,}|={7,}|>{7,}|\|{7,})(?:\s|$)")
 
 
 def read_fixed_lines(source: str) -> Iterator[FixedLine]:
@@ -27,7 +32,13 @@ def read_fixed_lines(source: str) -> Iterator[FixedLine]:
 
         tab_index = raw[:72].find("\t")
         tab_column = tab_index + 1 if tab_index >= 0 else None
-        yield FixedLine(n, raw[6], raw[7:72].rstrip(" "), tab_column)
+        code = raw[7:72].rstrip(" ")
+        conflict_column = None
+        if CONFLICT_RE.match(raw):
+            conflict_column = 1
+        elif raw[6] in (" ", "-") and CONFLICT_RE.match(code.lstrip(" ")):
+            conflict_column = 8 + len(code) - len(code.lstrip(" "))
+        yield FixedLine(n, raw[6], code, tab_column, conflict_column)
 
 
 @dataclass(frozen=True, slots=True)
@@ -38,11 +49,13 @@ class LogicalLine:
     positions: tuple[tuple[int, int], ...]
 
 
-def _quote_after(code: str, quote: str | None) -> str | None:
+def _without_inline_comment(code: str, quote: str | None) -> tuple[str, str | None]:
     index = 0
     while index < len(code):
         character = code[index]
         if quote is None:
+            if code.startswith("*>", index):
+                return code[:index].rstrip(" "), quote
             if character in ("'", '"'):
                 quote = character
         elif character == quote:
@@ -51,7 +64,7 @@ def _quote_after(code: str, quote: str | None) -> str | None:
             else:
                 quote = None
         index += 1
-    return quote
+    return code, quote
 
 
 def read_logical_lines(
@@ -68,10 +81,18 @@ def read_logical_lines(
     quote: str | None = None
 
     for physical in read_fixed_lines(source):
+        if physical.conflict_column is not None and not (
+            physical.indicator == "-" and quote is not None
+        ):
+            diagnostics.append(Diagnostic(
+                "MERGE_CONFLICT", "Marcador de conflito Git não resolvido no fonte.",
+                physical.line_number, physical.conflict_column,
+            ))
+            continue
         indicator = physical.indicator.upper()
         if indicator in ("*", "/") or (indicator == "D" and not debug_lines):
             continue
-        if physical.tab_column is not None:
+        if physical.tab_column is not None and physical.tab_column <= 7:
             diagnostics.append(Diagnostic(
                 "TAB_IN_SOURCE", "TAB não permitido em formato fixo; use espaços.",
                 physical.line_number, physical.tab_column,
@@ -97,19 +118,29 @@ def read_logical_lines(
                 ))
                 continue
             start = len(code) - len(code.lstrip(" "))
-            if quote is not None and code[start] == quote:
+            if quote is not None and start < len(code) and code[start] == quote:
                 start += 1
-        else:
+        fragment, next_quote = _without_inline_comment(
+            code[start:], quote if indicator == "-" else None,
+        )
+        if physical.tab_column is not None and physical.tab_column <= start + len(fragment) + 7:
+            diagnostics.append(Diagnostic(
+                "TAB_IN_SOURCE", "TAB não permitido em formato fixo; use espaços.",
+                physical.line_number, physical.tab_column,
+            ))
+            continue
+        if not fragment.strip():
+            continue
+        if indicator != "-":
             if chunks:
                 yield LogicalLine("".join(chunks), tuple(positions))
             chunks = []
             positions = []
             quote = None
 
-        fragment = code[start:]
         chunks.append(fragment)
-        positions.extend((physical.line_number, index + 8) for index in range(start, len(code)))
-        quote = _quote_after(fragment, quote)
+        positions.extend((physical.line_number, index + 8) for index in range(start, start + len(fragment)))
+        quote = next_quote
 
     if chunks:
         yield LogicalLine("".join(chunks), tuple(positions))

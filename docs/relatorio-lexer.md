@@ -1,5 +1,10 @@
 # Analisador Léxico para COBOL — Relatório da Entrega 1
 
+> **Atualização posterior à Entrega 1:** este documento preserva o registro da
+> primeira entrega. A consolidação para os sete oficiais COBOL Dicas e os testes
+> atuais estão em [auditoria-lexer.md](auditoria-lexer.md). As próximas fases estão
+> em [plano-implementacao-final.md](plano-implementacao-final.md).
+
 **Disciplina:** Construção de Compiladores\
 **Integrantes:** Filipe Valeriano Batista de Oliveira - 14570701\
 Felipe Teixeira Rodrigues - 13672213\
