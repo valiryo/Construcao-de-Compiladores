@@ -33,6 +33,11 @@ class Scenario:
     returncode:int=0
     stderr_contains:str|None=None
     oracle:bool=True
+    stdout_exact:bytes|None=None
+    environment:dict[str,str]=field(default_factory=dict)
+    rationale:str=''
+    reference_stdout_exact:bytes|None=None
+    oracle_note:str=''
 
 
 HARNESS='''       IDENTIFICATION DIVISION.
@@ -101,13 +106,18 @@ def validate_scenario(scenario,process,directory,*,encoding='utf-8'):
     stderr=process.stderr.decode(encoding,errors='replace')
     for expected in scenario.stdout_contains:
         if expected not in stdout:errors.append(f'stdout não contém {expected!r}')
+    if scenario.stdout_exact is not None and process.stdout!=scenario.stdout_exact:
+        errors.append('stdout binário divergente da expectativa independente')
     if scenario.stderr_contains:
         if scenario.stderr_contains not in stderr:errors.append(f'stderr não contém {scenario.stderr_contains}')
     elif stderr:errors.append('stderr inesperado: '+stderr[:500])
-    for name,expected in scenario.files.items():
+    for name,expected in {**scenario.fixtures,**scenario.files}.items():
         path=Path(directory)/name
         if not path.exists():errors.append(f'arquivo ausente: {name}')
         elif path.read_bytes()!=expected:errors.append(f'bytes divergentes: {name}')
+    allowed=set(scenario.fixtures)|set(scenario.files)
+    actual={str(p.relative_to(directory)) for p in Path(directory).rglob('*') if p.is_file()}
+    for name in sorted(actual-allowed):errors.append(f'arquivo inesperado: {name}')
     return errors
 
 EXTRA_PROGRAMS={'PROG012A','PROG020A','PROG039A'}
