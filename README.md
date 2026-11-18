@@ -6,15 +6,40 @@ com extensões para os corpora [ebasso](examples/ebasso/README.md) e
 [COBOL Dicas](examples/README.md): COPY → lexer → parser → AST → semântica/layout → C11 + runtime próprio → GCC →
 executável nativo. GnuCOBOL é usado somente como oráculo opcional de testes.
 
+## Etapa 5: validação funcional reproduzível
+
+Os **60 programas compilados foram executados e validados em 140 cenários**,
+incluindo os 49 anteriormente pendentes e seus cinco módulos chamáveis. Os sete
+oficiais passaram novamente nos 25 cenários existentes, com recompilação limpa.
+Há **136 comparações idênticas com GnuCOBOL**, três diferenças previstas da ABI
+verificadas por expectativas binárias completas e um cenário de erro próprio.
+Não há divergência inesperada. A suíte atual reúne **476 testes**.
+
+```bash
+python -m tools.auditar_funcional --write
+python -m tools.auditar_funcional --program PROG023E
+python -m tools.auditar_funcional --failed-from docs/auditoria-funcional.json
+python -m unittest discover -s tests -v
+```
+
+- [Auditoria funcional por programa e cenário](docs/auditoria-funcional.md) e [logs completos](docs/auditoria-funcional.json).
+- [Reprodução, isolamento, fixtures, ordem e diferenças da ABI](docs/validacao-funcional.md).
+
+O auditor descobre a coorte na auditoria anterior, copia os fontes/COPY declarados,
+gera novo C, executa GCC e verifica o hash do binário usado. Cada cenário recebe
+um diretório vazio com fixtures explícitas. Os fontes originais permanecem intactos.
+As seis dependências externas e os dois casos de tela continuam fora dessa coorte.
+
 ## Etapa 4: runtime e executáveis nativos
 
 Os sete oficiais geram C e compilam com GCC. CAD0002A é um módulo chamável,
 validado por driver COBOL com COPY002A compartilhado; PROG024A liga PROGDATA.
-Os 68 programas semanticamente válidos foram submetidos ao backend: **60 compilam
+Na Etapa 4, os 68 programas semanticamente válidos foram submetidos ao backend: **60 compilaram
 (53 executáveis e sete objetos)**, seis têm dependências externas indisponíveis e
 dois exigem posicionamento de terminal. **11 programas foram executados e
 validados em 30 cenários**, incluindo três complementares; os 29 cenários
-comparáveis coincidem integralmente com GnuCOBOL 3.2.0. A suíte tem **326 testes**.
+comparáveis coincidiram integralmente com GnuCOBOL 3.2.0. Ao fim da Etapa 4,
+eram **326 testes**.
 
 ```bash
 python compiler.py examples/oficiais/CALCMD01.cbl -o build/calcmd01 --keep-c
@@ -243,6 +268,9 @@ examples/dependencias/ copybooks e PROGDATA
 examples/complementares/ demais fontes COBOL Dicas
 docs/auditoria-lexer.md consolidação e limitações do corpus real
 tools/auditar_backend.py C/GCC por fonte e cenários executáveis
+tools/auditar_funcional.py inventário, construção limpa e relatórios funcionais
+tools/functional_execution.py executor compartilhado com proveniência
+tools/functional_scenarios.py fixtures e expectativas de toda a coorte
 tools/comparar_gnucobol.py oráculo independente com fixtures idênticas
 tests/test_backend*.py runtime, controle, ABI, arquivos, oficiais e auditoria
 docs/backend.md uso e contratos do backend
@@ -252,8 +280,9 @@ docs/plano-implementacao-final.md arquitetura e critérios de entrega
 ## Limites da entrega
 
 O backend implementa o subconjunto descrito em [backend.md](docs/backend.md).
-Os demais programas apenas compilados ainda precisam de cenários de execução;
-validade estática e compilação não garantem comportamento funcional. SCREEN, ALTER, SORT, START, arquivos indexados e usos
+Os 60 elegíveis foram validados nos cenários da Etapa 5. Novas entradas e ramos
+ainda podem ampliar a cobertura; validade estática e compilação, por si, não
+garantem comportamento funcional. SCREEN, ALTER, SORT, START, arquivos indexados e usos
 listados no [contrato semântico](docs/semantica.md) recebem erros explícitos.
 Formato livre, diretivas gerais, COPY REPLACING, programas aninhados e EXEC SQL/CICS
 permanecem fora da gramática atual. CALL para bibliotecas C/ncurses é analisado,

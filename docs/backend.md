@@ -1,10 +1,15 @@
-# Backend C11, runtime e execução — Etapa 4
+# Backend C11, runtime e execução — Etapas 4 e 5
 
 O pipeline executável é **COPY → lexer → parser → AST → semântica/layout → C11 +
 runtime próprio → GCC → executável nativo**. O gerador visita a AST validada e
 consome seus vínculos semânticos. Não há IR de instruções, interpretador Python,
 bytecode, reanálise do fonte em execução nem dependência de libgmp/libcob.
 GnuCOBOL participa somente de comparações independentes nos testes.
+
+A [Etapa 5](validacao-funcional.md) amplia a validação para os **60 programas
+compilados**, em **140 cenários**, com **476 testes** na suíte. Seus resultados
+estão na [auditoria funcional](auditoria-funcional.md); os números da Etapa 4
+abaixo são o registro histórico da implantação do backend.
 
 ## Resultado e requisitos
 
@@ -216,7 +221,7 @@ python -m tools.auditar_backend --write --no-oracle
 
 As ferramentas preparam fixtures em diretórios temporários e aplicam timeout de
 execução. O oráculo usa os mesmos bytes, entrada e relógio, com
-`COB_CURRENT_DATE=20261117123456`, `COB_LS_FIXED=Y`, `COB_LS_NULLS=N` e
+`COB_CURRENT_DATE=2026111712345600`, `COB_LS_FIXED=Y`, `COB_LS_NULLS=N` e
 `COB_LS_VALIDATE=N`. Não se removem espaços nem se normalizam saídas para obter
 igualdade. Os cenários ainda verificam expectativas próprias sem GnuCOBOL.
 
@@ -243,5 +248,6 @@ inválidos dependentes da entrada produzem diagnósticos do runtime.
 O fonte corrigido de CAD0005A oferece adicionar/listar, sem opção de exclusão. A exclusão de
 registro sequencial foi ensaiada no complementar PROG039A; os outros adicionais
 são PROG012A (refmod/texto) e PROG020A (SEARCH ALL). Esses três ensaios não
-substituem os três exemplos que serão escolhidos pelo professor. Os demais
-programas apenas compilados precisam de novas fixtures para validação funcional.
+substituem os três exemplos que serão escolhidos pelo professor. Todos os 60
+compilados agora têm cenários na Etapa 5; novas entradas/ramos podem
+ampliar a cobertura. Consulte [validação funcional](validacao-funcional.md).

@@ -79,6 +79,10 @@ else:
 `parse_source(text, filename=..., include_dirs=..., copybook=False)` atende testes
 e integrações sem arquivo de entrada. `Parser(tokens).parse(copybook=False)`
 também é público. A API histórica `CobolLexer().tokenize(source)` continua igual.
+A partir da Etapa 5, o pré-processador habilita `preserve_literal_padding=True`:
+literais abertos continuados preservam espaços até a coluna 72, inclusive colunas
+implícitas. Essa correção foi reproduzida em PROG044A e tem regressões; o lexer
+isolado conserva o padrão histórico de concatenação sem padding.
 
 `FrontendResult` expõe `preprocessed`, `parsed`, `diagnostics`, `ast` e `success`.
 `PreprocessResult` tem os tokens localizados, as linhas expandidas, diagnósticos e

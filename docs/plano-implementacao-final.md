@@ -1,6 +1,6 @@
 # Plano técnico do compilador COBOL final
 
-## Objetivo e estado após a Etapa 4
+## Objetivo e estado após a Etapa 5
 
 Implementar em Python 3.11+ um compilador com pipeline:
 
@@ -27,9 +27,15 @@ parcialmente suportado. Os copybooks são verificados no contexto de COPY.
 A **Etapa 4 implementa runtime C, geração C11 e driver GCC**, com **326 testes**.
 Dos 68 programas semanticamente válidos, 60 compilam (53 executáveis e sete
 objetos), seis dependem de chamadas externas e dois usam terminal posicionado.
-Os sete oficiais, PROGDATA e três complementares foram executados e validados
+Na Etapa 4, os sete oficiais, PROGDATA e três complementares foram executados e validados
 em 30 cenários; os 29 comparáveis coincidem integralmente com GnuCOBOL 3.2.0.
-Os demais programas compilados ainda precisam de cenários funcionais. Os
+A **Etapa 5 valida os 60 compilados em 140 cenários**, incluindo os 49 antes
+pendentes e seus cinco módulos. A suíte reúne **476 testes**. Os sete oficiais
+foram recompilados do zero nos 25 cenários originais. Há 136 comparações idênticas,
+três diferenças previstas da ABI com expectativas completas e nenhuma divergência
+inesperada; um cenário de divisor zero verifica a política do projeto. Duas falhas
+comprovadas foram corrigidas: separador decimal em MOVE/UNSTRING e padding de
+literais continuados no frontend. Os
 [inventários por fonte](inventario-corpus.md) e
 [dados completos](auditoria-lexer-depois.json) fixam o escopo conhecido ao commit
 `1ffb3bf279bbb1e596b1091f1dda1cf7ddf51295` do COBOL Dicas.
@@ -40,7 +46,9 @@ a gramática em [gramatica-cobol.ebnf](gramatica-cobol.ebnf) e a API/CLI em
 [frontend.md](frontend.md) e [semantica.md](semantica.md). Os fontes originais
 permanecem intactos. A [auditoria do backend](auditoria-backend.md) registra
 geração, GCC, execução e validação por fonte; [backend.md](backend.md) documenta
-uso, ABI, capacidades e limites.
+uso, ABI, capacidades e limites. A [auditoria funcional](auditoria-funcional.md) e
+[guia de reprodução](validacao-funcional.md) documentam inventário, isolamento,
+proveniência e verificação dos 60 programas.
 
 ## Inventário que orienta a arquitetura
 
@@ -88,6 +96,7 @@ deverão ser executados na avaliação.
 | Testes semânticos e auditoria | Implementados: 96 testes novos, sete oficiais e todos os 72 programas parseáveis |
 | Runtime e integração executável | 81 testes novos; sete oficiais, PROGDATA, três complementares e oráculo opcional |
 | `tools/auditar_backend.py` | Todos os 68 semanticamente válidos; 60 compilados e classificação de cada limite |
+| `tools/auditar_funcional.py`, `functional_execution.py`, `functional_scenarios.py` | Descoberta dos 49 pendentes, construção limpa, 140 cenários, logs binários, seleção e repetição de falhas |
 
 Os módulos Python estão em `cobol_compiler/` e o runtime em `runtime/`.
 Os comandos não são representados por tokens de texto
@@ -334,7 +343,15 @@ nativa. Dependências são configuradas, sem downloads ou execução durante com
    sete, PROGDATA e três complementares. Os 29 comparáveis coincidem com GnuCOBOL.
    A suíte total tem 326 testes. Na avaliação ainda será necessário executar os
    três efetivamente escolhidos pelo professor. Ampliar fixtures dos outros
-   programas compilados é trabalho posterior, sem presumir validação funcional.
+   programas compilados foi concluído na Etapa 5, nos cenários documentados.
+6. **Validação funcional de toda a coorte — concluída nos cenários:** 60 programas
+   executados, incluindo todos os 49 antes pendentes; 140 cenários, 136 comparações
+   idênticas e três diferenças previstas da ABI verificadas integralmente. Há
+   476 testes na suíte e nenhuma divergência inesperada. O executor compartilha
+   cenários com o oráculo, verifica regeneração de C/GCC/binário e isola cada
+   conjunto de fixtures. Novas entradas/ramos e os três escolhidos pelo professor
+   continuam como ampliação de cobertura; os seis externos e dois de tela permanecem
+   bloqueados explicitamente.
 
 | Programa | Cenários executáveis validados |
 |---|---|
