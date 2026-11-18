@@ -1,6 +1,6 @@
 """Perfis explícitos, contratos numéricos e execução dos cinco originais ampliados."""
 import base64
-import json
+from concurrent.futures import ThreadPoolExecutor
 import os
 from pathlib import Path
 import pty
@@ -8,6 +8,7 @@ import select
 import shutil
 import signal
 import subprocess
+import sys
 import tempfile
 import termios
 import time
@@ -159,6 +160,16 @@ class CompatibilityExecutableTests(unittest.TestCase):
             self.assertEqual(run['returncode'],1)
             self.assertIn(b'SCREEN_BOUNDS',base64.b64decode(run['stderr']['base64']))
 
+    def test_positioned_accept_unsupported_numeric_forms_block_before_gcc(self):
+        for pic in ['S99','9V9','ZZ9','9(5) COMP']:
+            with self.subTest(pic=pic),tempfile.TemporaryDirectory() as td:
+                directory=Path(td);path=directory/'probe.cbl'
+                path.write_text(source(f'WORKING-STORAGE SECTION.\n01 ANSWER PIC {pic}.',body='ACCEPT ANSWER AT LINE 2 COLUMN 3. STOP RUN.'))
+                result=compile_file(path,directory/'probe',source_format='free',dialect='gnucobol')
+                self.assertFalse(result.success)
+                self.assertIn('UNSUPPORTED_BACKEND_SCREEN_PICTURE',codes(result))
+                self.assertFalse(result.command)
+
     def test_signal_restores_terminal(self):
         with tempfile.TemporaryDirectory() as td:
             exe,_=self.compile(source('WORKING-STORAGE SECTION.\n01 ANSWER PIC XX.',body='ACCEPT ANSWER AT LINE 2 COLUMN 3. STOP RUN.'),Path(td))
@@ -215,6 +226,19 @@ class CompatibilityOriginalScreenTests(unittest.TestCase):
 
 
 class CompatibilityAuditTests(unittest.TestCase):
+    def test_compiler_temporary_files_are_isolated_across_concurrent_builds(self):
+        from tools.auditar_pendentes import command
+        script='import os,sys,time; from pathlib import Path; p=Path(os.environ["TMPDIR"])/"cob-fixed.o"; p.write_text(sys.argv[1]); time.sleep(.1); print(p.read_text())'
+        with tempfile.TemporaryDirectory() as td:
+            directories=[Path(td)/name for name in ['first','second']]
+            for d in directories:d.mkdir()
+            with ThreadPoolExecutor(2) as pool:
+                futures=[pool.submit(command,[sys.executable,'-c',script,d.name],d) for d in directories]
+                results=[f.result() for f in futures]
+            self.assertEqual([r['returncode'] for r in results],[0,0])
+            self.assertEqual([r['stdout'] for r in results],['first\n','second\n'])
+            self.assertFalse((Path(td)/'cob-fixed.o').exists())
+
     def test_all_original_hashes_and_derivative_exclusion(self):
         entries,_=sources();self.assertEqual(len(entries),85)
         self.assertNotIn('examples/corrigidos/CAD0005A.cbl',{e['path'] for e in entries})

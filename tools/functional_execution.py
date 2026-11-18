@@ -86,6 +86,11 @@ def clean_compile(source,deps,include,directory,*,module=False,compiler_options=
     regenerated=bool(absent and generated and c_bytes==result.generated.c_source.encode('utf-8') and c_path.stat().st_mtime_ns>=start)
     fresh=bool(absent and result.success and output.is_file() and output.stat().st_mtime_ns>=start)
     proof={'success':result.success,'generated_c':generated,'absent_before':absent,
+        'api_call':{'function':'cobol_compiler.driver.compile_file','source':str(source),'output':str(output),
+            'include_dirs':[str(include)],'source_paths':[str(p) for p in deps],'emit_c':str(c_path),'module':module,**(compiler_options or {})},
+        'phases':{'preprocessor':result.semantic.frontend.preprocessed.success,'parser':result.semantic.frontend.success,
+            'semantic':result.semantic.success,'c_generation':generated,'native_build':result.success,
+            'link':'not_applicable' if module else 'success' if result.success else 'not_completed'},
         'started_ns':start,'c_regenerated':regenerated,
         'gcc_executed':bool(result.command),'artifact_fresh':fresh,
         'command':result.command,'gcc_stdout':result.gcc_stdout,'gcc_stderr':result.gcc_stderr,
@@ -154,11 +159,12 @@ def run_cases(scenarios,input_resolver,*,reference=True,module_sources=None,seed
                 command=[oracle,'-x','-'+options.get('source_format','fixed'),'-fnot-reserved=ID','-freserved=VALUES:VALUE',*(reference_options or {}).get(program,[]),
                     '-I',str(include),str(source),*(str(p) for p in deps),'-o',str(binary)]
                 try:
-                    reference_build=subprocess.run(command,capture_output=True,text=True,env=environment(),cwd=build,timeout=60)
+                    reference_build=subprocess.run(command,capture_output=True,text=True,env=environment({'TMPDIR':str(build.resolve())}),cwd=build,timeout=60)
                     info['oracle_compiled']=reference_build.returncode==0
                     info['oracle_compile_stderr']=reference_build.stderr
                 except subprocess.TimeoutExpired:info['oracle_compile_stderr']='GnuCOBOL compilation timeout'
                 info['oracle_command']=command
+                info['oracle_temporary_directory']=str(build)
             report['programs'][program]=info
             program_cases=[s for s in scenarios if s.program==program]
             if seed is not None:random.Random(seed).shuffle(program_cases)

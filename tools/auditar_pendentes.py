@@ -58,7 +58,7 @@ def limits():
 
 def command(command,directory):
     try:
-        p=subprocess.run(command,cwd=directory,env=environment(),capture_output=True,text=True,
+        p=subprocess.run(command,cwd=directory,env=environment({'TMPDIR':str(Path(directory).resolve())}),capture_output=True,text=True,
             encoding='utf-8',errors='replace',timeout=30,preexec_fn=limits)
         return {'command':[str(c) for c in command],'returncode':p.returncode,'stdout':p.stdout,'stderr':p.stderr}
     except subprocess.TimeoutExpired as e:

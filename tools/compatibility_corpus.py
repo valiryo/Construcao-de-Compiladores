@@ -55,14 +55,17 @@ def gnu_build(source,deps,include,directory,*,fmt,module,strict=False,libraries=
     base=[exe,'-'+fmt,'-std=default',*VOCABULARY,'-I',str(include)]
     syntax=command([*base,'-fsyntax-only',str(source)],directory)
     artifact=directory/('module.o' if module else 'program')
+    object_path=artifact if module else directory/'unit.o'
+    object_build=command([*base,'-c',str(source),'-o',str(object_path)],directory) if syntax['returncode']==0 else None
+    object_ok=bool(object_build and object_build['returncode']==0 and object_path.is_file())
     argv=[*base,'-c' if module else '-x']
     if strict:argv+=['-fstatic-call']
     argv+=[str(source)]
     if not module:argv += [str(p) for p in deps]
     argv += [*libraries,'-o',str(artifact)]
-    build=command(argv,directory) if syntax['returncode']==0 else None
+    build=object_build if module else command(argv,directory) if object_ok else None
     success=bool(build and build['returncode']==0 and artifact.is_file())
-    return {'available':True,'analysis':syntax,'build':build,'compiled':success,
+    return {'available':True,'temporary_directory':str(directory),'analysis':syntax,'object_build':object_build,'object_compiled':object_ok,'build':build,'compiled':success,
         'linked':success if not module else None,'mode':'module-object' if module else 'static-executable' if strict else 'dynamic-executable',
         'artifact_sha256':digest(artifact.read_bytes()) if success else None,
         'artifact':str(artifact) if success else None,'executed':False}

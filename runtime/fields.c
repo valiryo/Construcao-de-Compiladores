@@ -406,17 +406,25 @@ static void screen_redraw(cb_runtime *rt,cb_screen_field *field,const unsigned c
 void cb_screen_accept(cb_runtime *rt,cb_screen_field *fields,size_t count) {
     if(!count)return;
     if(count>1024)cb_fail("SCREEN_CAPACITY","Screen has too many editable fields.");
+    for(size_t i=0;i<count;++i) {
+        const cb_desc *d=fields[i].field.desc;
+        if(d->category==3||(d->category==1&&(d->scale||d->signedness||d->usage)))
+            cb_fail("SCREEN_PICTURE","Screen input requires text or unsigned integral DISPLAY fields.");
+    }
     terminal_start(rt);
     if(!isatty(STDIN_FILENO)||tcgetattr(STDIN_FILENO,&saved_terminal))cb_fail("TERMINAL_REQUIRED","Screen input requires a terminal.");
     struct termios raw=saved_terminal;
     if(!terminal_exit_hook) { atexit(restore_terminal);terminal_exit_hook=1; }
+    sigset_t guarded,previous;sigemptyset(&guarded);sigaddset(&guarded,SIGINT);sigaddset(&guarded,SIGTERM);
+    sigprocmask(SIG_BLOCK,&guarded,&previous);
     struct sigaction action={0};action.sa_handler=terminal_signal;sigemptyset(&action.sa_mask);
     sigaction(SIGINT,&action,&terminal_int);sigaction(SIGTERM,&action,&terminal_term);terminal_handlers=1;
     raw.c_lflag&=(tcflag_t)~(ICANON|ECHO);
     raw.c_iflag&=(tcflag_t)~(ICRNL|INLCR);
     raw.c_cc[VMIN]=1;raw.c_cc[VTIME]=0;
-    if(tcsetattr(STDIN_FILENO,TCSANOW,&raw))cb_fail("TERMINAL_MODE","Cannot enter screen input mode.");
     terminal_saved=1;
+    if(tcsetattr(STDIN_FILENO,TCSANOW,&raw))cb_fail("TERMINAL_MODE","Cannot enter screen input mode.");
+    sigprocmask(SIG_SETMASK,&previous,NULL);
     unsigned char **buffers=cb_alloc(rt,count*sizeof *buffers);
     size_t *lengths=cb_alloc(rt,count*sizeof *lengths),*positions=cb_alloc(rt,count*sizeof *positions);
     int *changed=cb_alloc(rt,count*sizeof *changed);

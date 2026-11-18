@@ -351,6 +351,9 @@ class UnitGenerator:
         elif isinstance(node,A.Accept):
             if node.positions:
                 if not self.compatibility:self.error('SCREEN_POSITION',node)
+                typ=self.ann(node.target).type
+                if typ.edited or typ.numeric and (typ.scale or typ.signed or typ.usage!='DISPLAY'):
+                    self.error('SCREEN_PICTURE',node,'ACCEPT posicionado exige texto ou inteiro DISPLAY sem sinal/escala.')
                 axes={p.axis:self.value(p.value) for p in node.positions}
                 lines.append(f'cb_terminal_at(rt, cb_int({axes.get("LINE",self.int_value(0))}), cb_int({axes.get("COLUMN",self.int_value(0))}));')
             if node.source not in {None,'CONSOLE','DATE','DAY','DAY-OF-WEEK','TIME'}:self.error('ACCEPT_SOURCE',node)

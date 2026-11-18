@@ -1,5 +1,4 @@
 """Novos cenários sobre originais intactos; expectativas independentes do backend."""
-import base64
 from decimal import Decimal
 from itertools import groupby
 from pathlib import Path
@@ -19,7 +18,7 @@ def sales(rows):
     result=b''
     for state,city,name,cents in rows:
         digits=f'{abs(cents):08d}'
-        # DISPLAY signed trailing overpunch, ASCII convention used by both ABIs.
+        # ABI própria: caracteres de overpunch EBCDIC, codificados em Latin-1.
         if cents<0:digits=digits[:-1]+'}JKLMNOPQR'[int(digits[-1])]
         result+=record((state,2),(city,20),(name,30),(digits,8))+b'\n'
     return result
