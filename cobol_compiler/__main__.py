@@ -10,7 +10,7 @@ from .semantic import check_file
 
 
 def main(*, compile_default=False):
-    parser = argparse.ArgumentParser(description="Pré-processador e parser COBOL em formato fixo")
+    parser = argparse.ArgumentParser(description="Compilador COBOL fixo: análise estática e backend C11/GCC")
     parser.add_argument("file")
     parser.add_argument("-I", "--include-dir", action="append", default=[], dest="include_dirs")
     output = parser.add_mutually_exclusive_group()

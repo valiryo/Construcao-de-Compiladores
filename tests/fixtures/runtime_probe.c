@@ -1,6 +1,8 @@
+#define _POSIX_C_SOURCE 200809L
 #include "cobol_runtime.h"
 #include <assert.h>
 #include <string.h>
+#include <unistd.h>
 
 static cb_field field(unsigned char *p, size_t n, cb_desc *d) {
     return cb_field_at(p,n,0,n,d);
@@ -34,6 +36,8 @@ int main(int argc, char **argv) {
         cb_store(f,cb_decimal("-1234"),0,1);
         assert(data[0]==0x2e && data[1]==0xfb);
         assert(cb_num_cmp(cb_load(f),cb_decimal("-1234"))==0);
+        cb_value args[]={cb_field_value(f)};
+        assert(cb_int(cb_function(&rt,"LENGTH",args,1))==2);
         d.digits=28;f=field(data,12,&d);
         cb_store(f,cb_decimal("-9999999999999999999999999999"),0,1);
         assert(cb_num_cmp(cb_load(f),cb_decimal("-9999999999999999999999999999"))==0);
@@ -47,6 +51,9 @@ int main(int argc, char **argv) {
         cb_desc d={3,11,2,0,0,',',"ZZZ.ZZZ.ZZZ,ZZ"};f=field(data,14,&d);
         cb_store(f,cb_decimal("1234.50"),0,0);
         assert(!memcmp(data,"      1.234,50",14));
+        assert(cb_num_cmp(cb_as_num(cb_field_value(f)),cb_decimal("1234.50"))==0);
+        cb_store(f,cb_decimal("0"),0,0);
+        assert(!memcmp(data,"              ",14));
     } else if(!strcmp(argv[1],"overflow")) {
         memset(data,'7',28);
         assert(cb_store(f,cb_decimal("10000000000000000000000000000"),0,1)==1);
@@ -78,6 +85,25 @@ int main(int argc, char **argv) {
     } else if(!strcmp(argv[1],"zero-error")) {
         cb_div(cb_decimal("1"),cb_decimal("0"));
         assert(0);
+    } else if(!strcmp(argv[1],"file-errors")) {
+        unsigned char state[2]={0};
+        cb_file file={0};
+        file.fp=tmpfile();
+        assert(file.fp);
+        file.mode=2;
+        file.record=field(data,3,(cb_desc *)&cb_text_desc);
+        file.status=field(state,2,(cb_desc *)&cb_text_desc);
+        assert(close(fileno(file.fp))==0);
+        cb_write(&file);
+        assert(!memcmp(state,"30",2));
+        fclose(file.fp);
+        file.fp=tmpfile();
+        assert(file.fp);
+        file.mode=1;
+        assert(close(fileno(file.fp))==0);
+        assert(cb_read(&file)==2);
+        assert(!memcmp(state,"30",2));
+        fclose(file.fp);
     } else if(!strcmp(argv[1],"intrinsics")) {
         cb_value x[]={cb_number("20240229")};
         cb_value n=cb_function(&rt,"INTEGER-OF-DATE",x,1);

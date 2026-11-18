@@ -54,12 +54,17 @@ void cb_release(cb_runtime *rt,cb_mem *mark) {
     }
 }
 void cb_runtime_destroy(cb_runtime *rt) {
-    for(cb_file *f=rt->files;f;f=f->next) {
+    for(cb_file *f=rt->files;f;) {
+        cb_file *next=f->next;
         if(f->fp) {
             if(fclose(f->fp))cb_fail("FILE_CLOSE","Error closing file at run-unit termination.");
             f->fp=NULL;
         }
+        f->registered=0;
+        f->next=NULL;
+        f=next;
     }
+    rt->files=NULL;
     cb_release(rt,NULL);
 }
 cb_slice cb_slice_literal(const char *s,size_t n) {
@@ -167,7 +172,7 @@ cb_slice cb_bytes(cb_runtime *rt,cb_value v) {
     cb_field f= {
         p+1,CB_FIELD_DIGITS,&d
     };
-    cb_store(f,v.num,0,1);
+    if(cb_store(f,v.num,0,1)) cb_fail("NUMERIC_TEXT_CAPACITY","Integer expression exceeds numeric text conversion capacity.");
     size_t start=1;
     while(start<CB_FIELD_DIGITS&&p[start]=='0')++start;
     if(v.num.sign<0)p[--start]='-';
@@ -178,6 +183,34 @@ cb_slice cb_bytes(cb_runtime *rt,cb_value v) {
 cb_num cb_as_num(cb_value v) {
     if(v.kind==1)return v.num;
     if(v.kind==0&&v.f.desc->category==1)return cb_load(v.f);
+    if(v.kind==0&&v.f.desc->category==3) {
+        const cb_desc *d=v.f.desc;
+        char number[CB_FIELD_DIGITS+4];
+        size_t n=1,position=0;
+        int digit=0,negative=0;
+        number[0]='+';
+        for(const char *p=d->pic;*p;++p) {
+            if(*p=='S'||*p=='V')continue;
+            unsigned char c=v.f.p[position++];
+            if(*p=='9'||*p=='Z'||*p=='*') {
+                if(d->scale && digit==d->digits-d->scale)number[n++]='.';
+                if(c==' '||c=='*') {
+                    if(*p=='9')cb_fail("INVALID_NUMERIC_EDITED","Blank in mandatory edited digit.");
+                    c='0';
+                }
+                if(c<'0'||c>'9')cb_fail("INVALID_NUMERIC_EDITED","Invalid edited numeric digit.");
+                number[n++]=(char)c;
+                ++digit;
+            } else if(*p=='+'||*p=='-') {
+                if(c=='-')negative=1;
+                else if(c!='+'&&c!=' ')cb_fail("INVALID_NUMERIC_EDITED","Invalid edited numeric sign.");
+            } else if(c!=(unsigned char)*p && c!=' ')cb_fail("INVALID_NUMERIC_EDITED","Invalid edited numeric separator.");
+        }
+        if(position!=v.f.n)cb_fail("PICTURE_LENGTH","Edited field length mismatch.");
+        number[0]=negative?'-':'+';
+        number[n]=0;
+        return cb_decimal(number);
+    }
     if(v.kind==3&&(unsigned char)v.f.n=='0')return cb_decimal("0");
     cb_slice s=v.kind==0?(cb_slice) {
         v.f.p,v.f.n
@@ -301,6 +334,7 @@ static char *read_input(cb_runtime *rt) {
     size_t j=0;
     for(size_t i=0;i<n;++i) {
         unsigned char byte=(unsigned char)p[i];
+        if(!byte)cb_fail("TERMINAL_NUL","ACCEPT terminal input contains NUL.");
         if(!rt->raw_terminal&&byte>=128) {
             if((byte!=0xc2&&byte!=0xc3)||i+1>=n||((unsigned char)p[i+1]&0xc0)!=0x80)cb_fail("TERMINAL_ENCODING","Input is not UTF-8 representable in ISO-8859-1.");
             byte=(unsigned char)(((byte&31)<<6)|((unsigned char)p[++i]&63));
@@ -433,7 +467,7 @@ cb_value cb_function(cb_runtime *rt,const char *name,cb_value *args,size_t count
         snprintf(number,sizeof number,"%u",rt->random);
         return cb_numeric_value(cb_div(cb_decimal(number),cb_decimal("4294967296")));
     }
-    if(!strcmp(name,"LENGTH"))n=(long long)cb_bytes(rt,args[0]).n;
+    if(!strcmp(name,"LENGTH"))n=(long long)(args[0].kind==0?args[0].f.n:cb_bytes(rt,args[0]).n);
     else if(!strcmp(name,"ORD")) {
         cb_slice s=cb_bytes(rt,args[0]);
         if(s.n!=1)cb_fail("ORD_LENGTH","ORD requires one byte.");
@@ -441,6 +475,7 @@ cb_value cb_function(cb_runtime *rt,const char *name,cb_value *args,size_t count
     }
     else if(!strcmp(name,"INTEGER-OF-DATE")) {
         long long date=cb_int(args[0]);
+        if(date<16010101 || date>99991231)cb_fail("DATE_DOMAIN","Date value outside 1601..9999.");
         n=date_integer((int)(date/10000),(int)(date/100%100),(int)(date%100));
     }
     else if(!strcmp(name,"DATE-OF-INTEGER")) {
@@ -489,6 +524,11 @@ long long cb_inspect_count(cb_runtime *rt,cb_value subject,const char *mode,cb_v
 }
 void cb_inspect_replace(cb_runtime *rt,cb_field subject,const char *mode,cb_value pattern,cb_value replacement) {
     cb_slice p=cb_bytes(rt,pattern),r=cb_bytes(rt,replacement);
+    if(!strcmp(mode,"CHARACTERS")) {
+        if(r.n!=1)cb_fail("INSPECT_LENGTH","CHARACTERS replacement requires one byte.");
+        memset(subject.p,r.p[0],subject.n);
+        return;
+    }
     if(!p.n||p.n!=r.n)cb_fail("INSPECT_LENGTH","Replacement width differs from pattern.");
     size_t start=0,end=subject.n;
     if(!strcmp(mode,"TRAILING")) {

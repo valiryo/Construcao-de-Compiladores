@@ -3,6 +3,7 @@
 #include <string.h>
 static int status(cb_file *f,const char *code,const char *error) {
     if(f->status.p) {
+        if(f->status.n!=2)cb_fail("FILE_STATUS_LAYOUT","FILE STATUS requires exactly two bytes.");
         memcpy(f->status.p,code,2);
         return 1;
     }
@@ -27,12 +28,18 @@ int cb_open(cb_runtime *rt,cb_file *f,cb_value path,int mode,int line,cb_field r
     char *name=cb_alloc(rt,n+1);
     memcpy(name,s.p,n);
     name[n]=0;
-    f->fp=fopen(name,mode==1?"rb":mode==2?"wb":mode==3?"ab":"r+b");
+    f->fp=fopen(name,mode==1?"rb":mode==2?"wb":"r+b");
     f->mode=mode;
     f->line=line;
     f->record=record;
     if(!f->fp) {
         status(f,errno==ENOENT?"35":"30","FILE_OPEN");
+        return 1;
+    }
+    if(mode==3 && fseek(f->fp,0,SEEK_END)) {
+        fclose(f->fp);
+        f->fp=NULL;
+        status(f,"30","FILE_SEEK");
         return 1;
     }
     status(f,"00",NULL);
@@ -47,11 +54,18 @@ int cb_read(cb_file *f) {
     int c=EOF,too_long=0;
     unsigned char *p=f->record.p;
     if(f->line) {
+        int pending=-1;
         while((c=fgetc(f->fp))!=EOF&&c!='\n') {
-            if(n<f->record.n)p[n++]=(unsigned char)c;
+            if(pending>=0) {
+                if(n<f->record.n)p[n++]=(unsigned char)pending;
+                else too_long=1;
+            }
+            pending=c;
+        }
+        if(pending>=0 && !(pending=='\r'&&c=='\n')) {
+            if(n<f->record.n)p[n++]=(unsigned char)pending;
             else too_long=1;
         }
-        if(n&&p[n-1]=='\r')--n;
     }
     else n=fread(p,1,f->record.n,f->fp);
     if(ferror(f->fp)) {

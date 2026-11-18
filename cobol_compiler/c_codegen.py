@@ -4,7 +4,6 @@ sem bytecode, interpretação de COBOL ou representação intermediária execut�
 
 from dataclasses import dataclass, field
 import hashlib
-from itertools import product
 
 from . import ast as A
 from .diagnostics import Diagnostic
@@ -37,8 +36,9 @@ class CodegenError(Exception):
 
 
 class UnitGenerator:
-    def __init__(self,result):
+    def __init__(self,result,*,is_main=False):
         self.r=result
+        self.is_main=is_main
         self.root=result.ast
         self.symbols=result.table.symbols
         self.nodes={result.node_ids[id(node)]:node for node in A.walk(self.root)}
@@ -51,6 +51,7 @@ class UnitGenerator:
         self.sections=[]
         self.paragraphs=[]
         self.inline=[]
+        self.inline_ranges=[]
 
     def error(self,resource,node,message=None):
         raise CodegenError('UNSUPPORTED_BACKEND_'+resource,message or f'Backend não implementado: {resource}.',node)
@@ -60,6 +61,11 @@ class UnitGenerator:
     def desc(self,sid):return f'd_{sid}'
     def int_value(self,n):return f'cb_number("{n}")'
     def num_int(self,n):return f'cb_decimal("{n}")'
+
+    def require_text_format(self,node):
+        typ=self.ann(node).type
+        if typ.numeric and not isinstance(node,A.Reference) and typ.scale!=0:
+            self.error('EXPRESSION_TEXT_FORMAT',node,'Expressão fracionária exige receptor PIC numérico para definir escala antes da conversão textual.')
 
     def reserve(self):
         result=self.index;self.index+=1;return result
@@ -72,18 +78,22 @@ class UnitGenerator:
         self.cases.append(f'case {pc}: {{\n    {origin}\n    '+'\n    '.join(lines)+'\n    break;\n}')
 
     def simple(self,lines,next_pc,node):
-        pc=self.reserve();self.case(pc,[*lines,f'pc = {next_pc};'],node);return pc
+        pc=self.reserve();self.case(pc,[*lines,*([f'pc = {next_pc};'] if next_pc!='pc' else [])],node);return pc
 
     def field(self,node):
         sid=self.ann(node).symbol_id
         field=self.symbol_field(sid,subscripts=node.subscripts)
+        if not node.modification:
+            length=self.ann(node).type.length
+            if length is not None and sid in self.r.layout.items and length!=self.r.layout.items[sid].size:
+                field=self.symbol_field(sid,subscripts=node.subscripts,size=length)
         if node.modification:
             start=f'cb_int({self.value(node.modification.start)})'
             length=f'cb_int({self.value(node.modification.length)})' if node.modification.length else f'((long long)({field}).n - ({start}) + 1)'
             field=f'cb_refmod({field}, {start}, {length})'
         return field
 
-    def symbol_field(self,sid,*,subscripts=(),offsets=(),whole=False):
+    def symbol_field(self,sid,*,subscripts=(),offsets=(),whole=False,size=None):
         symbol=self.symbols[sid]
         if symbol.namespace=='special':
             member='return_code' if symbol.name=='RETURN-CODE' else 'sort_return'
@@ -98,7 +108,7 @@ class UnitGenerator:
                 upper=f'cb_bound({counter}, {dim.minimum}, {dim.maximum})'
             terms.append(f'cb_index({self.value(sub)}, {upper}) * {dim.stride}')
         terms.extend(offsets)
-        size=layout.total_size if whole and not subscripts else layout.size
+        if size is None:size=layout.total_size if whole and not subscripts else layout.size
         return f'cb_field_at({area}, {area}_size, {" + ".join(terms)}, {size}, &{self.desc(sid)})'
 
     def value(self,node):
@@ -124,6 +134,8 @@ class UnitGenerator:
                 return self.length_value(node.operand)
             return self.int_value(length)
         if isinstance(node,A.FunctionCall):
+            if node.name=='LENGTH' and node.arguments and self.ann(node.arguments[0]).type.numeric and not isinstance(node.arguments[0],A.Reference):
+                self.error('LENGTH_NONSTORAGE_NUMERIC',node)
             args=', '.join(self.value(arg) for arg in node.arguments)
             array=f'(cb_value[]){{{args}}}' if args else 'NULL'
             return f'cb_function(rt, {c_string(node.name)}, {array}, {len(node.arguments)})'
@@ -187,11 +199,11 @@ class UnitGenerator:
         # EVALUATE TRUE can compare literal/non-condition selections to subjects.
         return f'(cb_int({self.value(node)}) != 0)'
 
-    def initialization(self):
+    def initialization(self,*,local=False):
         lines=[]
         for sid,layout in self.r.layout.items.items():
             symbol=self.symbols[sid]
-            if not layout.local or symbol.type.category=='group':continue
+            if not layout.local or symbol.type.category=='group' or (layout.area=='LOCAL-STORAGE')!=local:continue
             alias=layout.redefines
             parent=symbol.parent
             while parent:
@@ -206,7 +218,7 @@ class UnitGenerator:
             if not isinstance(node,A.DataItem) or node.level==88:continue
             sid=self.ann(node).symbol_id
             layout=self.r.layout.items.get(sid)
-            if not layout or layout.initial.get('policy')!='explicit':continue
+            if not layout or layout.initial.get('policy')!='explicit' or (layout.area=='LOCAL-STORAGE')!=local:continue
             value=self.nodes[layout.initial['value_node']]
             source=self.value(value.values[0].lower)
             lines.extend(self.for_field(sid,lambda f:f'cb_move(rt, {source}, {f});'))
@@ -253,6 +265,8 @@ class UnitGenerator:
     def statement(self,node,next_pc):
         lines=[]
         if isinstance(node,A.Move):
+            if any(not (self.ann(target).type.numeric or self.ann(target).type.edited) for target in node.targets):
+                self.require_text_format(node.source)
             pairs=self.ann(node).details.get('corresponding')
             if node.corresponding:
                 for pair in pairs:lines.append(f'cb_move(rt, cb_field_value({self.symbol_field(pair["source"])}), {self.symbol_field(pair["target"])});')
@@ -274,7 +288,12 @@ class UnitGenerator:
             if node.upon not in {None,'CONSOLE','SYSOUT','CRT'}:self.error('DISPLAY_DEVICE',node)
             for operand in node.operands:
                 if isinstance(operand,A.ScreenPosition):self.error('SCREEN_POSITION',operand)
-                lines.append(f'cb_display(rt, {self.value(operand)});')
+                if isinstance(operand,A.Literal) and operand.category=='number':
+                    value=f'cb_text({c_string(operand.lexeme)}, {len(operand.lexeme)}, 0)'
+                else:
+                    self.require_text_format(operand)
+                    value=self.value(operand)
+                lines.append(f'cb_display(rt, {value});')
             lines.append(f'cb_display_end({int(node.no_advancing)});')
         elif isinstance(node,A.Accept):
             if node.positions:self.error('SCREEN_POSITION',node)
@@ -294,7 +313,7 @@ class UnitGenerator:
                     tests=[]
                     for subject,selection in zip(node.subjects,option):
                         if selection.kind=='any':continue
-                        left=self.value(subject)
+                        left=self.bool_value(subject) if self.ann(subject).type.category=='boolean' else self.value(subject)
                         if isinstance(selection.value,(A.AbbreviatedCondition,A.ClassCondition)):
                             test=self.condition(selection.value,left)
                         elif self.ann(subject).type.category=='boolean':
@@ -313,6 +332,10 @@ class UnitGenerator:
         elif isinstance(node,A.Perform):return self.perform(node,next_pc)
         elif isinstance(node,A.GoTo):
             targets=[self.ann(ref).symbol_id for ref in node.targets]
+            if self.inline_ranges:
+                start,end=self.inline_ranges[-1]
+                if any(not start<=self.nodes[self.symbols[sid].node_id].token_start<end for sid in targets):
+                    self.error('GO_ESCAPE_INLINE',node,'GO TO que sai de PERFORM inline exige suporte adicional de desenrolamento.')
             if node.depending:
                 lines=[f'switch (cb_int({self.value(node.depending)})) {{']
                 lines.extend(f'case {i+1}: pc = ENTRY_{sid}; break;' for i,sid in enumerate(targets))
@@ -326,7 +349,8 @@ class UnitGenerator:
             if node.scope in {'SECTION','PARAGRAPH'}:
                 context=self.sections if node.scope=='SECTION' else self.paragraphs
                 return self.simple([],f'END_{context[-1]}',node)
-            if node.scope=='PROGRAM':lines=['pc = -1;']
+            if node.scope=='PROGRAM':
+                return self.simple([f'if ({int(not self.is_main)} || rt->call_depth > 1) {{ depth = 0; pc = -1; }} else pc = {next_pc};'],'pc',node)
         elif isinstance(node,A.Continue):pass
         elif isinstance(node,A.Goback):return self.simple(['depth = 0;'], -1,node)
         elif isinstance(node,A.StopRun):return self.simple(['rt->stop = 1;'],-1,node)
@@ -336,17 +360,24 @@ class UnitGenerator:
             if info['status']!='resolved':raise CodegenError('LINK_UNRESOLVED_CALL',f'Implementação ausente para CALL {info["original_name"] or "dinâmico"}.',node)
             fields=[]
             for i,parameter in enumerate(node.parameters):
-                if isinstance(parameter.value,A.Reference):
+                formal=info['parameter_bindings'][i]['formal_type']
+                numeric_temporary=parameter.mode=='VALUE' and formal['category'] in {'numeric','index'} or isinstance(parameter.value,A.Literal) and parameter.value.category=='number'
+                if numeric_temporary:
+                    usage=1 if formal['representation']=='binary-le' else 2 if formal['representation']=='packed-decimal' else 0
+                    lines.append(f'const cb_desc parameter_desc_{i} = {{1, {formal["precision"]}, {formal["scale"]}, {int(formal["signed"])}, {usage}, {ord(formal["decimal_point"])}, {c_string(formal["expanded_picture"] or "")}}};')
+                    lines.append(f'cb_field numeric_parameter_{i} = {{cb_alloc(rt, {formal["length"]}), {formal["length"]}, &parameter_desc_{i}}};')
+                    lines.append(f'cb_move(rt, {self.value(parameter.value)}, numeric_parameter_{i});')
+                    f=f'numeric_parameter_{i}'
+                elif isinstance(parameter.value,A.Reference):
                     f=self.field(parameter.value)
                 else:
                     actual=info['arguments'][i]
-                    if actual['type']['category']=='numeric':self.error('NUMERIC_LITERAL_REFERENCE',parameter)
                     value=self.value(parameter.value)
                     lines.append(f'cb_slice literal_{i} = cb_bytes(rt, {value});')
                     lines.append(f'cb_field temporary_{i} = {{cb_alloc(rt, literal_{i}.n), literal_{i}.n, &cb_text_desc}};')
                     lines.append(f'memcpy(temporary_{i}.p, literal_{i}.p, literal_{i}.n);')
                     f=f'temporary_{i}'
-                if parameter.mode in {'CONTENT','VALUE'}:
+                if parameter.mode in {'CONTENT','VALUE'} and not numeric_temporary:
                     lines.append(f'cb_field copy_{i} = {f};')
                     lines.append(f'unsigned char *data_{i} = cb_alloc(rt, copy_{i}.n); memcpy(data_{i}, copy_{i}.p, copy_{i}.n); copy_{i}.p = data_{i};')
                     f=f'copy_{i}'
@@ -386,6 +417,7 @@ class UnitGenerator:
         elif isinstance(node,A.Close):
             lines.extend(f'cb_close(&f_{self.ann(ref).symbol_id});' for ref in node.files)
         elif isinstance(node,A.Inspect):
+            self.require_text_format(node.subject)
             lines.append(f'cb_value inspected = {self.value(node.subject)};')
             for tally in node.tallies:
                 count=' + '.join(f'cb_inspect_count(rt, inspected, {c_string(p.mode)}, {self.value(p.value) if p.value else "cb_fill(32)"})' for p in tally.patterns)
@@ -395,8 +427,8 @@ class UnitGenerator:
                 lines.append(f'cb_store({target}, cb_add(cb_load({target}), cb_decimal(text_{self.nid(tally)})), 0, 0);')
             if len(node.replacements)>1:self.error('MULTIPLE_INSPECT_REPLACEMENTS',node)
             for pattern in node.replacements:
-                lines.append(f'cb_inspect_replace(rt, {self.field(node.subject)}, {c_string(pattern.mode)}, {self.value(pattern.value)}, {self.value(pattern.replacement)});')
-            if node.converting:lines.append(f'cb_inspect_convert(rt, {self.field(node.subject)}, {self.value(node.converting[0])}, {self.value(node.converting[1])});')
+                lines.append(f'cb_inspect_replace(rt, inspected.f, {c_string(pattern.mode)}, {self.value(pattern.value) if pattern.value else "cb_fill(32)"}, {self.value(pattern.replacement)});')
+            if node.converting:lines.append(f'cb_inspect_convert(rt, inspected.f, {self.value(node.converting[0])}, {self.value(node.converting[1])});')
         elif isinstance(node,A.Set):
             for ref in node.targets:
                 symbol=self.symbols[self.ann(ref).symbol_id]
@@ -438,10 +470,10 @@ class UnitGenerator:
                 lines.append(f'size_error |= cb_store({self.field(receiver.target)}, result_{i}, {int(receiver.rounded)}, 1);')
             if node.remainder:
                 if any(r.rounded for r in node.giving):self.error('ROUNDED_REMAINDER',node)
-                dividend='src_0' if node.form=='BY' else 'operand_0'
+                dividend='src_0' if node.form=='BY' else 'src_1' if len(node.sources)>1 else 'operand_0'
                 divisor='src_1' if node.form=='BY' else 'src_0'
                 quotient=f'cb_load({self.field(node.giving[0].target)})'
-                lines.append(f'size_error |= cb_store({self.field(node.remainder)}, cb_sub({dividend}, cb_mul({divisor}, {quotient})), 0, 1);')
+                lines.append(f'if (!size_error) size_error |= cb_store({self.field(node.remainder)}, cb_sub({dividend}, cb_mul({divisor}, {quotient})), 0, 1);')
         lines.extend(['size_error |= cb_math_failed();','cb_math_end();'])
         if node.handlers:
             if not any(not handler.negated for handler in node.handlers):
@@ -457,10 +489,13 @@ class UnitGenerator:
             if node.target:
                 sid=self.ann(node.target).symbol_id;end=self.ann(node.through).symbol_id if node.through else sid
                 return self.simple([f'cb_push(frames, &depth, {next_pc}, END_{end});',f'pc = ENTRY_{sid};'],'pc',node)
-            self.inline.append(next_pc);start=self.body(node.body,next_pc);self.inline.pop();return start
+            self.inline.append(next_pc);self.inline_ranges.append((node.token_start,node.token_end))
+            start=self.body(node.body,next_pc)
+            self.inline.pop();self.inline_ranges.pop();return start
         finish=self.reserve()
         self.case(finish,['if (loop_depth <= 0) cb_fail("LOOP_STACK", "Missing active loop.");','--loop_depth;',f'pc = {next_pc};'],node)
         self.inline.append(finish)
+        if not node.target:self.inline_ranges.append((node.token_start,node.token_end))
         def inner(body_next):
             if node.target:
                 sid=self.ann(node.target).symbol_id;end=self.ann(node.through).symbol_id if node.through else sid
@@ -469,10 +504,12 @@ class UnitGenerator:
         if node.varying:
             def varying_at(index,after):
                 vary=node.varying[index];check=self.reserve();step=self.reserve()
-                begin=inner(step) if index+1==len(node.varying) else varying_at(index+1,step)
-                self.case(check,[f'pc = ({self.condition(vary.until)}) ? {after} : {begin};'],node)
+                after_body=check if node.test=='AFTER' else step
+                begin=inner(after_body) if index+1==len(node.varying) else varying_at(index+1,after_body)
+                false_target=step if node.test=='AFTER' else begin
+                self.case(check,[f'pc = ({self.condition(vary.until)}) ? {after} : {false_target};'],node)
                 target=self.field(vary.target)
-                self.case(step,[f'if (cb_store({target}, cb_add(cb_load({target}), {self.number(vary.step)}), 0, 1)) cb_fail("SIZE_ERROR", "PERFORM VARYING overflow.");',f'pc = {check};'],node)
+                self.case(step,[f'if (cb_store({target}, cb_add(cb_load({target}), {self.number(vary.step)}), 0, 1)) cb_fail("SIZE_ERROR", "PERFORM VARYING overflow.");',f'pc = {begin if node.test=="AFTER" else check};'],node)
                 entry=begin if node.test=='AFTER' else check
                 return self.simple([f'cb_store({target}, {self.number(vary.initial)}, 0, 0);'],entry,node)
             start=varying_at(0,finish)
@@ -487,6 +524,7 @@ class UnitGenerator:
             self.case(check,[f'pc = ({cond}) ? {finish} : {begin};'],node)
             start=begin if node.test=='AFTER' and not node.times else check
         self.inline.pop()
+        if not node.target:self.inline_ranges.pop()
         count=f'cb_int({self.value(node.times)})' if node.times else '0'
         return self.simple([f'long long count = {count};','if (count < 0) cb_fail("NEGATIVE_TIMES", "Negative PERFORM count.");',f'cb_loop_push(loops, &loop_depth, {self.nid(node)[1:]}, {finish}, depth, count);'],start,node)
 
@@ -495,7 +533,9 @@ class UnitGenerator:
         lines=[f'long long pointer = {pointer};','int overflow = 0;',f'cb_field target = {self.field(node.target)};']
         for part in node.parts:
             delimiter=self.value(part.delimiter.value) if part.delimiter.value else 'cb_fill(32)'
-            for value in part.values:lines.append(f'if (!overflow) overflow = cb_string_part(rt, target, &pointer, {self.value(value)}, {delimiter}, {int(part.delimiter.size)});')
+            for value in part.values:
+                self.require_text_format(value)
+                lines.append(f'if (!overflow) overflow = cb_string_part(rt, target, &pointer, {self.value(value)}, {delimiter}, {int(part.delimiter.size)});')
         if node.pointer:lines.append(f'char p[32]; snprintf(p, sizeof p, "%lld", pointer); cb_store({self.field(node.pointer)}, cb_decimal(p), 0, 0);')
         if node.handlers:return self.simple([*lines,*self.handlers(node.handlers,'OVERFLOW','overflow','!overflow',next_pc)],'pc',node)
         lines.append('if (overflow) cb_fail("STRING_OVERFLOW", "STRING receiver overflow.");')
@@ -514,6 +554,7 @@ class UnitGenerator:
         for ref,expression in [(node.pointer,'pointer'),(node.tallying,'count')]:
             if ref:lines.append(f'{{ char n[32]; snprintf(n, sizeof n, "%lld", {expression}); cb_store({self.field(ref)}, {"cb_add(cb_load("+self.field(ref)+"), cb_decimal(n))" if ref is node.tallying else "cb_decimal(n)"}, 0, 0); }}')
         lines.append('int overflow = pointer <= (long long)cb_bytes(rt, source).n;')
+        lines.append('(void)count;')
         if node.handlers:return self.simple([*lines,*self.handlers(node.handlers,'OVERFLOW','overflow','!overflow',next_pc)],'pc',node)
         lines.append('if (overflow) cb_fail("UNSTRING_OVERFLOW", "More source fields than UNSTRING receivers.");')
         return self.simple(lines,next_pc,node)
@@ -523,6 +564,7 @@ class UnitGenerator:
         if not indexes:self.error('SEARCH_INDEX',node)
         sid=self.ann(node.table).symbol_id
         layout=self.r.layout.items[sid];dim=layout.dimensions[-1]
+        if len(layout.dimensions)!=1:self.error('NESTED_SEARCH',node)
         index=indexes[0];index_field=self.symbol_field(index)
         end=self.body(node.at_end,next_pc);check=self.reserve();step=self.reserve()
         branch=step
@@ -533,13 +575,29 @@ class UnitGenerator:
         lines=[f'cb_store({index_field}, cb_add(cb_load({index_field}), cb_decimal("1")), 0, 0);']
         if node.varying:lines.append(f'cb_store({self.field(node.varying)}, cb_add(cb_load({self.field(node.varying)}), cb_decimal("1")), 0, 0);')
         self.case(step,[*lines,f'pc = {check};'],node)
-        return self.simple([f'cb_store({index_field}, cb_decimal("1"), 0, 0);'],check,node) if node.all else check
+        if node.all:
+            keys=self.ann(node).details['search_all']['keys']
+            if len(keys)!=1 or len(keys[0]['symbols'])!=1:self.error('COMPOSITE_SEARCH_ALL',node)
+            key=keys[0]['symbols'][0]
+            left=self.symbol_field(key,offsets=[f'(j-1)*{dim.stride}'])
+            right=self.symbol_field(key,offsets=[f'j*{dim.stride}'])
+            sign='>' if keys[0]['role']=='ASCENDING' else '<'
+            order=[f'for (size_t j=1; j<{dim.maximum}; ++j) {{',
+                f'if (cb_compare(rt, cb_field_value({left}), cb_field_value({right})) {sign} 0) cb_fail("SEARCH_ORDER", "SEARCH ALL table violates declared key order.");','}']
+            return self.simple([*order,f'cb_store({index_field}, cb_decimal("1"), 0, 0);'],check,node)
+        return check
 
     def generate(self):
         # Fixed resource limits have diagnostics before GCC, never truncated storage.
         for symbol in self.symbols.values():
             if symbol.type and symbol.type.precision and symbol.type.precision>128:
                 self.error('FIELD_PRECISION',self.nodes[symbol.node_id],'Backend suporta até 128 dígitos por campo; intermediários têm capacidade checada de 512.')
+            if symbol.type and symbol.type.edited and set(symbol.type.expanded_picture or '') & set('0B/*$'):
+                self.error('PICTURE_EDITING',self.nodes[symbol.node_id],'Backend suporta edição Z, sinais fixos e separadores; outras inserções exigem implementação adicional.')
+        if any(size>64*1024*1024 for size in self.r.layout.areas.values()):
+            self.error('STORAGE_CAPACITY',self.root,'Área de armazenamento excede o limite de 64 MiB do backend.')
+        for node in A.walk(self.root):
+            if isinstance(node,A.FileControlEntry) and node.optional:self.error('OPTIONAL_FILE',node)
         entry=self.body(self.root.procedure.body,-1)
         global_lines=[]
         for sid,symbol in self.symbols.items():
@@ -554,25 +612,31 @@ class UnitGenerator:
             size=self.r.layout.areas[area]
             if area.startswith('LINKAGE:'):
                 sid=area.split(':',1)[1]
-                param=next((i for i,p in enumerate(self.r.parameters) if p['symbol_id']==sid),None)
+                param=next((i for i,p in enumerate(self.r.parameters) if p['layout'] and p['layout']['area']==area),None)
                 if param is None:area_lines.extend([f'unsigned char *{name} = NULL;',f'size_t {name}_size = {size};'])
                 else:area_lines.extend([f'if (argc <= {param} || args[{param}].n < {size}) cb_fail("CALL_LAYOUT", "Missing or undersized LINKAGE argument.");',f'unsigned char *{name} = args[{param}].p;',f'size_t {name}_size = {size};'])
             else:
                 storage='' if area=='LOCAL-STORAGE' else 'static '
                 area_lines.extend([f'{storage}unsigned char {name}[{max(1,size)}];',f'const size_t {name}_size = {size};'])
-                reset.append(f'memset({name}, 32, {size});')
+                if size:reset.append(f'memset({name}, 32, {size});')
         for sid in self.r.files:area_lines.append(f'static cb_file f_{sid};')
         for area,name in self.areas.items():area_lines.extend([f'(void){name};',f'(void){name}_size;'])
         for sid in self.r.files:area_lines.append(f'(void)&f_{sid};')
         enums=[]
         for sid,(start,end) in self.labels.items():enums.append(f'ENTRY_{sid} = {start}, END_{sid} = {end}')
         init=self.initialization()
+        local_init=self.initialization(local=True)
+        local_reset=[f'memset({name}, 32, {self.r.layout.areas[area]});' for area,name in self.areas.items() if area=='LOCAL-STORAGE' and self.r.layout.areas[area]]
+        reset=[line for line in reset if not any(line.startswith(f'memset({name},') for area,name in self.areas.items() if area=='LOCAL-STORAGE')]
         # One static descriptor namespace per function avoids collisions across units.
         lines=[f'int {self.name}(cb_runtime *rt, cb_field *args, size_t argc) {{',*global_lines,*area_lines,
+            'if (++rt->call_depth > 16) cb_fail("CALL_STACK", "CALL nesting exceeds 16 activations.");',
+            'cb_mem *activation_mark = rt->memory;',
             'unsigned char return_code[4] = {0}, sort_return[4] = {0};',
             '(void)return_code; (void)sort_return;',
             '(void)args; (void)argc;', 'static int initialized = 0;',
             'if (!initialized) {',*reset,*init,'initialized = 1;','}',
+            *local_reset,*local_init,
             'enum { '+', '.join(enums)+' };' if enums else '',
             f'int pc = {entry}, depth = 0, loop_depth = 0;',
             'cb_frame frames[CB_STACK]; cb_loop loops[CB_STACK];',
@@ -582,6 +646,8 @@ class UnitGenerator:
             'cb_release(rt, mark);',
             'while (depth > 0 && pc == frames[depth-1].limit) { pc = frames[--depth].ret; }','}',
             '(void)loop_depth;',
+            'cb_release(rt, activation_mark);',
+            '--rt->call_depth;',
             'return (int)cb_int(cb_field_value(cb_field_at(return_code, 4, 0, 4, &d_s1)));','}']
         return '\n'.join(lines)
 
@@ -599,11 +665,17 @@ def generate_c(result,*,module=False):
             if isinstance(node,A.Call):
                 info=unit.calls[unit.node_ids[id(node)]]
                 if info['status']!='resolved':diagnostics.append(Diagnostic('LINK_UNRESOLVED_CALL',f'Implementação ausente para CALL {info["original_name"] or "dinâmico"}.',node.span,'link'))
+    program_names=set()
+    for unit in units:
+        name=unit.ast.identification.program_id.upper()
+        if name in program_names:
+            diagnostics.append(Diagnostic('LINK_DUPLICATE_PROGRAM',f'Mais de uma definição de PROGRAM-ID {name}.',unit.ast.identification.span,'link'))
+        program_names.add(name)
     if result.parameters and not module:
         diagnostics.append(Diagnostic('MAIN_REQUIRES_USING','Programa com USING deve ser compilado com --module ou chamado por um programa principal.',result.ast.procedure.span,'backend'))
     if diagnostics:return CodegenResult(None,diagnostics)
     try:
-        generators=[UnitGenerator(unit) for unit in units]
+        generators=[UnitGenerator(unit,is_main=unit is result and not module) for unit in units]
         definitions=[generator.generate() for generator in generators]
         prototypes=[f'int {generator.name}(cb_runtime *, cb_field *, size_t);' for generator in generators]
         source=['/* Generated from validated COBOL AST. Project runtime; no COBOL interpreter. */',

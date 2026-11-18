@@ -351,6 +351,10 @@ int cb_store(cb_field f,cb_num value,int rounded,int checked)  {
         trim(&q);
     }
     if(d->category==3) {
+        if(!value.sign && !strchr(d->pic,'9')) {
+            memset(f.p,' ',f.n);
+            return 0;
+        }
         int digit=d->digits-1,nonzero=0;
         size_t out=0;
         int after=0;

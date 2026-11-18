@@ -41,3 +41,4 @@ class RuntimeTests(unittest.TestCase):
     def test_subscript_runtime_bounds(self):self.run_probe('index-error','SUBSCRIPT_BOUNDS')
     def test_zero_divisor_is_explicit_error(self):self.run_probe('zero-error','DIVISION_BY_ZERO')
     def test_dates_mod_and_reverse_padding(self):self.run_probe('intrinsics')
+    def test_read_and_write_errors_report_file_status30(self):self.run_probe('file-errors')

@@ -22,7 +22,7 @@ typedef struct { int ret, limit; } cb_frame;
 typedef struct { int id, exit_pc, depth; long long remaining; } cb_loop;
 typedef struct cb_runtime {
     unsigned char return_code[4], sort_return[4];
-    int stop, raw_terminal; uint32_t random;
+    int stop, raw_terminal, call_depth; uint32_t random;
     const char *file; int line, column;
     cb_mem *memory; cb_file *files;
 } cb_runtime;

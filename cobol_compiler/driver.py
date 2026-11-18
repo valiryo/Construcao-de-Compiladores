@@ -7,9 +7,9 @@ import shutil
 import subprocess
 import tempfile
 
-from .c_codegen import generate_c
+from .c_codegen import CodegenResult, generate_c
 from .diagnostics import Diagnostic
-from .semantic import check_file
+from .semantic import SemanticResult, check_file
 
 ROOT=Path(__file__).resolve().parents[1]
 RUNTIME=ROOT/'runtime'
@@ -18,9 +18,9 @@ RUNTIME_SOURCES=[RUNTIME/name for name in ('decimal.c','fields.c','files.c')]
 
 @dataclass(slots=True)
 class CompilationResult:
-    semantic: object
-    generated: object | None = None
-    diagnostics: list = field(default_factory=list)
+    semantic: SemanticResult
+    generated: CodegenResult | None = None
+    diagnostics: list[Diagnostic] = field(default_factory=list)
     command: list[str] = field(default_factory=list)
     gcc_stdout: str = ''
     gcc_stderr: str = ''
@@ -41,6 +41,14 @@ def compile_result(semantic,output=None,*,emit_c=None,keep_c=False,module=False,
     span=semantic.ast.span
     destination=Path(output or Path(semantic.frontend.preprocessed.root_file).stem.lower()).absolute()
     try:
+        protected={path.resolve() for path in [*RUNTIME_SOURCES,RUNTIME/'cobol_runtime.h']}
+        for unit in [semantic,*semantic.source_results]:
+            protected.add(Path(unit.frontend.preprocessed.root_file).resolve())
+            protected.update(Path(dep.resolved_file).resolve() for dep in unit.frontend.preprocessed.dependencies if dep.resolved_file)
+        c_destination=Path(emit_c or str(destination)+'.c').absolute() if emit_c or keep_c else None
+        if destination.resolve() in protected or c_destination and c_destination.resolve() in protected:
+            result.diagnostics.append(Diagnostic('OUTPUT_SOURCE_COLLISION','A saída não pode sobrescrever fontes COBOL, COPY ou runtime.',span,'driver'))
+            return result
         destination.parent.mkdir(parents=True,exist_ok=True)
         if emit_c or keep_c:
             c_path=Path(emit_c or str(destination)+'.c').absolute()
