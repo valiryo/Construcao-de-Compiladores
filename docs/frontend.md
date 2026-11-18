@@ -5,6 +5,21 @@ parser utilizam o lexer existente. A Etapa 3 acrescenta análise semântica e la
 com tabelas laterais, detalhados em [semantica.md](semantica.md). A Etapa 4
 implementa [runtime, geração C e driver GCC](backend.md), preservando estas APIs.
 
+## Perfis de entrada — Etapa 7
+
+`parse_file`, `parse_source`, `Preprocessor` e `CobolLexer` aceitam
+`source_format="fixed"|"free"` e `dialect="project"|"gnucobol"`. Os mesmos parâmetros
+chegam à CLI como `--source-format` e `--dialect`. Os padrões continuam fixed/project.
+Formato livre preserva posições físicas e conteúdo depois da coluna 72, comentários
+inline e expansão COPY; não promete todas as continuações de literais. O perfil
+gnucobol permite nomes de até 63 posições e FD DATA RECORD(S) com nó tipado e
+vínculos semânticos. O limite de 30 permanece no perfil project. O formato vale
+para a unidade e seus COPY/fontes adicionais; conjuntos de formatos mistos exigem
+frontends separados pela API analyze, sem detecção automática por nome.
+
+Veja a [auditoria da Etapa 7](compatibilidade-gnucobol.md) para métricas, limites
+e comandos; as contagens anteriores desta página são históricas.
+
 ## Usar a CLI
 
 ```bash

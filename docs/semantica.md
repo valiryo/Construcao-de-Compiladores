@@ -13,6 +13,21 @@ Os números e as justificativas por fonte estão na
 acrescenta [runtime e compilação C/GCC](backend.md), com
 [auditoria de execução separada](auditoria-backend.md).
 
+## Perfil de compatibilidade — Etapa 7
+
+`check_file` e `check_source` propagam `source_format` e `dialect`; os padrões
+anteriores permanecem. Em `dialect="gnucobol"`, FD DATA RECORD(S) resolve referências
+que devem pertencer ao próprio FD. PIC com sequência inicial de + ou -, inclusive
+agrupamento, ganha precisão/layout sem float; misturas com Z, *, moeda ou uso
+binário/packed são rejeitadas. SCREEN permite PIC textual/inteiro sem sinal ou
+escala, USING gravável, LINE/COLUMN e BLANK SCREEN. CURSOR exige 4/6 posições e
+CRT STATUS um inteiro de pelo menos quatro dígitos. As referências continuam
+vinculadas nas tabelas laterais e o gerador consome os símbolos resolvidos.
+Os diagnósticos padrão e os layouts/strides existentes são preservados.
+
+Veja a [auditoria da Etapa 7](compatibilidade-gnucobol.md) para métricas, limites
+e comandos; as contagens anteriores desta página são históricas.
+
 ## API e CLI
 
 ```bash

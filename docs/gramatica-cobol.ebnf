@@ -1,4 +1,5 @@
-(* Gramática do front-end implementado, Etapa 2. Terminais case-insensitive.
+(* Gramática do front-end implementado, com extensões explícitas da Etapa 7.
+   Terminais case-insensitive.
    NUMBER, STRING, PICTURE e IDENTIFIER vêm do lexer existente. Não há regra
    catch-all para comandos ou cláusulas. COPY é expandido antes desta gramática.
 
@@ -7,8 +8,10 @@
    DECIMAL-POINT IS COMMA. Pontuação dentro de STRING/PICTURE não é separador.
 
    Restrições de contexto:
-   - cabeçalhos de divisão, PROGRAM-ID e seções do ambiente/dados ficam na área A;
+   - em formato fixo, cabeçalhos de divisão, PROGRAM-ID e seções ficam na área A;
      rótulos de seções/parágrafos de procedimentos são reconhecidos na área A;
+     formato livre não impõe área A nem corta o conteúdo na coluna 72;
+   - IDENTIFIER tem limite 30 no perfil project e 63 no perfil gnucobol;
    - nível 88 é associado ao último item, não ao grupo como irmão regular;
    - num bloco, PERIOD fecha todos os escopos implícitos sem ser consumido por
      cada comando. ELSE/WHEN/tratadores/END-* delimitam seus blocos e os externos;
@@ -56,8 +59,10 @@ data-section = "FILE", "SECTION", ".", {file-descriptor}
               | "SCREEN", "SECTION", ".", {screen-item} ;
 storage-section = "WORKING-STORAGE" | "LOCAL-STORAGE" | "LINKAGE" ;
 data-fragment = data-item, {data-item}, EOF ;
-file-descriptor = ("FD" | "SD"), reference, [record-size], ".",
+file-descriptor = ("FD" | "SD"), reference, [record-size], [data-records], ".",
                   data-item, {data-item} ;
+(* data-records somente com --dialect gnucobol; referências pertencem ao FD. *)
+data-records = "DATA", ("RECORD" | "RECORDS"), ["IS" | "ARE"], reference, {reference} ;
 record-size = "RECORD", ["CONTAINS"], unsigned-integer,
               ["TO", unsigned-integer], "CHARACTERS" ;
 data-item = level, (IDENTIFIER | "FILLER"), {data-clause}, "." ;

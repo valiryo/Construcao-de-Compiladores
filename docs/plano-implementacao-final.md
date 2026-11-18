@@ -1,11 +1,11 @@
 # Plano técnico do compilador COBOL final
 
-## Objetivo e estado após a Etapa 6
+## Objetivo e estado após a Etapa 7
 
 Implementar em Python 3.11+ um compilador com pipeline:
 
 ```text
-COBOL fixo → expansão COPY → lexer → parser → AST
+COBOL fixo/livre → expansão COPY → lexer → parser → AST
              → análise semântica → C + runtime → GCC → executável
 ```
 
@@ -49,6 +49,20 @@ geração, GCC, execução e validação por fonte; [backend.md](backend.md) doc
 uso, ABI, capacidades e limites. A [auditoria funcional](auditoria-funcional.md) e
 [guia de reprodução](validacao-funcional.md) documentam inventário, isolamento,
 proveniência e verificação dos 60 programas.
+
+A **Etapa 7** muda a meta para os originais que GnuCOBOL constrói intactos:
+**64/70 (91,43%)**, com **57/63 principais e 7/7 subprogramas**. O perfil explícito
+`--dialect gnucobol` acrescenta formato livre configurável, identificadores de
+63 posições, FD DATA RECORD(S), PIC de sinal flutuante e terminal/SCREEN no
+subconjunto documentado. Foram ampliados cinco originais sem alterações nos
+fontes. Os 140 cenários anteriores e os sete oficiais passaram novamente; há
+12 novos cenários e 522 testes na suíte. Dos originais, 60 coincidem nos cenários
+completos, três têm diferenças ABI conhecidas e GAMESNAK tem comparação parcial.
+As seis pendências são CALL externo, sem stubs; custos e arquitetura proposta
+estão na [auditoria de compatibilidade](compatibilidade-gnucobol.md), com
+[comandos e dados reproduzíveis](compatibilidade-gnucobol.json). Não há plano de
+recuperar fontes inválidos nem criar novas cópias corrigidas. As metas anteriores
+abaixo são históricas; a Etapa 7 prevalece sobre propostas antigas de recuperação.
 
 ## Inventário que orienta a arquitetura
 
@@ -97,6 +111,7 @@ deverão ser executados na avaliação.
 | Runtime e integração executável | 81 testes novos; sete oficiais, PROGDATA, três complementares e oráculo opcional |
 | `tools/auditar_backend.py` | Todos os 68 semanticamente válidos; 60 compilados e classificação de cada limite |
 | `tools/auditar_funcional.py`, `functional_execution.py`, `functional_scenarios.py` | Descoberta dos 49 pendentes, construção limpa, 140 cenários, logs binários, seleção e repetição de falhas |
+| `tools/auditar_compatibilidade.py`, `compatibility_corpus.py`, `compatibility_scenarios.py`, `terminal_probe.py` | Todo original intacto, GnuCOBOL por fase, perfil explícito, novas fixtures e PTY com evidências brutas |
 
 A **Etapa 6** audita os 26 arquivos fora da coorte compilada, sem mudanças no
 compilador/runtime nem nos originais. A [auditoria dos pendentes](auditoria-pendentes.md)
@@ -104,8 +119,9 @@ e o [plano de recuperação](recuperacao-pendentes.md) separam nove casos simple
 (oito identidades novas), quatro moderados, sete complexos, quatro fora do escopo
 e dois fragmentos. Dez fontes chegam ao GCC em cópias experimentais; isso não
 altera os 60 funcionalmente validados. Seis verificações novas preservam a suíte
-anterior, totalizando 482 testes. A prioridade é resolver fontes/dependências já
-suportadas antes de desenvolver terminal, edição flutuante ou outros recursos.
+anterior, totalizando 482 testes ao fim daquela etapa. A Etapa 7 substitui sua
+proposta de recuperação pelo critério de originais intactos compiláveis pelo
+GnuCOBOL e implementa terminal e edição flutuante nos casos comprovados.
 
 Os módulos Python estão em `cobol_compiler/` e o runtime em `runtime/`.
 Os comandos não são representados por tokens de texto

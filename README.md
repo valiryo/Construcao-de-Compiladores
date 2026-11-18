@@ -6,6 +6,31 @@ com extensões para os corpora [ebasso](examples/ebasso/README.md) e
 [COBOL Dicas](examples/README.md): COPY → lexer → parser → AST → semântica/layout → C11 + runtime próprio → GCC →
 executável nativo. GnuCOBOL é usado somente como oráculo opcional de testes.
 
+## Etapa 7: compatibilidade com GnuCOBOL
+
+O corpus original inteiro foi reavaliado sem alterações nos fontes. Dos **70
+programas construídos pelo GnuCOBOL**, nosso C + GCC compila **64 (91,43%)**:
+**57/63 principais** e **7/7 módulos**. O perfil explícito `--dialect gnucobol`
+acrescenta CBREAKEX, PROG042A, PROGTEST, TESTE002 e GAMESNAK. O padrão anterior
+continua disponível. Os 140 cenários anteriores e os sete oficiais passaram;
+12 cenários novos cobrem arquivos, chamadas e terminal. A suíte tem **522 testes**.
+
+Nos originais, 60 programas coincidem nos cenários completos (58 em bytes e dois
+em células de terminal), três conservam as diferenças conhecidas da ABI, e o jogo
+foi comparado parcialmente por causa de RANDOM. Permanecem seis pendências de
+CALL: três interfaces ncurses e três dependências ausentes ou inválidas.
+A derivada CAD0005A permanece nos testes, fora do denominador original.
+
+```bash
+python -m tools.auditar_compatibilidade --write
+python compiler.py examples/complementares/CBREAKEX.cbl --source-format free --dialect gnucobol -o build/cbreak
+python compiler.py examples/complementares/PROGTEST.cbl --dialect gnucobol -o build/tela
+```
+
+Veja [cobertura, diferenças e pendências](docs/compatibilidade-gnucobol.md) e
+[comandos, diagnósticos e evidências integrais](docs/compatibilidade-gnucobol.json).
+As etapas abaixo preservam seus resultados históricos.
+
 ## Etapa 6: auditoria dos arquivos não compilados
 
 Os **26 arquivos pendentes foram investigados individualmente**, sem modificar
@@ -24,7 +49,7 @@ Veja a [auditoria individual](docs/auditoria-pendentes.md), os
 [diagnósticos e patches](docs/auditoria-pendentes.json) e a
 [ordem de recuperação e custos](docs/recuperacao-pendentes.md).
 Os 476 testes anteriores foram preservados, com seis novas verificações da
-auditoria: **482 testes na suíte atual**. Não há novo backend nesta etapa.
+auditoria: **482 testes ao fim da Etapa 6**. Não há novo backend nesta etapa.
 
 ## Etapa 5: validação funcional reproduzível
 

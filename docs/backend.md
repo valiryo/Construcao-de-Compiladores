@@ -11,6 +11,26 @@ compilados**, em **140 cenários**, com **476 testes** na suíte. Seus resultado
 estão na [auditoria funcional](auditoria-funcional.md); os números da Etapa 4
 abaixo são o registro histórico da implantação do backend.
 
+## Compatibilidade e terminal — Etapa 7
+
+O perfil `--dialect gnucobol` acrescenta cinco originais sem alterações nos fontes.
+`--source-format free` seleciona formato livre para CBREAKEX. O backend segue
+C11 + runtime próprio; não liga GnuCOBOL ou ncurses. A parte de terminal requer
+POSIX/TTY e emite ANSI, com bounds da janela, cursor base 1 e edição de campos.
+ECHO/ICANON são restaurados na conclusão, erro e SIGINT/SIGTERM. SCREEN suporta
+LINE/COLUMN, BLANK SCREEN, VALUE, PIC textual/inteiro sem sinal/escala e USING,
+com até 1024 campos de 4096 bytes cada. DISPLAY posicionado aplica AT ao operando
+imediatamente anterior. Teclas básicas não implicam suporte a toda a SCREEN SECTION.
+ACCEPT posicionado de numérico editado, com sinal, escala ou USAGE binário/packed
+é rejeitado antes de GCC. A verificação em runtime protege também chamadas que
+herdam o contexto de terminal de outro programa.
+A ABI de dados, CALL COBOL, decimais e encoding permanece; cb_runtime ganha apenas
+estado interno de terminal. A portabilidade da parte interativa é POSIX; esta
+etapa não fornece adaptação de terminal para Windows.
+
+Veja a [auditoria da Etapa 7](compatibilidade-gnucobol.md) para métricas, limites
+e comandos; as contagens anteriores desta página são históricas.
+
 ## Resultado e requisitos
 
 São necessários Python 3.11+ e GCC com suporte a C11. As interfaces estáticas
