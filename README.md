@@ -6,6 +6,26 @@ com extensões para os corpora [ebasso](examples/ebasso/README.md) e
 [COBOL Dicas](examples/README.md): COPY → lexer → parser → AST → semântica/layout → C11 + runtime próprio → GCC →
 executável nativo. GnuCOBOL é usado somente como oráculo opcional de testes.
 
+## Etapa 6: auditoria dos arquivos não compilados
+
+Os **26 arquivos pendentes foram investigados individualmente**, sem modificar
+o compilador, runtime ou fontes originais. A classificação resulta em **9 A, 4 B,
+7 C, 4 D e 2 E**. Há oito candidatos novos de recuperação simples; o nono A é
+CAD0005A original, cuja derivada já foi validada. Dez arquivos chegaram ao GCC
+em cópias experimentais, incluindo um PROG018A sem o ALTER inválido; essas
+experiências não representam validação funcional nem ampliam a coorte de 60.
+
+```bash
+python -m tools.auditar_pendentes --write
+python -m unittest discover -s tests -v
+```
+
+Veja a [auditoria individual](docs/auditoria-pendentes.md), os
+[diagnósticos e patches](docs/auditoria-pendentes.json) e a
+[ordem de recuperação e custos](docs/recuperacao-pendentes.md).
+Os 476 testes anteriores foram preservados, com seis novas verificações da
+auditoria: **482 testes na suíte atual**. Não há novo backend nesta etapa.
+
 ## Etapa 5: validação funcional reproduzível
 
 Os **60 programas compilados foram executados e validados em 140 cenários**,
@@ -13,7 +33,7 @@ incluindo os 49 anteriormente pendentes e seus cinco módulos chamáveis. Os set
 oficiais passaram novamente nos 25 cenários existentes, com recompilação limpa.
 Há **136 comparações idênticas com GnuCOBOL**, três diferenças previstas da ABI
 verificadas por expectativas binárias completas e um cenário de erro próprio.
-Não há divergência inesperada. A suíte atual reúne **476 testes**.
+Não há divergência inesperada. Ao fim da Etapa 5, a suíte reunia **476 testes**.
 
 ```bash
 python -m tools.auditar_funcional --write

@@ -30,8 +30,10 @@ python -m unittest discover -s tests -v
 ```
 
 O primeiro comando regenera `docs/auditoria-funcional.json` e `.md`. O segundo
-executa a suíte completa, incluindo os 326 testes anteriores, quatro regressões
+executa a suíte completa. Na Etapa 5 eram os 326 testes anteriores, quatro regressões
 mínimas, 140 casos funcionais e seis verificações do auditor: **476 testes**.
+A [Etapa 6](auditoria-pendentes.md) acrescenta seis verificações de diagnóstico,
+totalizando **482 testes**; mantém os mesmos 140 cenários funcionais.
 A contagem é descoberta automaticamente; contar testes não substitui executá-los.
 
 Na preparação desta entrega, os **326 testes anteriores passaram**. Após as

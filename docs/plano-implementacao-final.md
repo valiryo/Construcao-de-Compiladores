@@ -1,6 +1,6 @@
 # Plano técnico do compilador COBOL final
 
-## Objetivo e estado após a Etapa 5
+## Objetivo e estado após a Etapa 6
 
 Implementar em Python 3.11+ um compilador com pipeline:
 
@@ -97,6 +97,15 @@ deverão ser executados na avaliação.
 | Runtime e integração executável | 81 testes novos; sete oficiais, PROGDATA, três complementares e oráculo opcional |
 | `tools/auditar_backend.py` | Todos os 68 semanticamente válidos; 60 compilados e classificação de cada limite |
 | `tools/auditar_funcional.py`, `functional_execution.py`, `functional_scenarios.py` | Descoberta dos 49 pendentes, construção limpa, 140 cenários, logs binários, seleção e repetição de falhas |
+
+A **Etapa 6** audita os 26 arquivos fora da coorte compilada, sem mudanças no
+compilador/runtime nem nos originais. A [auditoria dos pendentes](auditoria-pendentes.md)
+e o [plano de recuperação](recuperacao-pendentes.md) separam nove casos simples
+(oito identidades novas), quatro moderados, sete complexos, quatro fora do escopo
+e dois fragmentos. Dez fontes chegam ao GCC em cópias experimentais; isso não
+altera os 60 funcionalmente validados. Seis verificações novas preservam a suíte
+anterior, totalizando 482 testes. A prioridade é resolver fontes/dependências já
+suportadas antes de desenvolver terminal, edição flutuante ou outros recursos.
 
 Os módulos Python estão em `cobol_compiler/` e o runtime em `runtime/`.
 Os comandos não são representados por tokens de texto
