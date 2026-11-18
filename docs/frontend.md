@@ -2,8 +2,8 @@
 
 Implementação em Python 3.11+, sem bibliotecas externas. O pré-processador e o
 parser utilizam o lexer existente. A Etapa 3 acrescenta análise semântica e layout
-com tabelas laterais, detalhados em [semantica.md](semantica.md). Runtime, geração C
-e chamada ao GCC continuam futuros.
+com tabelas laterais, detalhados em [semantica.md](semantica.md). A Etapa 4
+implementa [runtime, geração C e driver GCC](backend.md), preservando estas APIs.
 
 ## Usar a CLI
 
@@ -54,7 +54,7 @@ não exclusões. Atualizar essas expectativas exige atualizar testes e relatóri
 | `validation.py` | Verificação independente de spans/intervalos e cobertura dos comandos |
 | `frontend.py` | parse_file, parse_source e FrontendResult |
 | `types.py`, `symbols.py`, `layout.py`, `semantic.py` | PIC, namespaces, descritores físicos e análise semântica da AST |
-| `__main__.py` | Interfaces sintática e semântica, sem backend |
+| `__main__.py` | CLI estática; opções explícitas ativam o backend C/GCC |
 
 ```python
 from cobol_compiler import parse_file
@@ -206,7 +206,8 @@ inteiro e não fica limitado a três exemplos escolhidos para passar.
 O [relatório de cobertura](auditoria-parser.md) separa **72 programas completos**,
 **dois fragmentos**, um arquivo vazio, duas extensões não suportadas e nove
 negativos léxicos. Os 77 aceitos anteriormente foram todos submetidos ao parser.
-Nenhum resultado exige bibliotecas externas, dados `.dat`, rede ou compilador C.
+Os testes das Etapas 1–3 não exigem bibliotecas externas, dados `.dat`, rede ou
+compilador C. A suíte atual inclui os testes nativos documentados em [backend.md](backend.md).
 
 ## Integração semântica e próxima etapa
 
@@ -217,7 +218,9 @@ Preservar os spans e pilhas nas mensagens semânticas, inclusive para declaraç�
 vindas dos copybooks. Condições relativas devem ser vinculadas ao sujeito de
 EVALUATE ou à comparação antecedente indicada pela AST.
 
-Implementar na sequência: escopos/qualificações; interpretação PIC/USAGE e layout
-de grupos/tabelas/linkage; tipos/conversões; vínculos de arquivos, parágrafos e
-CALL; depois runtime e backend C diretamente da AST. A disponibilidade de dados,
-bibliotecas e chamadas externas precisa de testes próprios na etapa executável.
+A semântica e o layout estão implementados em [semantica.md](semantica.md);
+o backend consome seus vínculos e gera C diretamente da AST. `--check-backend`
+verifica suporte e dependências sem GCC; `-o`, `--emit-c`, `--keep-c` e `--module`
+ativam compilação nativa. `compiler.py` compila por padrão. A disponibilidade de
+dados, bibliotecas e chamadas externas é verificada pelos testes da
+[etapa executável](auditoria-backend.md).

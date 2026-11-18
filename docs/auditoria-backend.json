@@ -1,0 +1,4908 @@
+{
+  "snapshot": "1ffb3bf279bbb1e596b1091f1dda1cf7ddf51295",
+  "files": {
+    "examples/complementares/ASCII001.cbl": {
+      "semantic_classification": "invalid_source",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/CAD0001A.cbl": {
+      "semantic_classification": "valid_pending_external",
+      "semantic_valid": true,
+      "backend": "external_dependency_missing",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": "executable",
+      "diagnostics": [
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL SORT001A: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/CAD0001A.cbl",
+              "line": 155,
+              "column": 13,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/CAD0001A.cbl",
+              "line": 155,
+              "column": 51,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL SORT001A.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/CAD0001A.cbl",
+              "line": 155,
+              "column": 13,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/CAD0001A.cbl",
+              "line": 155,
+              "column": 51,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        }
+      ],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "CAD0001A",
+      "oracle_match": null
+    },
+    "examples/complementares/CBREAKEX.cbl": {
+      "semantic_classification": "invalid_source",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/CLIESQL01.cbl": {
+      "semantic_classification": "invalid_source",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/GAMESNAK.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "unsupported_backend",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": "executable",
+      "diagnostics": [
+        {
+          "code": "UNSUPPORTED_BACKEND_SCREEN_POSITION",
+          "message": "Backend não implementado: SCREEN_POSITION.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/GAMESNAK.cbl",
+              "line": 331,
+              "column": 47,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/GAMESNAK.cbl",
+              "line": 331,
+              "column": 53,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "backend",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        }
+      ],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "GAMESNAK",
+      "oracle_match": null
+    },
+    "examples/complementares/GRAV001A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "module",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "GRAV001A",
+      "oracle_match": null
+    },
+    "examples/complementares/LER0001A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "module",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "LER0001A",
+      "oracle_match": null
+    },
+    "examples/complementares/LER0002A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "LER0002A",
+      "oracle_match": null
+    },
+    "examples/complementares/LOGIN01A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "LOGIN01A",
+      "oracle_match": null
+    },
+    "examples/complementares/MINICALC.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "MINICALC",
+      "oracle_match": null
+    },
+    "examples/complementares/NCURSESDEMO.cbl": {
+      "semantic_classification": "valid_pending_external",
+      "semantic_valid": true,
+      "backend": "external_dependency_missing",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": "executable",
+      "diagnostics": [
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL INITSCR: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 12,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 12,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL CBREAK: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 13,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 13,
+              "column": 24,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL NOECHO: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 14,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 14,
+              "column": 24,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL CLEAR: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 15,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 15,
+              "column": 23,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 18,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 19,
+              "column": 40,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 22,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 23,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL REFRESH: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 24,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 24,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL SCANW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 25,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 25,
+              "column": 50,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 28,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 29,
+              "column": 31,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL REFRESH: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 30,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 30,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL SCANW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 31,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 31,
+              "column": 51,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL CLEAR: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 34,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 34,
+              "column": 23,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 35,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 36,
+              "column": 43,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 37,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 38,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 39,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 40,
+              "column": 29,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 41,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 42,
+              "column": 31,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 43,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 44,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL REFRESH: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 47,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 47,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL GETCH: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 50,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 50,
+              "column": 49,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL ENDWIN: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 51,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 51,
+              "column": 24,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL initscr.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 12,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 12,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL cbreak.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 13,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 13,
+              "column": 24,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL noecho.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 14,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 14,
+              "column": 24,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL clear.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 15,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 15,
+              "column": 23,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 18,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 19,
+              "column": 40,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 22,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 23,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL refresh.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 24,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 24,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL scanw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 25,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 25,
+              "column": 50,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 28,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 29,
+              "column": 31,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL refresh.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 30,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 30,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL scanw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 31,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 31,
+              "column": 51,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL clear.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 34,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 34,
+              "column": 23,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 35,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 36,
+              "column": 43,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 37,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 38,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 39,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 40,
+              "column": 29,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 41,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 42,
+              "column": 31,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 43,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 44,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL refresh.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 47,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 47,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL getch.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 50,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 50,
+              "column": 49,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL endwin.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 51,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/NCURSESDEMO.cbl",
+              "line": 51,
+              "column": 24,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        }
+      ],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "NCURSESDEMO",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG001A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG001A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG002A.cbl": {
+      "semantic_classification": "invalid_source",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/PROG003A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG003A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG004A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG004A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG005A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG005A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG006A.cbl": {
+      "semantic_classification": "unsupported_extension",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/PROG007A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG007A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG008A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "LEARQDAT",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG009A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG009A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG010A.cbl": {
+      "semantic_classification": "invalid_source",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/PROG011A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG011A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG012A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": true,
+      "functionally_validated": true,
+      "scenarios": [
+        "extra-refmod-count"
+      ],
+      "program_id": "PROG012A",
+      "oracle_match": true
+    },
+    "examples/complementares/PROG014A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG014A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG015A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG015A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG016A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG016A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG017A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG017A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG018A.cbl": {
+      "semantic_classification": "invalid_source",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/PROG019A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG019A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG020A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": true,
+      "functionally_validated": true,
+      "scenarios": [
+        "extra-search-found",
+        "extra-search-absent"
+      ],
+      "program_id": "PROG020A",
+      "oracle_match": true
+    },
+    "examples/complementares/PROG021A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG021A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG022A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG022A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG023A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG023A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG023B.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG023B",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG023C.cbl": {
+      "semantic_classification": "invalid_source",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/PROG023D.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG023D",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG023E.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG023E",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG025A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG025A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG027A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG027A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG028A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG028A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG029A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG029A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG033A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG033A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG034A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG034A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG035A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG035A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG036A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG036A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG037A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG037A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG038A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG038A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG039A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": true,
+      "functionally_validated": true,
+      "scenarios": [
+        "extra-sequential-delete"
+      ],
+      "program_id": "PROG039A",
+      "oracle_match": true
+    },
+    "examples/complementares/PROG040A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG040A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG041A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG041A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG042A.cbl": {
+      "semantic_classification": "invalid_source",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/PROG042B.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "module",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG042B",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG043A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG043A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG044A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG044A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROG045A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROG045A",
+      "oracle_match": null
+    },
+    "examples/complementares/PROGTEST.cbl": {
+      "semantic_classification": "partially_supported",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/PROGTEST2.cbl": {
+      "semantic_classification": "valid_pending_external",
+      "semantic_valid": true,
+      "backend": "external_dependency_missing",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": "executable",
+      "diagnostics": [
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL INITSCR: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 16,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 16,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL KEYPAD: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 17,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 17,
+              "column": 52,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL NOECHO: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 18,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 18,
+              "column": 24,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL CLEAR: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 19,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 19,
+              "column": 23,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 22,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 23,
+              "column": 51,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 24,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 25,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 26,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 27,
+              "column": 31,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL REFRESH: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 30,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 30,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVSCANW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 31,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 32,
+              "column": 29,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVSCANW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 33,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 34,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL CLEAR: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 37,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 37,
+              "column": 23,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 38,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 39,
+              "column": 43,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 40,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 41,
+              "column": 39,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 42,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 43,
+              "column": 29,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 44,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 45,
+              "column": 40,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 46,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 47,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL REFRESH: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 49,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 49,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL GETCH: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 50,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 50,
+              "column": 49,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL ENDWIN: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 53,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 53,
+              "column": 24,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL initscr.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 16,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 16,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL keypad.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 17,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 17,
+              "column": 52,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL noecho.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 18,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 18,
+              "column": 24,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL clear.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 19,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 19,
+              "column": 23,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 22,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 23,
+              "column": 51,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 24,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 25,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 26,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 27,
+              "column": 31,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL refresh.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 30,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 30,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvscanw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 31,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 32,
+              "column": 29,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvscanw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 33,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 34,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL clear.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 37,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 37,
+              "column": 23,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 38,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 39,
+              "column": 43,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 40,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 41,
+              "column": 39,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 42,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 43,
+              "column": 29,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 44,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 45,
+              "column": 40,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 46,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 47,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL refresh.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 49,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 49,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL getch.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 50,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 50,
+              "column": 49,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL endwin.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 53,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST2.cbl",
+              "line": 53,
+              "column": 24,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        }
+      ],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROGTEST2",
+      "oracle_match": null
+    },
+    "examples/complementares/PROGTEST3.cbl": {
+      "semantic_classification": "valid_pending_external",
+      "semantic_valid": true,
+      "backend": "external_dependency_missing",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": "executable",
+      "diagnostics": [
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL INITSCR: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 14,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 14,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL CLEAR: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 15,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 15,
+              "column": 23,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 17,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 18,
+              "column": 40,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 19,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 20,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL REFRESH: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 21,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 21,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL SCANW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 22,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 22,
+              "column": 50,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 24,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 25,
+              "column": 31,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL REFRESH: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 26,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 26,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL SCANW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 27,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 27,
+              "column": 51,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL CLEAR: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 37,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 37,
+              "column": 23,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 38,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 39,
+              "column": 43,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 40,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 41,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 42,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 43,
+              "column": 29,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 44,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 45,
+              "column": 31,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MVPRINTW: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 46,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 47,
+              "column": 34,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL REFRESH: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 53,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 53,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL GETCH: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 57,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 57,
+              "column": 49,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL ENDWIN: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 59,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 59,
+              "column": 24,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL initscr.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 14,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 14,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL clear.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 15,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 15,
+              "column": 23,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 17,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 18,
+              "column": 40,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 19,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 20,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL refresh.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 21,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 21,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL scanw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 22,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 22,
+              "column": 50,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 24,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 25,
+              "column": 31,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL refresh.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 26,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 26,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL scanw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 27,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 27,
+              "column": 51,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL clear.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 37,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 37,
+              "column": 23,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 38,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 39,
+              "column": 43,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 40,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 41,
+              "column": 30,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 42,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 43,
+              "column": 29,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 44,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 45,
+              "column": 31,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mvprintw.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 46,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 47,
+              "column": 34,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL refresh.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 53,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 53,
+              "column": 25,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL getch.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 57,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 57,
+              "column": 49,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL endwin.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 59,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/PROGTEST3.cbl",
+              "line": 59,
+              "column": 24,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        }
+      ],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROGTEST3",
+      "oracle_match": null
+    },
+    "examples/complementares/PROGTEST4.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROGTEST4",
+      "oracle_match": null
+    },
+    "examples/complementares/PROGTIME.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "module",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "PROGTIME",
+      "oracle_match": null
+    },
+    "examples/complementares/PROGVSAM.cbl": {
+      "semantic_classification": "invalid_source",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/REL0001A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "module",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "REL0001A",
+      "oracle_match": null
+    },
+    "examples/complementares/REL0002A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "REL0002A",
+      "oracle_match": null
+    },
+    "examples/complementares/SORT001A.cbl": {
+      "semantic_classification": "invalid_source",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/SORT002A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "SORT002A",
+      "oracle_match": null
+    },
+    "examples/complementares/TELABMS.cbl": {
+      "semantic_classification": "invalid_source",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/TESTE002.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "unsupported_backend",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": "executable",
+      "diagnostics": [
+        {
+          "code": "UNSUPPORTED_BACKEND_SCREEN_POSITION",
+          "message": "Backend não implementado: SCREEN_POSITION.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/TESTE002.cbl",
+              "line": 18,
+              "column": 37,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/TESTE002.cbl",
+              "line": 18,
+              "column": 42,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "backend",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        }
+      ],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "TESTE002",
+      "oracle_match": null
+    },
+    "examples/complementares/VALCNPJ.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "VALCNPJ",
+      "oracle_match": null
+    },
+    "examples/complementares/VALCPF01.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "VALCPF01",
+      "oracle_match": null
+    },
+    "examples/complementares/VALIDA1A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "VALIDA1A",
+      "oracle_match": null
+    },
+    "examples/complementares/VALIDA1B.cbl": {
+      "semantic_classification": "invalid_source",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/clientes-sql.cbl": {
+      "semantic_classification": "unsupported_extension",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/complementares/main.cbl": {
+      "semantic_classification": "valid_pending_external",
+      "semantic_valid": true,
+      "backend": "external_dependency_missing",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": "executable",
+      "diagnostics": [
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL EXIBIR_TELA: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/main.cbl",
+              "line": 13,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/main.cbl",
+              "line": 13,
+              "column": 66,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL exibir_tela.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/main.cbl",
+              "line": 13,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/main.cbl",
+              "line": 13,
+              "column": 66,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        }
+      ],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "MAINCOBOL",
+      "oracle_match": null
+    },
+    "examples/complementares/meu_programa.cob": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "MEU-PROGRAMA",
+      "oracle_match": null
+    },
+    "examples/complementares/ncurses_demo.cbl": {
+      "semantic_classification": "valid_pending_external",
+      "semantic_valid": true,
+      "backend": "external_dependency_missing",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": "executable",
+      "diagnostics": [
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL NCURSES_WRAPPER.C: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 10,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 10,
+              "column": 35,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL MOSTRAR_MENSAGEM: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 12,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 12,
+              "column": 44,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL ESPERAR_TECLA: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 14,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 14,
+              "column": 31,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "EXTERNAL_CALL_PENDING",
+          "message": "CALL FINALIZAR_NCURSES: assinatura pendente para ligação.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 16,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 16,
+              "column": 35,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "semantic",
+          "expected": null,
+          "unexpected": null,
+          "severity": "I",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL ncurses_wrapper.c.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 10,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 10,
+              "column": 35,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL mostrar_mensagem.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 12,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 12,
+              "column": 44,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL esperar_tecla.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 14,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 14,
+              "column": 31,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        },
+        {
+          "code": "LINK_UNRESOLVED_CALL",
+          "message": "Implementação ausente para CALL finalizar_ncurses.",
+          "span": {
+            "start": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 16,
+              "column": 12,
+              "inclusion_stack": []
+            },
+            "end": {
+              "file": "examples/complementares/ncurses_demo.cbl",
+              "line": 16,
+              "column": 35,
+              "inclusion_stack": []
+            }
+          },
+          "phase": "link",
+          "expected": null,
+          "unexpected": null,
+          "severity": "E",
+          "related": []
+        }
+      ],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": [],
+      "program_id": "NCURSES-DEMO",
+      "oracle_match": null
+    },
+    "examples/corrigidos/CAD0005A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": true,
+      "functionally_validated": true,
+      "scenarios": [
+        "agenda-empty",
+        "agenda-add",
+        "agenda-reopen-add",
+        "agenda-list",
+        "agenda-duplicate",
+        "agenda-fim",
+        "agenda-invalid-option"
+      ],
+      "program_id": "CAD0005A",
+      "oracle_match": true
+    },
+    "examples/dependencias/COD001A.cpy": {
+      "semantic_classification": "copybook_context_only",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/dependencias/COPY002A.cpy": {
+      "semantic_classification": "copybook_context_only",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/dependencias/PROGDATA.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "module",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": true,
+      "functionally_validated": true,
+      "scenarios": [
+        "progdata-clock"
+      ],
+      "program_id": "PROGDATA",
+      "oracle_match": true,
+      "executed_via": [
+        "PROGDATA-DRIVER",
+        "PROG024A"
+      ]
+    },
+    "examples/oficiais/BUSCA01A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": true,
+      "functionally_validated": true,
+      "scenarios": [
+        "busca-first",
+        "busca-last",
+        "busca-absent",
+        "busca-empty"
+      ],
+      "program_id": "BUSCA01A",
+      "oracle_match": true
+    },
+    "examples/oficiais/CAD0002A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "module",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": true,
+      "functionally_validated": true,
+      "scenarios": [
+        "cad2-fim",
+        "cad2-validation-and-shared-record"
+      ],
+      "program_id": "CAD0002A",
+      "oracle_match": true
+    },
+    "examples/oficiais/CAD0004A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": true,
+      "functionally_validated": true,
+      "scenarios": [
+        "cad4-one",
+        "cad4-two"
+      ],
+      "program_id": "CAD0004A",
+      "oracle_match": true
+    },
+    "examples/oficiais/CAD0005A.cbl": {
+      "semantic_classification": "invalid_source",
+      "semantic_valid": false,
+      "backend": "not_run",
+      "generated_c": false,
+      "gcc": "not_run",
+      "compiled_as": null,
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": false,
+      "functionally_validated": false,
+      "scenarios": []
+    },
+    "examples/oficiais/CAIXAREG.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": true,
+      "functionally_validated": true,
+      "scenarios": [
+        "caixa-no-discount",
+        "caixa-retries-and-discount"
+      ],
+      "program_id": "CAIXAREG",
+      "oracle_match": true
+    },
+    "examples/oficiais/CALCMD01.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": true,
+      "functionally_validated": true,
+      "scenarios": [
+        "calcmd-basic",
+        "calcmd-retry-and-fraction",
+        "calcmd-zero-divisor"
+      ],
+      "program_id": "CALCMD01",
+      "oracle_match": true
+    },
+    "examples/oficiais/PROG024A.cbl": {
+      "semantic_classification": "semantic_valid",
+      "semantic_valid": true,
+      "backend": "compiled",
+      "generated_c": true,
+      "gcc": "success",
+      "compiled_as": "executable",
+      "diagnostics": [],
+      "gcc_stderr": "",
+      "executed": true,
+      "functionally_validated": true,
+      "scenarios": [
+        "biblioteca-empty",
+        "biblioteca-add-loan-return-query",
+        "biblioteca-reopen-list",
+        "biblioteca-absent",
+        "biblioteca-loan-unavailable"
+      ],
+      "program_id": "PROG024A",
+      "oracle_match": true
+    }
+  },
+  "functional": {
+    "oracle": true,
+    "oracle_version": "cobc (GnuCOBOL) 3.2.0",
+    "programs": {
+      "BUSCA01A": {
+        "generated_c": true,
+        "compiled": true,
+        "diagnostics": [],
+        "gcc_stderr": "",
+        "oracle_compiled": true,
+        "oracle_compile_stderr": "examples/oficiais/BUSCA01A.cbl:115: warning: line not terminated by a newline [-Wmissing-newline]\n  113 |       *> cobol-lint CL002 9999-end\n  114 |        9999-END.                       EXIT.\n  115 >       *----------------------------------------------------------------*<EOF>\n"
+      },
+      "CAD0002A": {
+        "generated_c": true,
+        "compiled": true,
+        "diagnostics": [],
+        "gcc_stderr": "",
+        "oracle_compiled": true,
+        "oracle_compile_stderr": "examples/dependencias/COPY002A.cpy:36: warning: line not terminated by a newline [-Wmissing-newline]\n   34 |           15 COPY002A-CIDADE            PIC X(30).\n   35 |           15 COPY002A-ESTADO            PIC X(02).\n   36 >           15 COPY002A-CEP               PIC 9(08).<EOF>\nexamples/dependencias/COPY002A.cpy:36: warning: line not terminated by a newline [-Wmissing-newline]\n   34 |           15 COPY002A-CIDADE            PIC X(30).\n   35 |           15 COPY002A-ESTADO            PIC X(02).\n   36 >           15 COPY002A-CEP               PIC 9(08).<EOF>\nexamples/oficiais/CAD0002A.cbl:422: warning: line not terminated by a newline [-Wmissing-newline]\n  420 |       *> cobol-lint CL002 9999-end\n  421 |        9999-END.                       EXIT.\n  422 >       *----------------------------------------------------------------*<EOF>\n"
+      },
+      "CAD0004A": {
+        "generated_c": true,
+        "compiled": true,
+        "diagnostics": [],
+        "gcc_stderr": "",
+        "oracle_compiled": true,
+        "oracle_compile_stderr": ""
+      },
+      "CAD0005A": {
+        "generated_c": true,
+        "compiled": true,
+        "diagnostics": [],
+        "gcc_stderr": "",
+        "oracle_compiled": true,
+        "oracle_compile_stderr": ""
+      },
+      "CAIXAREG": {
+        "generated_c": true,
+        "compiled": true,
+        "diagnostics": [],
+        "gcc_stderr": "",
+        "oracle_compiled": true,
+        "oracle_compile_stderr": "examples/oficiais/CAIXAREG.cbl:239: warning: line not terminated by a newline [-Wmissing-newline]\n  237 |       *> cobol-lint CL002 9999-end\n  238 |        9999-END.                       EXIT.\n  239 >       *----------------------------------------------------------------*<EOF>\n"
+      },
+      "CALCMD01": {
+        "generated_c": true,
+        "compiled": true,
+        "diagnostics": [],
+        "gcc_stderr": "",
+        "oracle_compiled": true,
+        "oracle_compile_stderr": "examples/oficiais/CALCMD01.cbl:171: warning: line not terminated by a newline [-Wmissing-newline]\n  169 |       *> cobol-lint CL002 9999-end\n  170 |        9999-END.                       EXIT.\n  171 >       *----------------------------------------------------------------*<EOF>\n"
+      },
+      "PROG012A": {
+        "generated_c": true,
+        "compiled": true,
+        "diagnostics": [],
+        "gcc_stderr": "",
+        "oracle_compiled": true,
+        "oracle_compile_stderr": "examples/complementares/PROG012A.cbl:71: warning: line not terminated by a newline [-Wmissing-newline]\n   69 | \n   70 | \n   71 >            STOP RUN.<EOF>\n"
+      },
+      "PROG020A": {
+        "generated_c": true,
+        "compiled": true,
+        "diagnostics": [],
+        "gcc_stderr": "",
+        "oracle_compiled": true,
+        "oracle_compile_stderr": ""
+      },
+      "PROG024A": {
+        "generated_c": true,
+        "compiled": true,
+        "diagnostics": [],
+        "gcc_stderr": "",
+        "oracle_compiled": true,
+        "oracle_compile_stderr": "examples/dependencias/COD001A.cpy:37: warning: line not terminated by a newline [-Wmissing-newline]\n   35 |          10 COD001A-SEGUNDO             PIC 9(002).\n   36 |          10 COD001A-MILESIMO            PIC 9(002).\n   37 >         05  COD001A-PERIODO             PIC X(020).<EOF>\nexamples/dependencias/COD001A.cpy:37: warning: line not terminated by a newline [-Wmissing-newline]\n   35 |          10 COD001A-SEGUNDO             PIC 9(002).\n   36 |          10 COD001A-MILESIMO            PIC 9(002).\n   37 >         05  COD001A-PERIODO             PIC X(020).<EOF>\n"
+      },
+      "PROG039A": {
+        "generated_c": true,
+        "compiled": true,
+        "diagnostics": [],
+        "gcc_stderr": "",
+        "oracle_compiled": true,
+        "oracle_compile_stderr": "examples/complementares/PROG039A.cbl:154: warning: line not terminated by a newline [-Wmissing-newline]\n  152 |       *> cobol-lint CL002 9999-end\n  153 |        9999-END.                       EXIT.\n  154 >       *----------------------------------------------------------------*<EOF>\n"
+      },
+      "PROGDATA": {
+        "generated_c": true,
+        "compiled": true,
+        "diagnostics": [],
+        "gcc_stderr": "",
+        "oracle_compiled": true,
+        "oracle_compile_stderr": "examples/dependencias/COD001A.cpy:37: warning: line not terminated by a newline [-Wmissing-newline]\n   35 |          10 COD001A-SEGUNDO             PIC 9(002).\n   36 |          10 COD001A-MILESIMO            PIC 9(002).\n   37 >         05  COD001A-PERIODO             PIC X(020).<EOF>\nexamples/dependencias/COD001A.cpy:37: warning: line not terminated by a newline [-Wmissing-newline]\n   35 |          10 COD001A-SEGUNDO             PIC 9(002).\n   36 |          10 COD001A-MILESIMO            PIC 9(002).\n   37 >         05  COD001A-PERIODO             PIC X(020).<EOF>\n"
+      }
+    },
+    "scenarios": {
+      "busca-first": {
+        "program": "BUSCA01A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "8055ed1d0a2b385bd3ee488473a16d7a90c8e7741c2abcb9211f9941a1cbd61a",
+        "stdout_bytes": 97,
+        "stderr": "",
+        "files": {
+          "CADASTRO2.dat": {
+            "bytes": 88,
+            "sha256": "1d7efa25909fbae84e429e2099ea06eefb26bc74d2bd79451d0000da9fad3a0c"
+          }
+        }
+      },
+      "busca-last": {
+        "program": "BUSCA01A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "11635883b9a396ab403a81e6999e4777013b8678c9792fae7ef20df7da767c87",
+        "stdout_bytes": 97,
+        "stderr": "",
+        "files": {
+          "CADASTRO2.dat": {
+            "bytes": 88,
+            "sha256": "1d7efa25909fbae84e429e2099ea06eefb26bc74d2bd79451d0000da9fad3a0c"
+          }
+        }
+      },
+      "busca-absent": {
+        "program": "BUSCA01A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "df9db250fe4166c11a22cebf7bc39f6f56674776cb950d5ba7d72d50ba9f11d8",
+        "stdout_bytes": 102,
+        "stderr": "",
+        "files": {
+          "CADASTRO2.dat": {
+            "bytes": 44,
+            "sha256": "be7a3883f3d53cd2b933fde47dc6c3c727ef7f393101ab139af993fa692de7a4"
+          }
+        }
+      },
+      "busca-empty": {
+        "program": "BUSCA01A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "2ab3a34efeca4b7851cf5607fd81451bda6f146d7a7ad383c1dde0a02f239597",
+        "stdout_bytes": 102,
+        "stderr": "",
+        "files": {
+          "CADASTRO2.dat": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      },
+      "cad2-fim": {
+        "program": "CAD0002A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "94b603131a27f55a236a01c08e193a3323ef2ca533f27fddd1a11d407d896ba4",
+        "stdout_bytes": 378,
+        "stderr": "",
+        "files": {}
+      },
+      "cad2-validation-and-shared-record": {
+        "program": "CAD0002A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "7fa1e35c3da8f4c766858c1b55fd22df8fc44ac21734acf4fa23f4158e4b7974",
+        "stdout_bytes": 759,
+        "stderr": "",
+        "files": {}
+      },
+      "cad4-one": {
+        "program": "CAD0004A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "a4c75452c3cdf9b9ce2d1558b8ef6fb89c6f46626d2e6884a1b5f815668c0596",
+        "stdout_bytes": 110,
+        "stderr": "",
+        "files": {
+          "CADASTRO.dat": {
+            "bytes": 48,
+            "sha256": "2bb185ade70bda262a40e6a6e801ed7ca6bd312226b6a2e98a413e634637e298"
+          }
+        }
+      },
+      "cad4-two": {
+        "program": "CAD0004A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "c214bfc0b3a0e6deaa6c3a2cfa3590f6a1cfe82bddb04f58ab7658e762caf4d5",
+        "stdout_bytes": 220,
+        "stderr": "",
+        "files": {
+          "CADASTRO.dat": {
+            "bytes": 96,
+            "sha256": "ee63878255f91a351c40093dc67bd38e3b52e3fb638a8e4622584b21293c299a"
+          }
+        }
+      },
+      "agenda-empty": {
+        "program": "CAD0005A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "8f09dfb26d1fbffab4138aece66348de5ee76c3e98dd4b46272d4558dc599b63",
+        "stdout_bytes": 444,
+        "stderr": "",
+        "files": {
+          "CADAGENDA.dat": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      },
+      "agenda-add": {
+        "program": "CAD0005A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "ecce0c364864f896bcd0e010d7b4313d1c434ab0d52ceab832a35f18f1f25dce",
+        "stdout_bytes": 431,
+        "stderr": "",
+        "files": {
+          "CADAGENDA.dat": {
+            "bytes": 46,
+            "sha256": "7f49068339667f33067a7d685bdfd3f916ac1c8971d52d6ab255498d28ee320b"
+          }
+        }
+      },
+      "agenda-reopen-add": {
+        "program": "CAD0005A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "ecce0c364864f896bcd0e010d7b4313d1c434ab0d52ceab832a35f18f1f25dce",
+        "stdout_bytes": 431,
+        "stderr": "",
+        "files": {
+          "CADAGENDA.dat": {
+            "bytes": 92,
+            "sha256": "5ca03fbe2532ac7e816092932ebb2acdf138623ea40038cdc9787bd55dfeb11e"
+          }
+        }
+      },
+      "agenda-list": {
+        "program": "CAD0005A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "6719d9e5cfa2403088dafa5c73a196601b600a9648e0ef13be80384862ebb64a",
+        "stdout_bytes": 611,
+        "stderr": "",
+        "files": {
+          "CADAGENDA.dat": {
+            "bytes": 92,
+            "sha256": "5ca03fbe2532ac7e816092932ebb2acdf138623ea40038cdc9787bd55dfeb11e"
+          }
+        }
+      },
+      "agenda-duplicate": {
+        "program": "CAD0005A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "bf382a9b8ac9d6e1035317936ed5946654bb59b8396197b30f46a38bd150d46d",
+        "stdout_bytes": 469,
+        "stderr": "",
+        "files": {
+          "CADAGENDA.dat": {
+            "bytes": 46,
+            "sha256": "7f49068339667f33067a7d685bdfd3f916ac1c8971d52d6ab255498d28ee320b"
+          }
+        }
+      },
+      "agenda-fim": {
+        "program": "CAD0005A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "e25be8a10bd7618a13dda33813dcd4df5902a26e8fd570fac69bef54feb8d2dc",
+        "stdout_bytes": 419,
+        "stderr": "",
+        "files": {
+          "CADAGENDA.dat": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      },
+      "agenda-invalid-option": {
+        "program": "CAD0005A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "36f60a69dd1c5af02719e2913d44b20459b529434a0488c7b88dbadb71b43454",
+        "stdout_bytes": 295,
+        "stderr": "",
+        "files": {}
+      },
+      "caixa-no-discount": {
+        "program": "CAIXAREG",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "32ae6caed2932452fdade782b0bf98c099d50a7bbe4f2b197eec5e0f2bba2f4c",
+        "stdout_bytes": 547,
+        "stderr": "",
+        "files": {}
+      },
+      "caixa-retries-and-discount": {
+        "program": "CAIXAREG",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "723a4c9620cd0779ab040f2e6c42767359b14246e4fad0af25ccf72c90f6250d",
+        "stdout_bytes": 649,
+        "stderr": "",
+        "files": {}
+      },
+      "calcmd-basic": {
+        "program": "CALCMD01",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "0e6fb4918a5721032c230a7b98e70b74019349c2cef02302a18566fc16b64e7b",
+        "stdout_bytes": 338,
+        "stderr": "",
+        "files": {}
+      },
+      "calcmd-retry-and-fraction": {
+        "program": "CALCMD01",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "a1d67f96cc0dcfd814f7ab4e386c9e2d1fa74b5ff854b071230bfa5d9fe3977f",
+        "stdout_bytes": 388,
+        "stderr": "",
+        "files": {}
+      },
+      "calcmd-zero-divisor": {
+        "program": "CALCMD01",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": false,
+        "oracle_match": null,
+        "differences": [],
+        "returncode": 1,
+        "stdout_sha256": "6ef05019b7716959ec8e8797321555207a977a832d1ac4e8cca7cec3a558e127",
+        "stdout_bytes": 281,
+        "stderr": "examples/oficiais/CALCMD01.cbl:135:15: DIVISION_BY_ZERO: Division by zero.\n",
+        "files": {}
+      },
+      "extra-refmod-count": {
+        "program": "PROG012A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "eb18dc2af11abb093877cb3068fc84fb15ada103fdb8d83ecfb9b75d6e16bba5",
+        "stdout_bytes": 66,
+        "stderr": "",
+        "files": {}
+      },
+      "extra-search-found": {
+        "program": "PROG020A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "a8f1551deb64084930b438977b493fb92ee310382c5ce4ab743b628fe8ae2496",
+        "stdout_bytes": 84,
+        "stderr": "",
+        "files": {}
+      },
+      "extra-search-absent": {
+        "program": "PROG020A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "6591de45f6ea1cde725c29453c0dd5449fdade98c65f970d1a2b90f4f92a3a5c",
+        "stdout_bytes": 68,
+        "stderr": "",
+        "files": {}
+      },
+      "biblioteca-empty": {
+        "program": "PROG024A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "67e03dcbee0b7aa1bfe88e8265ae27fa9121902353513f088c62d5e0f48e554c",
+        "stdout_bytes": 501,
+        "stderr": "",
+        "files": {
+          "BIBLIOTECA.dat": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "BIBLIOTECA.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      },
+      "biblioteca-add-loan-return-query": {
+        "program": "PROG024A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "f184cc74dcbe5b271188310f3e14ff9f07ff6c984344dc75746ddb56abe81884",
+        "stdout_bytes": 3962,
+        "stderr": "",
+        "files": {
+          "BIBLIOTECA.dat": {
+            "bytes": 77,
+            "sha256": "f39b873bb12d7a820656ac030fb05db39e9877615190c589f75cc94622664f9c"
+          },
+          "BIBLIOTECA.txt": {
+            "bytes": 342,
+            "sha256": "3dd97559032c6b10ffd24a1c30eb9dd8fc26d021022ab05e085f650f755028b3"
+          }
+        }
+      },
+      "biblioteca-reopen-list": {
+        "program": "PROG024A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "aac53c62b7be7dc621b6853085b5bd01a535ed46995d5f6a9eb64cbeb19d207b",
+        "stdout_bytes": 1261,
+        "stderr": "",
+        "files": {
+          "BIBLIOTECA.dat": {
+            "bytes": 77,
+            "sha256": "f81018be6c1ece399e0075b45ddbe6464b9fe4d104a96943bef903f8dcdbe7b8"
+          },
+          "BIBLIOTECA.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      },
+      "biblioteca-absent": {
+        "program": "PROG024A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "2067e9a30913279399b5ee8ecdc47aa23db528ffa3bff51ecc5f819bd317483a",
+        "stdout_bytes": 1152,
+        "stderr": "",
+        "files": {
+          "BIBLIOTECA.dat": {
+            "bytes": 77,
+            "sha256": "f81018be6c1ece399e0075b45ddbe6464b9fe4d104a96943bef903f8dcdbe7b8"
+          },
+          "BIBLIOTECA.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      },
+      "biblioteca-loan-unavailable": {
+        "program": "PROG024A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "08a906d0b97d91e8ed6260e5086dace583e0ff16d25a806004fd86909426c9f2",
+        "stdout_bytes": 1174,
+        "stderr": "",
+        "files": {
+          "BIBLIOTECA.dat": {
+            "bytes": 77,
+            "sha256": "09dbe4d1b1f2780e182dc5029202fe979825c064e999811c60f61a29c1207a8c"
+          },
+          "BIBLIOTECA.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      },
+      "extra-sequential-delete": {
+        "program": "PROG039A",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "eb20e91e8b7d9db093623afe098033ca19fd8cc95d42cbd4f4ab88167e29ffaf",
+        "stdout_bytes": 48,
+        "stderr": "",
+        "files": {
+          "CADASTRO1.dat": {
+            "bytes": 39,
+            "sha256": "2d19f9c6c6fd9bb2304761e771e9bcf18245a61601cd934e4e4bc5067af32cdf"
+          }
+        }
+      },
+      "progdata-clock": {
+        "program": "PROGDATA",
+        "executed": true,
+        "validated": true,
+        "errors": [],
+        "oracle_compared": true,
+        "oracle_match": true,
+        "differences": [],
+        "returncode": 0,
+        "stdout_sha256": "6e9faba0d904061aca90c8054b95873de578e9e1f24e6935a5e373faa058aca6",
+        "stdout_bytes": 132,
+        "stderr": "",
+        "files": {}
+      }
+    },
+    "summary": {
+      "programs": 11,
+      "compiled": 11,
+      "executed_scenarios": 30,
+      "validated_scenarios": 30,
+      "oracle_compared": 29,
+      "oracle_matched": 29
+    }
+  },
+  "summary": {
+    "files": 86,
+    "suite_tests": 326,
+    "semantic_valid_programs": 68,
+    "generated_c": 60,
+    "gcc_compiled": 60,
+    "executables": 53,
+    "modules": 7,
+    "executed_programs": 11,
+    "functionally_validated_programs": 11,
+    "additional_functionally_validated": 3,
+    "classifications": {
+      "compiled": 60,
+      "external_dependency_missing": 6,
+      "not_run": 18,
+      "unsupported_backend": 2
+    }
+  }
+}

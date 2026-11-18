@@ -8,8 +8,10 @@ têm pendências externas. Os dois copybooks são analisados nas inclusões.
 
 Os números e as justificativas por fonte estão na
 [auditoria reproduzível](auditoria-semantica.md) e em seu
-[JSON completo](auditoria-semantica.json). A suíte tem **245 testes aprovados**:
-149 anteriores e 96 novos. Isso não atesta execução; runtime, C e GCC são futuros.
+[JSON completo](auditoria-semantica.json). Ao fim da Etapa 3 eram **245 testes**:
+149 anteriores e 96 novos. Esses resultados atestam análise estática. A Etapa 4
+acrescenta [runtime e compilação C/GCC](backend.md), com
+[auditoria de execução separada](auditoria-backend.md).
 
 ## API e CLI
 
@@ -85,7 +87,7 @@ inclusive validade local com chamada externa informativa. Nenhum comando invoca 
 
 `symbols.py` contém as tabelas e a resolução; `types.py`, PIC e tipos;
 `layout.py`, os descritores físicos; `semantic.py`, a coordenação e validações.
-Não há IR de instruções. O futuro gerador consome a AST e suas anotações, sem
+Não há IR de instruções. O gerador C consome a AST e suas anotações, sem
 resolver nomes nem inferir tipos novamente.
 
 Os namespaces são programa, dados (grupos e campos), arquivos, seções, parágrafos,
@@ -99,7 +101,7 @@ Os dois TAB-ENT-LINHA do PROG024A são pai/filho válidos, sem referência ambí
 usada pelo programa. Parágrafos homônimos em seções distintas também permitem
 qualificação. Rótulos guardam limites de tokens, entrada, pai e fall-through.
 PERFORM guarda alvo, limite THRU e retorno ao sucessor do próprio comando para a
-futura pilha explícita. EXIT isolado é no-op; GOBACK e STOP RUN têm efeitos distintos.
+pilha explícita do backend. EXIT isolado é no-op; GOBACK e STOP RUN têm efeitos distintos.
 
 ## PIC e ABI do projeto
 
@@ -132,7 +134,7 @@ O gerador ainda deverá testar o código de overpunch, packed e conversões exat
 O arquivo fonte continua sendo UTF-8 lido pelo front-end. Para dados/literais, a
 política inicial é ISO-8859-1: caracteres acentuados representáveis ocupam um byte;
 literais não representáveis são rejeitados. Não se usa `len(texto Python)` como
-largura de um buffer UTF-8 gerado. I/O futuro deverá aplicar essa codificação.
+largura de um buffer UTF-8 gerado. O runtime aplica essa codificação e converte UTF-8 na fronteira do terminal.
 
 ## Armazenamento e inicialização
 
@@ -199,7 +201,8 @@ metadados de temporário; BY VALUE numérico usa o descritor formal para convers
 O vínculo guarda símbolos formais/atuais e modos. Chamadas externas/dinâmicas
 mantêm nome original, argumentos e pendência de assinatura; não recebem assinatura
 inventada. Erros em fontes adicionais bloqueiam o resultado; pendências são
-propagadas transitivamente. Ainda não há ligação nem execução de subprogramas.
+propagadas transitivamente. A análise estática não faz ligação nem executa subprogramas; o driver da Etapa 4
+rejeita pendências antes de GCC e liga somente implementações fornecidas.
 
 ## Diagnósticos, cobertura e próxima etapa
 
@@ -226,11 +229,11 @@ funções não listadas, SQL/CICS e extensões fora da gramática também são d
 Isso não impede analisar suas referências disponíveis e conservar layouts para
 inspeção; esses resultados nunca são tratados como programas válidos.
 
-A Etapa 4 implementará runtime decimal/string/edição, checks dinâmicos, dispatcher
-e pilha de PERFORM, COPY/linkage e CALL, I/O e relógio controlável, geração C direta
-da AST e driver GCC. Precisará de fixtures e testes de execução para os sete mais
-três complementares, incluindo overflow, EOF, erros de I/O, bytes e acentos.
-GnuCOBOL continuará sendo somente um oráculo opcional de testes.
+A Etapa 4 implementa runtime decimal/string/edição, checks dinâmicos, dispatcher
+e pilha de PERFORM, linkage e CALL, I/O e relógio controlável, geração C direta
+da AST e driver GCC. Seus testes cobrem os sete oficiais, PROGDATA e três
+complementares, overflow, EOF, erros de I/O, bytes e acentos; os resultados estão
+na [auditoria do backend](auditoria-backend.md). GnuCOBOL é somente oráculo opcional.
 
 O auditor termina com código 1 se um programa antes parseável regredir ou apresentar
 uma falha semântica inesperada. Os quatro casos negativos novos são expectativas

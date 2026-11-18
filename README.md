@@ -1,19 +1,47 @@
-# Compilador COBOL — Front-end, semântica e layout
+# Compilador COBOL — Python → C11 → GCC
 
 Trabalho de Construção de Compiladores em Python 3.11+. Implementa o **front-end** para
 COBOL em **formato fixo** definido na seção 2 da [especificação do professor](docs/EspecificacaoCOBOL.md),
 com extensões para os corpora [ebasso](examples/ebasso/README.md) e
-[COBOL Dicas](examples/README.md): COPY → lexer → parser → AST → semântica/layout.
-As próximas fases serão runtime → C → GCC → executável nativo.
+[COBOL Dicas](examples/README.md): COPY → lexer → parser → AST → semântica/layout → C11 + runtime próprio → GCC →
+executável nativo. GnuCOBOL é usado somente como oráculo opcional de testes.
+
+## Etapa 4: runtime e executáveis nativos
+
+Os sete oficiais geram C e compilam com GCC. CAD0002A é um módulo chamável,
+validado por driver COBOL com COPY002A compartilhado; PROG024A liga PROGDATA.
+Os 68 programas semanticamente válidos foram submetidos ao backend: **60 compilam
+(53 executáveis e sete objetos)**, seis têm dependências externas indisponíveis e
+dois exigem posicionamento de terminal. **11 programas foram executados e
+validados em 30 cenários**, incluindo três complementares; os 29 cenários
+comparáveis coincidem integralmente com GnuCOBOL 3.2.0. A suíte tem **326 testes**.
+
+```bash
+python compiler.py examples/oficiais/CALCMD01.cbl -o build/calcmd01 --keep-c
+printf '1\n2\n3\n3\n' | ./build/calcmd01
+python compiler.py examples/oficiais/PROG024A.cbl -I examples/dependencias \
+  --source examples/dependencias/PROGDATA.cbl -o build/biblioteca
+python -m cobol_compiler examples/oficiais/CALCMD01.cbl --check-backend
+python -m tools.auditar_backend --write
+```
+
+- [Uso, API, runtime, ABI, fixtures e limites](docs/backend.md).
+- [Auditoria executável por fonte/cenário](docs/auditoria-backend.md) e [JSON](docs/auditoria-backend.json).
+
+O runtime usa armazenamento de largura fixa e decimais exatos, incluindo PIC de
+28 dígitos. O C nasce diretamente da AST validada; o dispatcher e a pilha de
+PERFORM preservam parágrafos, seções, fall-through, GO TO e retornos. Não há
+interpretador nem dependência de runtime GnuCOBOL. Compilação não cria arquivos
+de dados: prepare fixtures explicitamente antes de executar programas de arquivo.
 
 ## Etapa 3: semântica e memória
 
 Os sete oficiais são semanticamente válidos. Todos os 72 programas aceitos pelo
 parser foram analisados: **68 válidos**, incluindo seis com chamadas externas
-pendentes; três têm erros reais e um usa SCREEN fora do subconjunto. A suíte tem
+pendentes; três têm erros reais e um usa SCREEN fora do subconjunto. Ao fim da etapa, a suíte tinha
 **245 testes aprovados**, preservando os 149 anteriores. Símbolos, tipos/PIC,
 conversões, layouts, arquivos, controle e CALL ficam vinculados à AST por tabelas
-laterais. Runtime, geração C e GCC ainda não foram implementados.
+laterais. A Etapa 4 consome esses vínculos para gerar C, sem repetir resolução de nomes.
 
 ```bash
 python -m cobol_compiler examples/oficiais/CALCMD01.cbl --check
@@ -47,7 +75,7 @@ python -m tools.auditar_semantica --write
 
 A AST usa nós tipados com origem física e pilha de inclusão. Não há comandos
 armazenados como texto bruto nem aceitação genérica de tokens desconhecidos.
-Os originais do corpus permanecem intactos; não há execução nativa nesta etapa.
+Os originais do corpus permanecem intactos; a auditoria sintática não atesta execução.
 
 ## Consolidação léxica da Etapa 1
 
@@ -58,7 +86,7 @@ Os originais do corpus permanecem intactos; não há execução nativa nesta eta
 - [Inventário reproduzível](docs/inventario-corpus.md): tokens, máscaras,
   construções e dependências; nove arquivos externos ficam como casos negativos.
 - [Plano técnico atualizado](docs/plano-implementacao-final.md): distingue o
-  front-end e semântica implementados das etapas futuras de runtime e geração C.
+  componentes implementados e os limites que ainda precisam de ampliação.
 
 Para os testes positivos, use `examples/corrigidos/CAD0005A.cbl`.
 `examples/oficiais/CAD0005A.cbl` preserva o conflito upstream como teste negativo.
@@ -72,6 +100,7 @@ O documento apresenta a introdução ao COBOL, a implementação e o uso de IA, 
 ## Requisitos
 
 - Python **3.11+** (sem bibliotecas externas).
+- **GCC/C11** para compilação nativa; GnuCOBOL opcional para comparação independente.
 - Arquivos-fonte usando o **COBOL Fixed Format**, não o formato livre.
 
 ## Executar o lexer isoladamente
@@ -98,6 +127,7 @@ python -m unittest discover -s tests -v
 python -m tools.auditar_corpus
 python -m tools.auditar_parser --write
 python -m tools.auditar_semantica --write
+python -m tools.auditar_backend --write
 ```
 
 No Windows, `py -3 -m cobol_lexer examples/hello.cob` também funciona caso `python` não esteja no PATH.
@@ -187,7 +217,11 @@ cobol_compiler/
   symbols.py        namespaces e qualificação
   layout.py         descritores de grupos, tabelas, aliases e linkage
   semantic.py       passagens semânticas e vínculos com a AST
-  __main__.py       sintaxe, --check, --dump-symbols e --dump-layout
+  c_codegen.py      visitante da AST validada e dispatcher C11
+  driver.py         construção GCC e publicação atômica
+  __main__.py       CLI estática e compilação
+compiler.py          entrada de compilação nativa
+runtime/             cobol_runtime.h, decimal.c, fields.c e files.c
 docs/EspecificacaoCOBOL.pdf especificação do professor
 docs/relatorio-lexer.md relatório da entrega e resultados de validação
 examples/hello.cob  exemplo em formato fixo
@@ -208,16 +242,20 @@ examples/corrigidos/ cópia de CAD0005A usada nos testes positivos
 examples/dependencias/ copybooks e PROGDATA
 examples/complementares/ demais fontes COBOL Dicas
 docs/auditoria-lexer.md consolidação e limitações do corpus real
-docs/plano-implementacao-final.md arquitetura das próximas fases
+tools/auditar_backend.py C/GCC por fonte e cenários executáveis
+tools/comparar_gnucobol.py oráculo independente com fixtures idênticas
+tests/test_backend*.py runtime, controle, ABI, arquivos, oficiais e auditoria
+docs/backend.md uso e contratos do backend
+docs/plano-implementacao-final.md arquitetura e critérios de entrega
 ```
 
 ## Limites da entrega
 
-**Ainda não há runtime, gerador C ou invocação do GCC.**
-A análise semântica valida o subconjunto documentado; validade estática não garante
-comportamento executável. SCREEN, ALTER, SORT, START, arquivos indexados e usos
+O backend implementa o subconjunto descrito em [backend.md](docs/backend.md).
+Os demais programas apenas compilados ainda precisam de cenários de execução;
+validade estática e compilação não garantem comportamento funcional. SCREEN, ALTER, SORT, START, arquivos indexados e usos
 listados no [contrato semântico](docs/semantica.md) recebem erros explícitos.
 Formato livre, diretivas gerais, COPY REPLACING, programas aninhados e EXEC SQL/CICS
 permanecem fora da gramática atual. CALL para bibliotecas C/ncurses é analisado,
-mas sua execução depende de infraestrutura futura. As limitações individuais
+e bloqueia a ligação enquanto faltarem implementações e ABI disponíveis. As limitações individuais
 estão nas auditorias do [parser](docs/auditoria-parser.md) e da [semântica](docs/auditoria-semantica.md).
