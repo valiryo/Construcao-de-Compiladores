@@ -77,6 +77,7 @@ class Analyzer:
         self.r = SemanticResult(frontend)
         self.root = frontend.ast
         self.strict = strict
+        self.compatibility = frontend.preprocessed.dialect=='gnucobol'
         self.nodes = {}
         self.declarations = {}
         self.file_descriptors = {}
@@ -218,7 +219,7 @@ class Analyzer:
             return
         if self.root.data:
             for section in self.root.data.sections:
-                if section.name == "SCREEN":
+                if section.name == "SCREEN" and not self.compatibility:
                     self.unsupported("SCREEN", section)
                 if section.name == "FILE":
                     for fd in section.entries:
@@ -283,13 +284,14 @@ class Analyzer:
             self.diagnostic("GROUP_WITH_PICTURE", "Grupo não pode possuir PIC elementar.", picture)
         if picture:
             try:
-                typ = parse_picture(picture.mask, usage.usage if usage else "DISPLAY", decimal_comma=self.decimal_comma)
+                typ = parse_picture(picture.mask, usage.usage if usage else "DISPLAY", decimal_comma=self.decimal_comma,
+                                    allow_floating=self.compatibility)
             except PictureError as exc:
                 code = "UNSUPPORTED_USAGE" if usage and usage.usage in {"COMP-1","COMP-2","POINTER"} else "INVALID_PICTURE"
                 self.diagnostic(code, str(exc), picture)
                 typ = ERROR
         elif regular:
-            typ = CobolType("group")
+            typ = CobolType("screen" if symbol.id in self.screen and self.compatibility else "group")
             if usage:
                 self.unsupported("GROUP_USAGE", usage)
         elif usage and usage.usage in {"INDEX", "POINTER"}:
@@ -404,7 +406,13 @@ class Analyzer:
                         if key_sid and symbol.id not in [s.id for s in self.table.ancestors(self.table.symbols[key_sid])]:
                             self.diagnostic("TABLE_KEY_OUTSIDE_TABLE", "Chave deve ser subordinada à tabela.", ref)
             elif isinstance(clause,A.ScreenUsing):
-                self.expr(clause.target,write=True)
+                using=self.expr(clause.target,write=True)
+                if self.compatibility:
+                    if not self.clause(item,A.PictureClause):
+                        self.diagnostic('SCREEN_PICTURE_REQUIRED','Campo USING exige PIC explícito neste perfil.',clause)
+                    elif target_type.numeric and (target_type.scale or target_type.signed) or target_type.edited:
+                        self.unsupported('SCREEN_PICTURE',clause)
+                    else:self.compatible(using,target_type,clause)
             elif isinstance(clause,A.ScreenPosition):
                 self.require_integer(clause.value)
 
@@ -733,6 +741,11 @@ class Analyzer:
                 "record_lengths":[self.r.layout.items[s].total_size for s in records],"open_modes":[]}
             if fd:
                 for clause in fd.clauses:
+                    if isinstance(clause,A.DataRecordsClause):
+                        for ref in clause.records:
+                            self.expr(ref,whole=True)
+                            if self.ann(ref).symbol_id not in records:
+                                self.diagnostic('INVALID_DATA_RECORD','DATA RECORD deve nomear registro raiz deste FD.',ref)
                     if isinstance(clause,A.RecordSizeClause):
                         lo=self.integer_constant(clause.minimum)
                         hi=self.integer_constant(clause.maximum) if clause.maximum else lo
@@ -750,7 +763,11 @@ class Analyzer:
         if self.root.environment:
             for node in A.walk(self.root.environment):
                 if isinstance(node,A.SpecialName):
-                    self.expr(node.value,write=isinstance(node.value,A.Reference))
+                    typ=self.expr(node.value,write=isinstance(node.value,A.Reference))
+                    if self.compatibility and node.setting=='CURSOR' and typ.length not in {4,6}:
+                        self.diagnostic('INVALID_CURSOR_FIELD','CURSOR exige quatro ou seis posições neste perfil.',node)
+                    if self.compatibility and node.setting=='CRT STATUS' and not (typ.numeric and typ.integral and (typ.precision or 0)>=4):
+                        self.diagnostic('INVALID_CRT_STATUS','CRT STATUS exige campo inteiro com pelo menos quatro dígitos.',node)
 
     def file_ref(self,ref,operation):
         symbol=self.resolve(ref,("file",),"file")
@@ -888,7 +905,7 @@ class Analyzer:
             elif typ.category != "screen":
                 self.compatible(CobolType("alphanumeric"),typ,node,target_id=self.ann(node.target).symbol_id)
                 ann.checks.append({"kind":"accept-conversion","target":self.ann(node.target).symbol_id,"category":typ.category})
-            if typ.category=="screen": self.unsupported("SCREEN_EXECUTION",node)
+            if typ.category=="screen" and not self.compatibility: self.unsupported("SCREEN_EXECUTION",node)
             ann.details.update({"source":node.source,"date_format":node.date_format,"width":source_width})
         elif isinstance(node,A.Arithmetic): self.arithmetic(node)
         elif isinstance(node,A.If):
@@ -1260,12 +1277,12 @@ def analyze(frontend, *, sources=(), strict=False):
     return analyzers[0].r
 
 
-def check_file(path, *, include_dirs=(), source_paths=(), strict=False, debug_lines=False):
-    frontend=parse_file(path,include_dirs=include_dirs,debug_lines=debug_lines)
-    sources=[parse_file(p,include_dirs=include_dirs,debug_lines=debug_lines) for p in source_paths]
+def check_file(path, *, include_dirs=(), source_paths=(), strict=False, debug_lines=False, source_format='fixed', dialect='project'):
+    frontend=parse_file(path,include_dirs=include_dirs,debug_lines=debug_lines,source_format=source_format,dialect=dialect)
+    sources=[parse_file(p,include_dirs=include_dirs,debug_lines=debug_lines,source_format=source_format,dialect=dialect) for p in source_paths]
     result=analyze(frontend,sources=sources,strict=strict)
     return result
 
 
-def check_source(source, *, filename="<memory>", include_dirs=(), sources=(), strict=False):
-    return analyze(parse_source(source,filename=filename,include_dirs=include_dirs),sources=sources,strict=strict)
+def check_source(source, *, filename="<memory>", include_dirs=(), sources=(), strict=False, source_format='fixed', dialect='project'):
+    return analyze(parse_source(source,filename=filename,include_dirs=include_dirs,source_format=source_format,dialect=dialect),sources=sources,strict=strict)

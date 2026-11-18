@@ -90,6 +90,6 @@ def compile_result(semantic,output=None,*,emit_c=None,keep_c=False,module=False,
     return result
 
 
-def compile_file(path,output=None,*,include_dirs=(),source_paths=(),strict=False,debug_lines=False,**options):
-    semantic=check_file(path,include_dirs=include_dirs,source_paths=source_paths,strict=strict,debug_lines=debug_lines)
+def compile_file(path,output=None,*,include_dirs=(),source_paths=(),strict=False,debug_lines=False,source_format='fixed',dialect='project',**options):
+    semantic=check_file(path,include_dirs=include_dirs,source_paths=source_paths,strict=strict,debug_lines=debug_lines,source_format=source_format,dialect=dialect)
     return compile_result(semantic,output,**options)

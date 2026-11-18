@@ -42,12 +42,14 @@ class Parser(ExpressionParser, StatementParser):
     data_sections = frozenset("FILE WORKING-STORAGE LOCAL-STORAGE LINKAGE SCREEN".split())
     usages = frozenset("DISPLAY COMP COMP-1 COMP-2 COMP-3 COMP-4 COMP-5 COMPUTATIONAL BINARY PACKED-DECIMAL INDEX POINTER".split())
 
-    def __init__(self, tokens, *, root_file="<memory>"):
+    def __init__(self, tokens, *, root_file="<memory>", source_format='fixed', dialect='project'):
         self.tokens = tokens
         self.root_file = root_file
         self.i = 0
         self.diagnostics = []
         self.skipped = 0
+        self.source_format = source_format
+        self.dialect = dialect
 
     def current(self, offset=0):
         index = self.i + offset
@@ -109,11 +111,11 @@ class Parser(ExpressionParser, StatementParser):
         node.span = SourceSpan(node.span.start, self.tokens[self.i - 1].span.end)
 
     def area_a(self):
-        if self.current() and self.current().token.area != "A":
+        if self.source_format=='fixed' and self.current() and self.current().token.area != "A":
             self.fail("cabeçalho na área A (colunas 8–11)", code="INVALID_HEADER_AREA")
 
     def header(self):
-        return self.kind() == "IDENTIFIER" and self.current().token.area == "A" and (
+        return self.kind() == "IDENTIFIER" and (self.source_format=='free' or self.current().token.area == "A") and (
             self.word(1) == "." or self.word(1) == "SECTION"
         )
 
@@ -302,6 +304,14 @@ class Parser(ExpressionParser, StatementParser):
                             high = self.integer_literal() if self.match("TO") else None
                             unit = self.expect("CHARACTERS").value
                             clauses.append(self.node(A.RecordSizeClause, c_start, minimum=low, maximum=high, unit=unit))
+                        if self.dialect=='gnucobol' and self.match('DATA'):
+                            c_start=self.i-1
+                            if not self.match('RECORD','RECORDS'):self.fail('RECORD ou RECORDS')
+                            self.match('IS','ARE')
+                            refs=[]
+                            while self.kind()=='IDENTIFIER':refs.append(self.reference(suffixes=False))
+                            if not refs:self.fail('nome de registro em DATA RECORD')
+                            clauses.append(self.node(A.DataRecordsClause,c_start,records=refs))
                         self.expect(".")
                         records = self.data_entries()
                         if not records:

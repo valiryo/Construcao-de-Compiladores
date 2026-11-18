@@ -339,6 +339,11 @@ cb_num cb_load(cb_field f)  {
     r.d=shift(big_one(),d->scale);
     return normalized(r);
 }
+int cb_floating_sign(const cb_desc *desc) {
+    int plus=0,minus=0;
+    for(const char *p=desc->pic;*p;++p) { plus+=*p=='+'; minus+=*p=='-'; }
+    return plus>1?'+':minus>1?'-':0;
+}
 int cb_store(cb_field f,cb_num value,int rounded,int checked)  {
     if(checked && cb_math_failed()) return 1;
     const cb_desc *d=f.desc;
@@ -356,6 +361,8 @@ int cb_store(cb_field f,cb_num value,int rounded,int checked)  {
             return 0;
         }
         int digit=d->digits-1,nonzero=0;
+        int floating=cb_floating_sign(d),seen=0,placed=0;
+        size_t sign_slot=0;
         size_t out=0;
         int after=0;
         for(const char *p=d->pic;*p;++p) {
@@ -364,13 +371,21 @@ int cb_store(cb_field f,cb_num value,int rounded,int checked)  {
                 if(c=='V')after=1;
                 continue;
             }
-            if(c=='9'||c=='Z'||c=='*') {
+            if(c==floating&&!seen++) {
+                sign_slot=out; f.p[out++]=' '; continue;
+            }
+            if(c=='9'||c=='Z'||c=='*'||c==floating) {
                 int v=digit>=0&&digit<q.len?q.v[digit]:0;
                 --digit;
                 if(c=='9'||v||after)nonzero=1;
-                f.p[out++]=(unsigned char)((c!='9'&&!nonzero)?(c=='*'?'*':' '):'0'+v);
+                if(c!='9'&&!nonzero) { sign_slot=out; f.p[out++]=(unsigned char)(c=='*'?'*':' '); }
+                else {
+                    if(floating&&!placed) { f.p[sign_slot]=(unsigned char)(value.sign<0?'-':floating=='+'?'+':' '); placed=1; }
+                    f.p[out++]=(unsigned char)('0'+v);
+                }
             }
             else if(c==d->decimal) {
+                if(floating&&!placed) { f.p[sign_slot]=(unsigned char)(value.sign<0?'-':floating=='+'?'+':' '); placed=1; }
                 f.p[out++]=(unsigned char)c;
                 after=1;
                 nonzero=1;
@@ -378,7 +393,10 @@ int cb_store(cb_field f,cb_num value,int rounded,int checked)  {
             else if(c=='+'||c=='-')f.p[out++]=(unsigned char)(value.sign<0?'-':c=='+'?'+':' ');
             else if(c=='B')f.p[out++]=' ';
             else if(c=='0')f.p[out++]='0';
-            else f.p[out++]=(unsigned char)(!nonzero&&(c=='.'||c==','||c=='/')?' ':c);
+            else {
+                if(floating&&!nonzero&&(c=='.'||c==','))sign_slot=out;
+                f.p[out++]=(unsigned char)(!nonzero&&(c=='.'||c==','||c=='/')?' ':c);
+            }
         }
         if(out!=f.n)cb_fail("PICTURE_LENGTH","Edited picture/descriptor size mismatch.");
     }

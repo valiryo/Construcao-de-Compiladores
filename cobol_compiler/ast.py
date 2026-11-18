@@ -171,6 +171,11 @@ class RecordSizeClause(Node):
 
 
 @dataclass(slots=True)
+class DataRecordsClause(Node):
+    records: list[Reference]
+
+
+@dataclass(slots=True)
 class FileDescriptor(Node):
     name: Reference
     sort: bool

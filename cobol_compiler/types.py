@@ -40,7 +40,7 @@ class PictureError(ValueError):
     pass
 
 
-def parse_picture(mask, usage="DISPLAY", *, decimal_comma=False):
+def parse_picture(mask, usage="DISPLAY", *, decimal_comma=False, allow_floating=False):
     """Interpreta PIC; limita expansão para não alocar a partir de fonte hostil."""
     usage = {"COMPUTATIONAL": "COMP", "BINARY": "COMP", "COMP-4": "COMP",
              "PACKED-DECIMAL": "COMP-3"}.get(usage, usage)
@@ -69,7 +69,13 @@ def parse_picture(mask, usage="DISPLAY", *, decimal_comma=False):
         if usage != "DISPLAY":
             raise PictureError("PIC textual requer USAGE DISPLAY.")
         return CobolType(category, len(pic), picture=mask, expanded_picture=pic, decimal_point=decimal)
-    digits = sum(pic.count(c) for c in "9Z*")
+    repeated = next((c for c in '+-' if pic.count(c)>1), None)
+    if repeated:
+        prefix=pic[:pic.rfind(repeated)+1]
+        if (not allow_floating or set(pic)&set('Z*$') or set(prefix)-{repeated,separator}
+                or any(c in pic for c in '+-' if c!=repeated)):
+            raise PictureError('Edição flutuante exige sequência inicial de um único sinal, sem Z, * ou moeda.')
+    digits = sum(pic.count(c) for c in "9Z*") + (pic.count(repeated)-1 if repeated else 0)
     if not digits:
         raise PictureError("PIC numérico sem posição de dígito.")
     if pic.count("S") > 1 or ("S" in pic and not pic.startswith("S")) or pic.count("V") > 1:
@@ -77,7 +83,7 @@ def parse_picture(mask, usage="DISPLAY", *, decimal_comma=False):
     if pic.count(decimal) > 1 or ("V" in pic and decimal in pic):
         raise PictureError("Mais de um ponto decimal em PIC.")
     edited = bool(set(pic) - {"S", "9", "V"})
-    if pic.count("+") + pic.count("-") > 1 or pic.count("$") > 1:
+    if (pic.count("+") + pic.count("-") > 1 and not repeated) or pic.count("$") > 1:
         raise PictureError("Edição flutuante com sinais/moedas repetidos fora do subconjunto.")
     if "S" in pic and edited:
         raise PictureError("S não pode combinar com edição numérica.")

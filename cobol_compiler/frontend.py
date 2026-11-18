@@ -26,15 +26,16 @@ class FrontendResult:
 
 
 def _parse(preprocessed, copybook):
-    parsed = Parser(preprocessed.tokens, root_file=preprocessed.root_file).parse(copybook=copybook) if preprocessed.success else None
+    parsed = Parser(preprocessed.tokens, root_file=preprocessed.root_file, source_format=preprocessed.source_format,
+                    dialect=preprocessed.dialect).parse(copybook=copybook) if preprocessed.success else None
     return FrontendResult(preprocessed, parsed)
 
 
-def parse_file(path, *, include_dirs=(), copybook=None, debug_lines=False):
+def parse_file(path, *, include_dirs=(), copybook=None, debug_lines=False, source_format='fixed', dialect='project'):
     path = Path(path)
-    return _parse(Preprocessor(include_dirs, debug_lines=debug_lines).process(path),
+    return _parse(Preprocessor(include_dirs, debug_lines=debug_lines,source_format=source_format,dialect=dialect).process(path),
                   path.suffix.lower() == ".cpy" if copybook is None else copybook)
 
 
-def parse_source(source, *, filename="<memory>", include_dirs=(), copybook=False):
-    return _parse(Preprocessor(include_dirs).process_text(source, filename=filename), copybook)
+def parse_source(source, *, filename="<memory>", include_dirs=(), copybook=False, source_format='fixed', dialect='project'):
+    return _parse(Preprocessor(include_dirs,source_format=source_format,dialect=dialect).process_text(source, filename=filename), copybook)

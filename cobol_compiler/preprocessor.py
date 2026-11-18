@@ -35,6 +35,8 @@ class PreprocessResult:
     dependencies: list[CopyDependency] = field(default_factory=list)
     lines: list[SourceLine] = field(default_factory=list)
     root_file: str = ""
+    source_format: str = 'fixed'
+    dialect: str = 'project'
 
     @property
     def success(self) -> bool:
@@ -42,21 +44,28 @@ class PreprocessResult:
 
 
 class Preprocessor:
-    def __init__(self, include_dirs=(), *, debug_lines: bool = False, max_depth: int = 128):
+    def __init__(self, include_dirs=(), *, debug_lines: bool = False, max_depth: int = 128,
+                 source_format='fixed', dialect='project'):
         self.include_dirs = tuple(Path(p).resolve() for p in include_dirs)
         self.debug_lines = debug_lines
         self.max_depth = max_depth
+        self.source_format = source_format
+        self.dialect = dialect
+
+    def lexer(self):
+        return CobolLexer(debug_lines=self.debug_lines,preserve_literal_padding=True,
+                          source_format=self.source_format,dialect=self.dialect)
 
     def process(self, path: str | Path) -> PreprocessResult:
         path = Path(path).resolve()
-        result = PreprocessResult(root_file=str(path))
+        result = PreprocessResult(root_file=str(path),source_format=self.source_format,dialect=self.dialect)
         self._expand(path, (), (), result)
         self._tokenize(result)
         return result
 
     def process_text(self, source: str, *, filename: str = "<memory>") -> PreprocessResult:
         """Conveniência para testes/ferramentas; COPY relativo usa o diretório indicado."""
-        result = PreprocessResult(root_file=filename)
+        result = PreprocessResult(root_file=filename,source_format=self.source_format,dialect=self.dialect)
         self._expand(Path(filename), (), (), result, source=source)
         self._tokenize(result)
         return result
@@ -92,7 +101,7 @@ class Preprocessor:
                 result.diagnostics.append(Diagnostic("SOURCE_READ_ERROR", str(exc), self._point(file, 1, 1, stack), "preprocessor"))
                 return
         raw_lines = source.splitlines()
-        scan = CobolLexer(debug_lines=self.debug_lines,preserve_literal_padding=True).tokenize(source)
+        scan = self.lexer().tokenize(source)
         directives = []
         i = 0
         while i < len(scan.tokens):
@@ -147,7 +156,7 @@ class Preprocessor:
         def append_piece(line_no, begin, end):
             raw = raw_lines[line_no - 1]
             text = " " * begin + raw[begin:end]
-            if begin:
+            if begin and self.source_format=='fixed':
                 text = "       " + text[7:]
             result.lines.append(SourceLine(text, file, line_no, stack))
         for start, end, included in directives:
@@ -157,7 +166,7 @@ class Preprocessor:
                 begin = cursor_col
             else:
                 begin = 0
-            if raw_lines[start.line - 1][max(7, begin):start.column - 1].strip():
+            if raw_lines[start.line - 1][max(7 if self.source_format=='fixed' else 0, begin):start.column - 1].strip():
                 append_piece(start.line, begin, start.column - 1)
             result.lines.extend(included)
             cursor_line, cursor_col = end.end_line, end.end_column
@@ -165,7 +174,7 @@ class Preprocessor:
             append_piece(line_no, cursor_col if line_no == cursor_line else 0, None)
 
     def _tokenize(self, result):
-        scan = CobolLexer(debug_lines=self.debug_lines,preserve_literal_padding=True).tokenize("\n".join(line.text for line in result.lines))
+        scan = self.lexer().tokenize("\n".join(line.text for line in result.lines))
         def location(line, column):
             row = result.lines[line - 1]
             return SourceLocation(row.file, row.line, column, row.inclusion_stack)

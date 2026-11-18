@@ -28,13 +28,16 @@ def main(*, compile_default=False):
     parser.add_argument("--strict", action="store_true", help="exigir VALUE em itens elementares")
     parser.add_argument("--copybook", action="store_true", default=None, help="analisar fragmento de dados (automático em .cpy)")
     parser.add_argument("--debug-lines", action="store_true")
+    parser.add_argument('--source-format',choices=('fixed','free'),default='fixed')
+    parser.add_argument('--dialect',choices=('project','gnucobol'),default='project',help='perfil explícito de compatibilidade; padrão preserva a disciplina')
     args = parser.parse_args()
     static = args.check or args.dump_symbols or args.dump_layout or args.check_syntax or args.dump_ast
     if args.check_backend or args.output or args.emit_c or args.keep_c or args.module or compile_default and not static:
         from .driver import compile_file
         result = compile_file(args.file, args.output, include_dirs=args.include_dirs,
             source_paths=args.source, strict=args.strict, debug_lines=args.debug_lines,
-            emit_c=args.emit_c, keep_c=args.keep_c, module=args.module, check_backend=args.check_backend)
+            emit_c=args.emit_c, keep_c=args.keep_c, module=args.module, check_backend=args.check_backend,
+            source_format=args.source_format,dialect=args.dialect)
         for diagnostic in result.diagnostics:
             print(diagnostic.format(), file=sys.stderr)
         if result.gcc_stderr:
@@ -44,7 +47,7 @@ def main(*, compile_default=False):
         return 0 if result.success else 1
     if args.check or args.dump_symbols or args.dump_layout:
         result = check_file(args.file, include_dirs=args.include_dirs, source_paths=args.source,
-                            strict=args.strict, debug_lines=args.debug_lines)
+                            strict=args.strict, debug_lines=args.debug_lines,source_format=args.source_format,dialect=args.dialect)
         for diagnostic in result.diagnostics:
             print(diagnostic.format(), file=sys.stderr)
         if args.dump_symbols or args.dump_layout:
@@ -54,7 +57,8 @@ def main(*, compile_default=False):
             pending = f"; {len(result.pending_externals)} chamada(s) pendente(s) de ligação" if result.pending_externals else ""
             print(f"Semântica válida: {args.file} ({len(result.table.symbols)} símbolos{pending}).")
         return 0 if result.success else 2 if any(d.code == "SOURCE_READ_ERROR" for d in result.diagnostics) else 1
-    result = parse_file(args.file, include_dirs=args.include_dirs, copybook=args.copybook, debug_lines=args.debug_lines)
+    result = parse_file(args.file, include_dirs=args.include_dirs, copybook=args.copybook, debug_lines=args.debug_lines,
+                        source_format=args.source_format,dialect=args.dialect)
     for diagnostic in result.diagnostics:
         print(diagnostic.format(), file=sys.stderr)
     if result.parsed:

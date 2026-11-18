@@ -52,6 +52,8 @@ class UnitGenerator:
         self.paragraphs=[]
         self.inline=[]
         self.inline_ranges=[]
+        self.compatibility=result.frontend.preprocessed.dialect=='gnucobol'
+        self.screen_index=0
 
     def error(self,resource,node,message=None):
         raise CodegenError('UNSUPPORTED_BACKEND_'+resource,message or f'Backend não implementado: {resource}.',node)
@@ -61,6 +63,44 @@ class UnitGenerator:
     def desc(self,sid):return f'd_{sid}'
     def int_value(self,n):return f'cb_number("{n}")'
     def num_int(self,n):return f'cb_decimal("{n}")'
+
+    def screen(self, reference, *, accept=False):
+        sid=self.ann(reference).symbol_id
+        root=self.nodes[self.symbols[sid].node_id]
+        self.screen_index+=1; prefix=f'screen_{self.screen_index}'
+        lines=[f'long long {prefix}_line=1, {prefix}_column=1;']
+        inputs=[]
+        for item in A.walk(root):
+            if not isinstance(item,A.DataItem):continue
+            clauses=item.clauses
+            for clause in clauses:
+                if isinstance(clause,A.ScreenPosition):
+                    lines.append(f'{prefix}_{clause.axis.lower()}=cb_int({self.value(clause.value)});')
+                if isinstance(clause,A.ScreenBlank):
+                    if clause.mode!='SCREEN':self.error('SCREEN_BLANK_MODE',clause)
+                    lines.extend(['cb_terminal_clear(rt);',f'{prefix}_line=1; {prefix}_column=1;'])
+                if isinstance(clause,(A.OccursClause,A.RedefinesClause,A.UsageClause)):
+                    self.error('SCREEN_CLAUSE',clause)
+            if item.children:continue
+            field_sid=self.ann(item).symbol_id
+            layout=self.r.layout.items[field_sid]
+            if not layout.size:continue
+            field=self.symbol_field(field_sid)
+            binding=next((c for c in clauses if isinstance(c,A.ScreenUsing)),None)
+            if binding:lines.append(f'cb_move(rt, {self.value(binding.target)}, {field});')
+            lines.extend([f'cb_terminal_at(rt, {prefix}_line, {prefix}_column);',
+                          f'cb_display(rt, cb_field_value({field}));'])
+            if binding and accept:
+                if layout.size>4096:self.error('SCREEN_CAPACITY',item)
+                inputs.append((field,self.field(binding.target)))
+                lines.append(f'{prefix}_inputs[{len(inputs)-1}] = (cb_screen_field){{{field}, {self.field(binding.target)}, {prefix}_line, {prefix}_column}};')
+            lines.append(f'{prefix}_column += {layout.size};')
+        if inputs:
+            if len(inputs)>1024:self.error('SCREEN_CAPACITY',root)
+            lines.insert(0,f'cb_screen_field {prefix}_inputs[{len(inputs)}];')
+            lines.append(f'cb_screen_accept(rt, {prefix}_inputs, {len(inputs)});')
+        lines.append('cb_display_end(1);')
+        return lines
 
     def require_text_format(self,node):
         typ=self.ann(node).type
@@ -286,19 +326,36 @@ class UnitGenerator:
                 lines.extend(self.for_field(sid,lambda f:f'cb_move(rt, {source}, {f});',prefix_subscripts=target.subscripts if target else ()))
         elif isinstance(node,A.Display):
             if node.upon not in {None,'CONSOLE','SYSOUT','CRT'}:self.error('DISPLAY_DEVICE',node)
-            for operand in node.operands:
-                if isinstance(operand,A.ScreenPosition):self.error('SCREEN_POSITION',operand)
+            positions=[p for p in node.operands if isinstance(p,A.ScreenPosition)]
+            screen=any(isinstance(o,A.Reference) and self.symbols[self.ann(o).symbol_id].section=='SCREEN' for o in node.operands if not isinstance(o,A.ScreenPosition))
+            if self.compatibility and not positions and not screen:lines.append('cb_terminal_stream_begin(rt);')
+            if positions and not self.compatibility:self.error('SCREEN_POSITION',positions[0])
+            for i,operand in enumerate(node.operands):
+                if isinstance(operand,A.ScreenPosition):continue
+                following=[]
+                for item in node.operands[i+1:]:
+                    if not isinstance(item,A.ScreenPosition):break
+                    following.append(item)
+                if following:
+                    axes={p.axis:self.value(p.value) for p in following}
+                    lines.append(f'cb_terminal_at(rt, cb_int({axes.get("LINE",self.int_value(0))}), cb_int({axes.get("COLUMN",self.int_value(0))}));')
+                if isinstance(operand,A.Reference) and self.symbols[self.ann(operand).symbol_id].section=='SCREEN':
+                    lines.extend(self.screen(operand));continue
                 if isinstance(operand,A.Literal) and operand.category=='number':
                     value=f'cb_text({c_string(operand.lexeme)}, {len(operand.lexeme)}, 0)'
                 else:
                     self.require_text_format(operand)
                     value=self.value(operand)
                 lines.append(f'cb_display(rt, {value});')
-            lines.append(f'cb_display_end({int(node.no_advancing)});')
+            lines.append(f'cb_display_end({int(node.no_advancing or bool(positions) or screen)});')
         elif isinstance(node,A.Accept):
-            if node.positions:self.error('SCREEN_POSITION',node)
+            if node.positions:
+                if not self.compatibility:self.error('SCREEN_POSITION',node)
+                axes={p.axis:self.value(p.value) for p in node.positions}
+                lines.append(f'cb_terminal_at(rt, cb_int({axes.get("LINE",self.int_value(0))}), cb_int({axes.get("COLUMN",self.int_value(0))}));')
             if node.source not in {None,'CONSOLE','DATE','DAY','DAY-OF-WEEK','TIME'}:self.error('ACCEPT_SOURCE',node)
-            lines.append(f'cb_accept(rt, {self.field(node.target)}, {c_string(node.source) if node.source else "NULL"}, {c_string(node.date_format) if node.date_format else "NULL"});')
+            if self.symbols[self.ann(node.target).symbol_id].section=='SCREEN':lines.extend(self.screen(node.target,accept=True))
+            else:lines.append(f'cb_accept(rt, {self.field(node.target)}, {c_string(node.source) if node.source else "NULL"}, {c_string(node.date_format) if node.date_format else "NULL"});')
         elif isinstance(node,A.Arithmetic):return self.arithmetic(node,next_pc)
         elif isinstance(node,A.If):
             yes=self.body(node.then_body,next_pc);no=self.body(node.else_body,next_pc)
@@ -628,6 +685,12 @@ class UnitGenerator:
         local_init=self.initialization(local=True)
         local_reset=[f'memset({name}, 32, {self.r.layout.areas[area]});' for area,name in self.areas.items() if area=='LOCAL-STORAGE' and self.r.layout.areas[area]]
         reset=[line for line in reset if not any(line.startswith(f'memset({name},') for area,name in self.areas.items() if area=='LOCAL-STORAGE')]
+        terminal_bind=[]
+        if self.compatibility:
+            names={n.setting:n.value for n in A.walk(self.root.environment) if isinstance(n,A.SpecialName)} if self.root.environment else {}
+            empty='(cb_field){NULL,0,&cb_text_desc}'
+            if 'CURSOR' in names or 'CRT STATUS' in names:
+                terminal_bind=[f'cb_terminal_bind(rt, {self.field(names["CURSOR"]) if "CURSOR" in names else empty}, {self.field(names["CRT STATUS"]) if "CRT STATUS" in names else empty});']
         # One static descriptor namespace per function avoids collisions across units.
         lines=[f'int {self.name}(cb_runtime *rt, cb_field *args, size_t argc) {{',*global_lines,*area_lines,
             'if (++rt->call_depth > 16) cb_fail("CALL_STACK", "CALL nesting exceeds 16 activations.");',
@@ -636,7 +699,7 @@ class UnitGenerator:
             '(void)return_code; (void)sort_return;',
             '(void)args; (void)argc;', 'static int initialized = 0;',
             'if (!initialized) {',*reset,*init,'initialized = 1;','}',
-            *local_reset,*local_init,
+            *local_reset,*local_init,*terminal_bind,
             'enum { '+', '.join(enums)+' };' if enums else '',
             f'int pc = {entry}, depth = 0, loop_depth = 0;',
             'cb_frame frames[CB_STACK]; cb_loop loops[CB_STACK];',

@@ -1,14 +1,32 @@
+#define _POSIX_C_SOURCE 200809L
 #include "cobol_runtime.h"
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
 #include <time.h>
+#include <unistd.h>
+#include <termios.h>
+#include <sys/ioctl.h>
+#include <poll.h>
+#include <signal.h>
 const cb_desc cb_text_desc= {
     0,0,0,0,0,'.',""
 };
 static _Thread_local cb_runtime *active;
 static _Thread_local int math_handled, math_failed;
+static _Thread_local struct termios saved_terminal;
+static _Thread_local int terminal_saved;
+static struct sigaction terminal_int,terminal_term;
+static int terminal_handlers,terminal_exit_hook;
+static void restore_terminal(void) {
+    if(terminal_saved) { tcsetattr(STDIN_FILENO,TCSANOW,&saved_terminal); terminal_saved=0; }
+    if(terminal_handlers) {
+        sigaction(SIGINT,&terminal_int,NULL);sigaction(SIGTERM,&terminal_term,NULL);
+        terminal_handlers=0;
+    }
+}
+static void terminal_signal(int number) { restore_terminal();kill(getpid(),number); }
 void cb_math_begin(int handled) { math_handled=handled; math_failed=0; }
 int cb_math_failed(void) { return math_failed; }
 int cb_math_error(const char *code, const char *message) {
@@ -31,6 +49,7 @@ void cb_origin(cb_runtime *rt,const char *file,int line,int column) {
     rt->column=column;
 }
 _Noreturn void cb_fail(const char *code,const char *message) {
+    restore_terminal();
     if(active&&active->file)fprintf(stderr,"%s:%d:%d: ",active->file,active->line,active->column);
     fprintf(stderr,"%s: %s\n",code,message);
     exit(1);
@@ -54,6 +73,7 @@ void cb_release(cb_runtime *rt,cb_mem *mark) {
     }
 }
 void cb_runtime_destroy(cb_runtime *rt) {
+    restore_terminal();
     for(cb_file *f=rt->files;f;) {
         cb_file *next=f->next;
         if(f->fp) {
@@ -188,12 +208,19 @@ cb_num cb_as_num(cb_value v) {
         char number[CB_FIELD_DIGITS+4];
         size_t n=1,position=0;
         int digit=0,negative=0;
+        int floating=cb_floating_sign(d),seen=0;
         number[0]='+';
         for(const char *p=d->pic;*p;++p) {
             if(*p=='S'||*p=='V')continue;
             unsigned char c=v.f.p[position++];
-            if(*p=='9'||*p=='Z'||*p=='*') {
+            if(*p==floating&&!seen++) {
+                if(c=='-')negative=1;
+                else if(c!='+'&&c!=' ')cb_fail("INVALID_NUMERIC_EDITED","Invalid floating sign.");
+                continue;
+            }
+            if(*p=='9'||*p=='Z'||*p=='*'||*p==floating) {
                 if(d->scale && digit==d->digits-d->scale)number[n++]='.';
+                if(*p==floating&&(c=='-'||c=='+')) { negative=c=='-'; c='0'; }
                 if(c==' '||c=='*') {
                     if(*p=='9')cb_fail("INVALID_NUMERIC_EDITED","Blank in mandatory edited digit.");
                     c='0';
@@ -204,7 +231,8 @@ cb_num cb_as_num(cb_value v) {
             } else if(*p=='+'||*p=='-') {
                 if(c=='-')negative=1;
                 else if(c!='+'&&c!=' ')cb_fail("INVALID_NUMERIC_EDITED","Invalid edited numeric sign.");
-            } else if(c!=(unsigned char)*p && c!=' ')cb_fail("INVALID_NUMERIC_EDITED","Invalid edited numeric separator.");
+            } else if(floating&&(c=='-'||c=='+'))negative=c=='-';
+            else if(c!=(unsigned char)*p && c!=' ')cb_fail("INVALID_NUMERIC_EDITED","Invalid edited numeric separator.");
         }
         if(position!=v.f.n)cb_fail("PICTURE_LENGTH","Edited field length mismatch.");
         number[0]=negative?'-':'+';
@@ -295,6 +323,11 @@ static void output(cb_runtime *rt,unsigned char c) {
         if(fputc(0xc0|(c>>6),stdout)==EOF||fputc(0x80|(c&63),stdout)==EOF)cb_fail("STDOUT_WRITE","Cannot write stdout.");
     }
     else if(fputc(c,stdout)==EOF)cb_fail("STDOUT_WRITE","Cannot write stdout.");
+    if(rt->terminal_active) {
+        if(c=='\n') { ++rt->terminal_line;rt->terminal_column=1; }
+        else if(c=='\r')rt->terminal_column=1;
+        else if(c>=32)++rt->terminal_column;
+    }
 }
 void cb_display(cb_runtime *rt,cb_value v) {
     if(v.kind==0&&v.f.desc->category==1&&cb_is_numeric(v)) {
@@ -313,8 +346,146 @@ void cb_display(cb_runtime *rt,cb_value v) {
 }
 void cb_display_end(int no_advancing) {
     if(!no_advancing&&fputc('\n',stdout)==EOF)cb_fail("STDOUT_WRITE","Cannot write stdout.");
+    if(!no_advancing&&active&&active->terminal_active) { ++active->terminal_line;active->terminal_column=1; }
+    if(active&&active->terminal_stream) {
+        active->text_line=active->terminal_line;active->text_column=active->terminal_column;active->terminal_stream=0;
+    }
     if(fflush(stdout))cb_fail("STDOUT_WRITE","Cannot flush stdout.");
 }
+static void terminal_start(cb_runtime *rt) {
+    if(!isatty(STDOUT_FILENO))cb_fail("TERMINAL_REQUIRED","Positioned I/O requires a terminal.");
+    if(!rt->terminal_active) {
+        rt->terminal_active=1;rt->terminal_line=1;rt->terminal_column=1;
+        if(fputs("\033[0m\033[2J\033[H",stdout)==EOF)cb_fail("STDOUT_WRITE","Cannot initialize terminal.");
+    }
+}
+void cb_terminal_at(cb_runtime *rt,long long line,long long column) {
+    terminal_start(rt);
+    if(!line)line=rt->terminal_line;
+    if(!column)column=rt->terminal_column;
+    struct winsize size={0};
+    ioctl(STDOUT_FILENO,TIOCGWINSZ,&size);
+    if(line<1||column<1||(size.ws_row&&line>size.ws_row)||(size.ws_col&&column>size.ws_col))
+        cb_fail("SCREEN_BOUNDS","Terminal coordinates outside available screen.");
+    if(printf("\033[%lld;%lldH",line,column)<0)cb_fail("STDOUT_WRITE","Cannot position cursor.");
+    rt->terminal_line=line;rt->terminal_column=column;
+}
+void cb_terminal_clear(cb_runtime *rt) {
+    terminal_start(rt);
+    if(fputs("\033[2J",stdout)==EOF)cb_fail("STDOUT_WRITE","Cannot clear terminal.");
+    cb_terminal_at(rt,1,1);
+}
+void cb_terminal_stream_begin(cb_runtime *rt) {
+    if(!rt->terminal_active)return;
+    if(!rt->text_line) { rt->text_line=1;rt->text_column=1; }
+    cb_terminal_at(rt,rt->text_line,rt->text_column);rt->terminal_stream=1;
+}
+void cb_terminal_bind(cb_runtime *rt,cb_field cursor,cb_field status) {
+    if(cursor.p)rt->cursor_field=cursor;
+    if(status.p)rt->crt_status_field=status;
+}
+static void terminal_status(cb_runtime *rt,int status) {
+    if(rt->crt_status_field.p)cb_store(rt->crt_status_field,cb_decimal(status?"2005":"0"),0,0);
+    if(rt->cursor_field.p) {
+        cb_field f=rt->cursor_field;
+        int half=(int)f.n/2;
+        long long limit=half==2?99:999;
+        if(rt->terminal_line>limit||rt->terminal_column>limit)cb_fail("CURSOR_CAPACITY","Cursor position exceeds CURSOR field.");
+        char value[32];
+        snprintf(value,sizeof value,"%0*lld%0*lld",half,rt->terminal_line,half,rt->terminal_column);
+        memcpy(f.p,value,f.n);
+    }
+}
+static void screen_redraw(cb_runtime *rt,cb_screen_field *field,const unsigned char *text,size_t n,size_t cursor) {
+    cb_terminal_at(rt,field->line,field->column);
+    cb_display(rt,cb_text((const char *)text,n,0));
+    for(size_t j=n;j<field->field.n;++j)output(rt,(unsigned char)(field->field.desc->category==1?'0':'_'));
+    cb_terminal_at(rt,field->line,field->column+(long long)(cursor<field->field.n?cursor:field->field.n-1));
+    cb_display_end(1);
+}
+void cb_screen_accept(cb_runtime *rt,cb_screen_field *fields,size_t count) {
+    if(!count)return;
+    if(count>1024)cb_fail("SCREEN_CAPACITY","Screen has too many editable fields.");
+    terminal_start(rt);
+    if(!isatty(STDIN_FILENO)||tcgetattr(STDIN_FILENO,&saved_terminal))cb_fail("TERMINAL_REQUIRED","Screen input requires a terminal.");
+    struct termios raw=saved_terminal;
+    if(!terminal_exit_hook) { atexit(restore_terminal);terminal_exit_hook=1; }
+    struct sigaction action={0};action.sa_handler=terminal_signal;sigemptyset(&action.sa_mask);
+    sigaction(SIGINT,&action,&terminal_int);sigaction(SIGTERM,&action,&terminal_term);terminal_handlers=1;
+    raw.c_lflag&=(tcflag_t)~(ICANON|ECHO);
+    raw.c_iflag&=(tcflag_t)~(ICRNL|INLCR);
+    raw.c_cc[VMIN]=1;raw.c_cc[VTIME]=0;
+    if(tcsetattr(STDIN_FILENO,TCSANOW,&raw))cb_fail("TERMINAL_MODE","Cannot enter screen input mode.");
+    terminal_saved=1;
+    unsigned char **buffers=cb_alloc(rt,count*sizeof *buffers);
+    size_t *lengths=cb_alloc(rt,count*sizeof *lengths),*positions=cb_alloc(rt,count*sizeof *positions);
+    int *changed=cb_alloc(rt,count*sizeof *changed);
+    for(size_t i=0;i<count;++i) {
+        if(!fields[i].field.n||fields[i].field.n>4096)cb_fail("SCREEN_CAPACITY","Editable field size outside 1..4096 bytes.");
+        buffers[i]=cb_alloc(rt,fields[i].field.n+1);
+        if(fields[i].field.desc->category==1) {
+            cb_slice initial=cb_bytes(rt,cb_field_value(fields[i].field));
+            memcpy(buffers[i],initial.p,fields[i].field.n);lengths[i]=fields[i].field.n;
+        } else screen_redraw(rt,&fields[i],buffers[i],0,0);
+    }
+    size_t current=0;int status=0;
+    cb_terminal_at(rt,fields[0].line,fields[0].column);cb_display_end(1);
+    for(;;) {
+        unsigned char key;
+        if(read(STDIN_FILENO,&key,1)!=1)cb_fail("STDIN_EOF","Screen input ended before confirmation.");
+        if(key==13||key==10)break;
+        if(key==9) { current=(current+1)%count;cb_terminal_at(rt,fields[current].line,fields[current].column);cb_display_end(1);continue; }
+        if(key==27) {
+            struct pollfd p={STDIN_FILENO,POLLIN,0};
+            if(poll(&p,1,100)<=0) { status=2005;break; }
+            unsigned char a,b;
+            if(read(STDIN_FILENO,&a,1)!=1||read(STDIN_FILENO,&b,1)!=1)cb_fail("SCREEN_KEY","Incomplete cursor key.");
+            if(a!='[')cb_fail("SCREEN_KEY","Unsupported terminal key sequence.");
+            if(b=='D'&&positions[current])--positions[current];
+            else if(b=='C'&&positions[current]<lengths[current])++positions[current];
+            else if(b=='H')positions[current]=0;
+            else if(b=='F')positions[current]=lengths[current];
+            else if(b=='A')current=(current+count-1)%count;
+            else if(b=='B')current=(current+1)%count;
+            else if(b=='Z')current=(current+count-1)%count;
+            else cb_fail("SCREEN_KEY","Unsupported terminal key sequence.");
+            cb_terminal_at(rt,fields[current].line,fields[current].column+(long long)positions[current]);cb_display_end(1);continue;
+        }
+        if(key==127||key==8) {
+            size_t pos=positions[current];
+            if(pos) {
+                if(fields[current].field.desc->category==1)buffers[current][pos-1]='0';
+                else { memmove(buffers[current]+pos-1,buffers[current]+pos,lengths[current]-pos);--lengths[current]; }
+                --positions[current];changed[current]=1;
+            }
+        } else if(key>=32) {
+            if(!rt->raw_terminal&&key>=128) {
+                unsigned char second;
+                if((key!=0xc2&&key!=0xc3)||read(STDIN_FILENO,&second,1)!=1||(second&0xc0)!=0x80)cb_fail("TERMINAL_ENCODING","Screen input outside ISO-8859-1.");
+                key=(unsigned char)(((key&31)<<6)|(second&63));
+            }
+            if(fields[current].field.desc->category==1&&(key<'0'||key>'9')) { output(rt,7);cb_display_end(1);continue; }
+            if(fields[current].field.desc->pic[0]=='A'&&!((key>='A'&&key<='Z')||(key>='a'&&key<='z')||key==' '||key>=192)) { output(rt,7);cb_display_end(1);continue; }
+            size_t pos=positions[current];
+            if(pos>=fields[current].field.n) { output(rt,7);cb_display_end(1);continue; }
+            buffers[current][pos]=key;++positions[current];
+            if(positions[current]>lengths[current])lengths[current]=positions[current];
+            changed[current]=1;
+        } else cb_fail("SCREEN_KEY","Unsupported screen control key.");
+        screen_redraw(rt,&fields[current],buffers[current],lengths[current],positions[current]);
+    }
+    for(size_t i=0;i<count;++i) {
+        if(changed[i])cb_move(rt,lengths[i]?cb_text((char *)buffers[i],lengths[i],0):fields[i].field.desc->category==1?cb_number("0"):cb_fill(32),fields[i].field);
+        cb_move(rt,cb_field_value(fields[i].field),fields[i].target);
+        if(fields[i].field.desc->category==1) {
+            cb_terminal_at(rt,fields[i].line,fields[i].column);cb_display(rt,cb_field_value(fields[i].field));
+        }
+    }
+    size_t final=positions[current]<fields[current].field.n?positions[current]:fields[current].field.n-1;
+    cb_terminal_at(rt,fields[current].line,fields[current].column+(long long)final);
+    terminal_status(rt,status);cb_display_end(1);restore_terminal();
+}
+
 static char *read_input(cb_runtime *rt) {
     size_t cap=128,n=0;
     char *p=malloc(cap);
@@ -394,6 +565,19 @@ static struct tm clock_value(void) {
     return *current;
 }
 void cb_accept(cb_runtime *rt,cb_field f,const char *source,const char *format) {
+    if(rt->terminal_active&&(!source||!strcmp(source,"CONSOLE"))) {
+        long long line=rt->terminal_line,column=rt->terminal_column;
+        if(rt->cursor_field.p) {
+            cb_field cursor=rt->cursor_field;size_t half=cursor.n/2;line=column=0;
+            for(size_t i=0;i<cursor.n;++i) {
+                if(cursor.p[i]<'0'||cursor.p[i]>'9')cb_fail("CURSOR_VALUE","CURSOR contains nondigits.");
+                if(i<half)line=line*10+cursor.p[i]-'0';else column=column*10+cursor.p[i]-'0';
+            }
+            if(!line)line=1;
+            if(!column)column=1;
+        }
+        cb_screen_field field={f,f,line,column};cb_screen_accept(rt,&field,1);return;
+    }
     char date[40];
     char *text;
     if(source&&(!strcmp(source,"DATE")||!strcmp(source,"DAY")||!strcmp(source,"DAY-OF-WEEK")||!strcmp(source,"TIME"))) {
@@ -442,6 +626,7 @@ void cb_accept(cb_runtime *rt,cb_field f,const char *source,const char *format) 
         }
     }
     else cb_move(rt,cb_text(text,strlen(text),0),f);
+    if((!source||!strcmp(source,"CONSOLE"))&&(rt->cursor_field.p||rt->crt_status_field.p))terminal_status(rt,0);
 }
 cb_value cb_function(cb_runtime *rt,const char *name,cb_value *args,size_t count) {
     if(!strcmp(name,"REVERSE")||!strcmp(name,"UPPER-CASE")||!strcmp(name,"LOWER-CASE")) {

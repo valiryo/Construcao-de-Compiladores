@@ -50,6 +50,16 @@ class LogicalLine:
     positions: tuple[tuple[int, int], ...]
 
 
+def read_free_lines(source: str, diagnostics: list[Diagnostic]) -> Iterator[LogicalLine]:
+    """Formato livre sem deslocar colunas ou descartar o conteúdo após coluna 72."""
+    for number, raw in enumerate(source.splitlines(), 1):
+        if CONFLICT_RE.match(raw):
+            diagnostics.append(Diagnostic('MERGE_CONFLICT', 'Marcador de conflito Git não resolvido no fonte.', number, 1))
+            continue
+        code, _ = _without_inline_comment(raw.replace('\t', ' '), None)
+        yield LogicalLine(code, tuple((number, i+1) for i in range(len(code))))
+
+
 def _without_inline_comment(code: str, quote: str | None) -> tuple[str, str | None]:
     index = 0
     while index < len(code):

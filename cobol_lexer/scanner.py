@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 import re
 
-from .fixed_format import LogicalLine, read_logical_lines
+from .fixed_format import LogicalLine, read_logical_lines, read_free_lines
 from .model import Diagnostic, LexerResult, Token
 
 
@@ -55,15 +55,21 @@ class _ScanState:
 class CobolLexer:
     """Produz tokens e diagnósticos com posições físicas, sem validar a gramática."""
 
-    def __init__(self, *, debug_lines: bool = False, preserve_literal_padding: bool = False) -> None:
+    def __init__(self, *, debug_lines: bool = False, preserve_literal_padding: bool = False,
+                 source_format: str = 'fixed', dialect: str = 'project') -> None:
+        if source_format not in {'fixed','free'}:raise ValueError('Formato deve ser fixed ou free')
+        if dialect not in {'project','gnucobol'}:raise ValueError('Dialeto deve ser project ou gnucobol')
         self.debug_lines = debug_lines
         self.preserve_literal_padding = preserve_literal_padding
+        self.source_format = source_format
+        self.max_identifier = 63 if dialect == 'gnucobol' else 30
 
     def tokenize(self, source: str) -> LexerResult:
         result = LexerResult()
         state = _ScanState()
-        for logical in read_logical_lines(source, result.diagnostics, debug_lines=self.debug_lines,
-                                         preserve_literal_padding=self.preserve_literal_padding):
+        lines = read_free_lines(source, result.diagnostics) if self.source_format == 'free' else read_logical_lines(
+            source, result.diagnostics, debug_lines=self.debug_lines, preserve_literal_padding=self.preserve_literal_padding)
+        for logical in lines:
             self._scan_code(logical, result, state)
         result.diagnostics.sort(key=lambda error: (error.line, error.column))
         return result
@@ -201,10 +207,10 @@ class CobolLexer:
                     )
                     index = end
                     continue
-                elif len(lexeme) > 30:
+                elif len(lexeme) > self.max_identifier:
                     self._error(
                         result, source, index, "IDENTIFIER_TOO_LONG",
-                        f"Identificador contém {len(lexeme)} caracteres (máximo 30).",
+                        f"Identificador contém {len(lexeme)} caracteres (máximo {self.max_identifier}).",
                     )
                     index = end
                     continue

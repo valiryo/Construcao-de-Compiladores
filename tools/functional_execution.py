@@ -53,11 +53,11 @@ def relative_name(path):
     return str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else 'harnesses/'+path.name
 
 
-def copy_sources(source,deps,directory):
+def copy_sources(source,deps,directory,*,frontend_options=None):
     """Copiar apenas unidades declaradas e seu fechamento COPY, sem alterações."""
     paths={Path(source).resolve(),*(Path(p).resolve() for p in deps)}
     for path in list(paths):
-        parsed=parse_file(path,include_dirs=[ROOT/'examples/dependencias'])
+        parsed=parse_file(path,include_dirs=[ROOT/'examples/dependencias'],**(frontend_options or {}))
         paths.update(Path(d.resolved_file).resolve() for d in parsed.preprocessed.dependencies if d.resolved_file)
     copied={}
     evidence={}
@@ -74,13 +74,13 @@ def copy_sources(source,deps,directory):
     return copied[Path(source).resolve()],[copied[Path(p).resolve()] for p in deps],include,evidence,copied
 
 
-def clean_compile(source,deps,include,directory,*,module=False):
+def clean_compile(source,deps,include,directory,*,module=False,compiler_options=None):
     directory.mkdir()
     c_path=directory/'program.c'
     output=directory/('program.o' if module else 'program')
     absent=not c_path.exists() and not output.exists()
     start=time.time_ns()
-    result=compile_file(source,output,include_dirs=[include],source_paths=deps,emit_c=c_path,module=module)
+    result=compile_file(source,output,include_dirs=[include],source_paths=deps,emit_c=c_path,module=module,**(compiler_options or {}))
     c_bytes=c_path.read_bytes() if c_path.exists() else b''
     generated=bool(result.generated and result.generated.success)
     regenerated=bool(absent and generated and c_bytes==result.generated.c_source.encode('utf-8') and c_path.stat().st_mtime_ns>=start)
@@ -114,7 +114,7 @@ def differences(a,b,left_files,right_files):
     return result
 
 
-def run_cases(scenarios,input_resolver,*,reference=True,module_sources=None,seed=None):
+def run_cases(scenarios,input_resolver,*,reference=True,module_sources=None,seed=None,compiler_options=None,reference_options=None):
     scenarios=list(scenarios)
     if len({s.name for s in scenarios})!=len(scenarios):raise ValueError('Duplicate scenario name')
     module_sources=module_sources or {}
@@ -131,18 +131,19 @@ def run_cases(scenarios,input_resolver,*,reference=True,module_sources=None,seed
         root=Path(temporary)
         report['run_id']=root.name
         for program in names:
+            options=(compiler_options or {}).get(program,{})
             build=root/program
             build.mkdir()
             try:
                 source,deps=input_resolver(program,build)
-                source,deps,include,sources,copied=copy_sources(source,deps,build/'sources')
-                ours,proof=clean_compile(source,deps,include,build/'native')
+                source,deps,include,sources,copied=copy_sources(source,deps,build/'sources',frontend_options=options)
+                ours,proof=clean_compile(source,deps,include,build/'native',compiler_options=options)
                 info={'generated_c':proof['generated_c'],'compiled':ours.success,
                     'diagnostics':proof['diagnostics'],'gcc_stderr':ours.gcc_stderr,'build':proof,
                     'sources':sources,'oracle_compiled':False,'oracle_compile_stderr':''}
                 if program in module_sources:
                     original=Path(module_sources[program]).resolve()
-                    _,info['module_build']=clean_compile(copied[original],[p for p in deps if p!=copied[original]],include,build/'module',module=True)
+                    _,info['module_build']=clean_compile(copied[original],[p for p in deps if p!=copied[original]],include,build/'module',module=True,compiler_options=options)
                     info['compiled']=info['compiled'] and info['module_build']['success']
             except Exception as error:
                 info={'generated_c':False,'compiled':False,'diagnostics':[],
@@ -150,7 +151,7 @@ def run_cases(scenarios,input_resolver,*,reference=True,module_sources=None,seed
                     'setup_error':f'{type(error).__name__}: {error}'}
             binary=build/'reference'
             if oracle and not info.get('setup_error'):
-                command=[oracle,'-x','-fixed','-fnot-reserved=ID','-freserved=VALUES:VALUE',
+                command=[oracle,'-x','-'+options.get('source_format','fixed'),'-fnot-reserved=ID','-freserved=VALUES:VALUE',*(reference_options or {}).get(program,[]),
                     '-I',str(include),str(source),*(str(p) for p in deps),'-o',str(binary)]
                 try:
                     reference_build=subprocess.run(command,capture_output=True,text=True,env=environment(),cwd=build,timeout=60)
