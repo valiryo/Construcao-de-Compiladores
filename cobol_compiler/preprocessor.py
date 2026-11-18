@@ -92,7 +92,7 @@ class Preprocessor:
                 result.diagnostics.append(Diagnostic("SOURCE_READ_ERROR", str(exc), self._point(file, 1, 1, stack), "preprocessor"))
                 return
         raw_lines = source.splitlines()
-        scan = CobolLexer(debug_lines=self.debug_lines).tokenize(source)
+        scan = CobolLexer(debug_lines=self.debug_lines,preserve_literal_padding=True).tokenize(source)
         directives = []
         i = 0
         while i < len(scan.tokens):
@@ -165,7 +165,7 @@ class Preprocessor:
             append_piece(line_no, cursor_col if line_no == cursor_line else 0, None)
 
     def _tokenize(self, result):
-        scan = CobolLexer(debug_lines=self.debug_lines).tokenize("\n".join(line.text for line in result.lines))
+        scan = CobolLexer(debug_lines=self.debug_lines,preserve_literal_padding=True).tokenize("\n".join(line.text for line in result.lines))
         def location(line, column):
             row = result.lines[line - 1]
             return SourceLocation(row.file, row.line, column, row.inclusion_stack)

@@ -14,6 +14,7 @@ class FixedLine:
     code: str
     tab_column: int | None = None
     conflict_column: int | None = None
+    raw_code: str = ''
 
 
 CONFLICT_RE = re.compile(r"^(?:<{7,}|={7,}|>{7,}|\|{7,})(?:\s|$)")
@@ -38,7 +39,7 @@ def read_fixed_lines(source: str) -> Iterator[FixedLine]:
             conflict_column = 1
         elif raw[6] in (" ", "-") and CONFLICT_RE.match(code.lstrip(" ")):
             conflict_column = 8 + len(code) - len(code.lstrip(" "))
-        yield FixedLine(n, raw[6], code, tab_column, conflict_column)
+        yield FixedLine(n, raw[6], code, tab_column, conflict_column, raw[7:72])
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,13 +69,17 @@ def _without_inline_comment(code: str, quote: str | None) -> tuple[str, str | No
 
 
 def read_logical_lines(
-    source: str, diagnostics: list[Diagnostic], *, debug_lines: bool = False
+    source: str, diagnostics: list[Diagnostic], *, debug_lines: bool = False,
+    preserve_literal_padding: bool = False,
 ) -> Iterator[LogicalLine]:
     """Une linhas com '-' e preserva um mapa das coordenadas originais.
 
     Espaços finais e a indentação da continuação são descartados. Uma aspa
     repetida no início da continuação de uma string aberta também é removida.
     Comentários e linhas de debugging desabilitadas não interrompem a união.
+    Com preserve_literal_padding, literais abertos preservam os espaços até a
+    coluna 72 (inclusive colunas implícitas). O frontend habilita essa opção;
+    o padrão mantém a API léxica histórica.
     """
     chunks: list[str] = []
     positions: list[tuple[int, int]] = []
@@ -106,7 +111,7 @@ def read_logical_lines(
             ))
             continue
 
-        code = physical.code
+        code = physical.raw_code.ljust(65) if preserve_literal_padding else physical.code
         if not code.strip():
             continue
         start = 0
@@ -123,6 +128,8 @@ def read_logical_lines(
         fragment, next_quote = _without_inline_comment(
             code[start:], quote if indicator == "-" else None,
         )
+        if preserve_literal_padding and next_quote is None:
+            fragment=fragment.rstrip(' ')
         if physical.tab_column is not None and physical.tab_column <= start + len(fragment) + 7:
             diagnostics.append(Diagnostic(
                 "TAB_IN_SOURCE", "TAB não permitido em formato fixo; use espaços.",

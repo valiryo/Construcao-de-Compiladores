@@ -55,13 +55,15 @@ class _ScanState:
 class CobolLexer:
     """Produz tokens e diagnósticos com posições físicas, sem validar a gramática."""
 
-    def __init__(self, *, debug_lines: bool = False) -> None:
+    def __init__(self, *, debug_lines: bool = False, preserve_literal_padding: bool = False) -> None:
         self.debug_lines = debug_lines
+        self.preserve_literal_padding = preserve_literal_padding
 
     def tokenize(self, source: str) -> LexerResult:
         result = LexerResult()
         state = _ScanState()
-        for logical in read_logical_lines(source, result.diagnostics, debug_lines=self.debug_lines):
+        for logical in read_logical_lines(source, result.diagnostics, debug_lines=self.debug_lines,
+                                         preserve_literal_padding=self.preserve_literal_padding):
             self._scan_code(logical, result, state)
         result.diagnostics.sort(key=lambda error: (error.line, error.column))
         return result

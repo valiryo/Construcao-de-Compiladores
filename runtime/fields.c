@@ -237,7 +237,13 @@ void cb_move(cb_runtime *rt,cb_value source,cb_field target) {
             if(n<target.n)memset(target.p+n,' ',target.n-n);
             return;
         }
-        cb_store(target,cb_as_num(source),0,0);
+        if(source.kind==2 || (source.kind==0 && source.f.desc->category==0)) {
+            cb_slice text=cb_bytes(rt,source);
+            char *number=cb_alloc(rt,text.n+1);
+            memcpy(number,text.p,text.n);
+            for(size_t i=0;i<text.n;++i)if(number[i]==target.desc->decimal)number[i]='.';
+            cb_store(target,cb_decimal(number),0,0);
+        } else cb_store(target,cb_as_num(source),0,0);
         return;
     }
     cb_slice text;
