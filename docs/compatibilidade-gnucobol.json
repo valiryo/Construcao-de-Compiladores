@@ -58232,5 +58232,3987 @@
     "tools/functional_scenarios.py": "a4a8e9d5202e2f67a74caa7af37d1660bea8b5e93e5677a8cf328701f6451e5b",
     "tools/pending_findings.py": "bdfc543576cab2addffbe6de1516bd63da0e59ef2cb5c4b55429af1da6cdf096",
     "tools/terminal_probe.py": "167a10bec647897ba17fde68f1c8db152fa5f59dabe111cbde2e6c87084d45c0"
+  },
+  "execution_gaps": {
+    "snapshot": "1ffb3bf279bbb1e596b1091f1dda1cf7ddf51295",
+    "gnucobol": "cobc (GnuCOBOL) 3.2.0",
+    "excluded": [
+      "GAMESNAK"
+    ],
+    "execution_environment": {
+      "LANG": "C.UTF-8",
+      "LC_ALL": "C.UTF-8",
+      "TZ": "UTC",
+      "COBOL_DATETIME": "2026-11-17T12:34:56",
+      "COBOL_TERMINAL_ENCODING": "utf8",
+      "COB_CURRENT_DATE": "2026111712345600",
+      "COB_LS_FIXED": "Y",
+      "COB_LS_NULLS": "N",
+      "COB_LS_VALIDATE": "N"
+    },
+    "cases": {
+      "CAD0001A": {
+        "scenario": "CAD0001A",
+        "scope": "missing_target",
+        "builds": {
+          "ours": {
+            "success": true,
+            "generated_c": true,
+            "absent_before": true,
+            "api_call": {
+              "function": "cobol_compiler.driver.compile_file",
+              "source": "$GAPS/CAD0001A/sources/examples/complementares/CAD0001A.cbl",
+              "output": "$GAPS/CAD0001A/ours/program",
+              "include_dirs": [
+                "$GAPS/CAD0001A/sources/examples/dependencias"
+              ],
+              "source_paths": [
+                "$GAPS/CAD0001A/sources/examples/complementares/GRAV001A.cbl",
+                "$GAPS/CAD0001A/sources/examples/complementares/LER0001A.cbl",
+                "$GAPS/CAD0001A/sources/examples/complementares/PROGTIME.cbl",
+                "$GAPS/CAD0001A/sources/examples/complementares/REL0001A.cbl",
+                "$GAPS/CAD0001A/sources/examples/dependencias/PROGDATA.cbl",
+                "$GAPS/CAD0001A/sources/examples/oficiais/CAD0002A.cbl"
+              ],
+              "emit_c": "$GAPS/CAD0001A/ours/program.c",
+              "module": false,
+              "dialect": "gnucobol"
+            },
+            "phases": {
+              "preprocessor": true,
+              "parser": true,
+              "semantic": true,
+              "c_generation": true,
+              "native_build": true,
+              "link": "success"
+            },
+            "started_ns": 1795127362668039088,
+            "c_regenerated": true,
+            "gcc_executed": true,
+            "artifact_fresh": true,
+            "command": [
+              "/usr/bin/gcc",
+              "-std=c11",
+              "-Wall",
+              "-Wextra",
+              "-I",
+              "$REPO/runtime",
+              "-rdynamic",
+              "$GAPS/CAD0001A/ours/.cobol-build-wdcxvmmq/program.c",
+              "$REPO/runtime/decimal.c",
+              "$REPO/runtime/fields.c",
+              "$REPO/runtime/files.c",
+              "$REPO/runtime/calls.c",
+              "-ldl",
+              "-o",
+              "$GAPS/CAD0001A/ours/.cobol-build-wdcxvmmq/program"
+            ],
+            "gcc_stdout": "",
+            "gcc_stderr": "",
+            "diagnostics": [
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL SORT001A: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/CAD0001A/sources/examples/complementares/CAD0001A.cbl",
+                    "line": 155,
+                    "column": 13,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/CAD0001A/sources/examples/complementares/CAD0001A.cbl",
+                    "line": 155,
+                    "column": 51,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              }
+            ],
+            "c": {
+              "bytes": 192885,
+              "sha256": "4ff83e8f521a0c917329dde43b1806e95204c073939d09e1151e1e3b9e6aead5"
+            },
+            "artifact": {
+              "bytes": 266024,
+              "sha256": "eb35e9cc64c2455dd45d36fd69bf096083e0ecc4be28fccadd352f801131dc69"
+            }
+          },
+          "reference": {
+            "available": true,
+            "temporary_directory": "$GAPS/CAD0001A/gnu",
+            "analysis": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/CAD0001A/sources/examples/dependencias",
+                "-fsyntax-only",
+                "$GAPS/CAD0001A/sources/examples/complementares/CAD0001A.cbl"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": "$GAPS/CAD0001A/sources/examples/dependencias/COD001A.cpy:37: warning: line not terminated by a newline [-Wmissing-newline]\n   35 |          10 COD001A-SEGUNDO             PIC 9(002).\n   36 |          10 COD001A-MILESIMO            PIC 9(002).\n   37 >         05  COD001A-PERIODO             PIC X(020).<EOF>\n$GAPS/CAD0001A/sources/examples/dependencias/COPY002A.cpy:36: warning: line not terminated by a newline [-Wmissing-newline]\n   34 |           15 COPY002A-CIDADE            PIC X(30).\n   35 |           15 COPY002A-ESTADO            PIC X(02).\n   36 >           15 COPY002A-CEP               PIC 9(08).<EOF>\n"
+            },
+            "object_build": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/CAD0001A/sources/examples/dependencias",
+                "-c",
+                "$GAPS/CAD0001A/sources/examples/complementares/CAD0001A.cbl",
+                "-o",
+                "$GAPS/CAD0001A/gnu/unit.o"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": "$GAPS/CAD0001A/sources/examples/dependencias/COD001A.cpy:37: warning: line not terminated by a newline [-Wmissing-newline]\n   35 |          10 COD001A-SEGUNDO             PIC 9(002).\n   36 |          10 COD001A-MILESIMO            PIC 9(002).\n   37 >         05  COD001A-PERIODO             PIC X(020).<EOF>\n$GAPS/CAD0001A/sources/examples/dependencias/COPY002A.cpy:36: warning: line not terminated by a newline [-Wmissing-newline]\n   34 |           15 COPY002A-CIDADE            PIC X(30).\n   35 |           15 COPY002A-ESTADO            PIC X(02).\n   36 >           15 COPY002A-CEP               PIC 9(08).<EOF>\n"
+            },
+            "object_compiled": true,
+            "build": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/CAD0001A/sources/examples/dependencias",
+                "-x",
+                "$GAPS/CAD0001A/sources/examples/complementares/CAD0001A.cbl",
+                "$GAPS/CAD0001A/sources/examples/complementares/GRAV001A.cbl",
+                "$GAPS/CAD0001A/sources/examples/complementares/LER0001A.cbl",
+                "$GAPS/CAD0001A/sources/examples/complementares/PROGTIME.cbl",
+                "$GAPS/CAD0001A/sources/examples/complementares/REL0001A.cbl",
+                "$GAPS/CAD0001A/sources/examples/dependencias/PROGDATA.cbl",
+                "$GAPS/CAD0001A/sources/examples/oficiais/CAD0002A.cbl",
+                "-o",
+                "$GAPS/CAD0001A/gnu/program"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": "$GAPS/CAD0001A/sources/examples/dependencias/COD001A.cpy:37: warning: line not terminated by a newline [-Wmissing-newline]\n   35 |          10 COD001A-SEGUNDO             PIC 9(002).\n   36 |          10 COD001A-MILESIMO            PIC 9(002).\n   37 >         05  COD001A-PERIODO             PIC X(020).<EOF>\n$GAPS/CAD0001A/sources/examples/dependencias/COPY002A.cpy:36: warning: line not terminated by a newline [-Wmissing-newline]\n   34 |           15 COPY002A-CIDADE            PIC X(30).\n   35 |           15 COPY002A-ESTADO            PIC X(02).\n   36 >           15 COPY002A-CEP               PIC 9(08).<EOF>\n$GAPS/CAD0001A/sources/examples/dependencias/COPY002A.cpy:36: warning: line not terminated by a newline [-Wmissing-newline]\n   34 |           15 COPY002A-CIDADE            PIC X(30).\n   35 |           15 COPY002A-ESTADO            PIC X(02).\n   36 >           15 COPY002A-CEP               PIC 9(08).<EOF>\n$GAPS/CAD0001A/sources/examples/complementares/GRAV001A.cbl:119: warning: line not terminated by a newline [-Wmissing-newline]\n  117 |       *> cobol-lint CL002 9999-end\n  118 |        9999-END.                       EXIT.\n  119 >       *----------------------------------------------------------------*<EOF>\n$GAPS/CAD0001A/sources/examples/dependencias/COPY002A.cpy:36: warning: line not terminated by a newline [-Wmissing-newline]\n   34 |           15 COPY002A-CIDADE            PIC X(30).\n   35 |           15 COPY002A-ESTADO            PIC X(02).\n   36 >           15 COPY002A-CEP               PIC 9(08).<EOF>\n$GAPS/CAD0001A/sources/examples/complementares/LER0001A.cbl:90: warning: continuation of COBOL words used [-Wdialect]\n   88 |             IF FIM-ARQUIVO = \"N\"\n   89 |                DISPLAY \"ID: \" COPY002A-COD(WRK-IND1)\n   90 >       -                \" - NOME: \" COPY002A-NOME(WRK-IND1)\n   91 |             END-IF\n   92 | \n$GAPS/CAD0001A/sources/examples/dependencias/COD001A.cpy:37: warning: line not terminated by a newline [-Wmissing-newline]\n   35 |          10 COD001A-SEGUNDO             PIC 9(002).\n   36 |          10 COD001A-MILESIMO            PIC 9(002).\n   37 >         05  COD001A-PERIODO             PIC X(020).<EOF>\n$GAPS/CAD0001A/sources/examples/dependencias/COD001A.cpy:37: warning: line not terminated by a newline [-Wmissing-newline]\n   35 |          10 COD001A-SEGUNDO             PIC 9(002).\n   36 |          10 COD001A-MILESIMO            PIC 9(002).\n   37 >         05  COD001A-PERIODO             PIC X(020).<EOF>\n$GAPS/CAD0001A/sources/examples/dependencias/COPY002A.cpy:36: warning: line not terminated by a newline [-Wmissing-newline]\n   34 |           15 COPY002A-CIDADE            PIC X(30).\n   35 |           15 COPY002A-ESTADO            PIC X(02).\n   36 >           15 COPY002A-CEP               PIC 9(08).<EOF>\n$GAPS/CAD0001A/sources/examples/complementares/REL0001A.cbl:311: warning: line not terminated by a newline [-Wmissing-newline]\n  309 |       *> cobol-lint CL002 9999-end\n  310 |        9999-END.                       EXIT.\n  311 >       *----------------------------------------------------------------*<EOF>\n$GAPS/CAD0001A/sources/examples/dependencias/COD001A.cpy:37: warning: line not terminated by a newline [-Wmissing-newline]\n   35 |          10 COD001A-SEGUNDO             PIC 9(002).\n   36 |          10 COD001A-MILESIMO            PIC 9(002).\n   37 >         05  COD001A-PERIODO             PIC X(020).<EOF>\n$GAPS/CAD0001A/sources/examples/dependencias/COPY002A.cpy:36: warning: line not terminated by a newline [-Wmissing-newline]\n   34 |           15 COPY002A-CIDADE            PIC X(30).\n   35 |           15 COPY002A-ESTADO            PIC X(02).\n   36 >           15 COPY002A-CEP               PIC 9(08).<EOF>\n$GAPS/CAD0001A/sources/examples/oficiais/CAD0002A.cbl:422: warning: line not terminated by a newline [-Wmissing-newline]\n  420 |       *> cobol-lint CL002 9999-end\n  421 |        9999-END.                       EXIT.\n  422 >       *----------------------------------------------------------------*<EOF>\n"
+            },
+            "compiled": true,
+            "linked": true,
+            "mode": "dynamic-executable",
+            "artifact_sha256": "a1597a6cbe7d34fb868806820e9092860568c4c9d5ebfb31d39d98121c35dfb3",
+            "artifact": "$GAPS/CAD0001A/gnu/program",
+            "executed": false
+          }
+        },
+        "validated": true,
+        "ours": {
+          "returncode": 1,
+          "timeout": false,
+          "stdout": {
+            "bytes": 199,
+            "sha256": "610aea9d389ecdb9d4cab0b9b3c3620dac3725c41308fa42841d84fb66b2aa73",
+            "base64": "IAo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgICAgICAgQ0FEQVNUUk8gREUgVVNVw4FSSU8gICAgICAgICAgICAgICAgIAo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KIApEaWdpdGUgJ0ZJTScgbm8gY2FtcG8gTm9tZSBwYXJhIHNhaXIuCk5vbWUuLi4uLi4uLi4uLjogCg=="
+          },
+          "stderr": {
+            "bytes": 166,
+            "sha256": "94cf0c87878af078e294f2ec3ed2ab7123729fdfde7a923c45e89eedb0e699e2",
+            "base64": "L3RtcC9jb2JvbC1leGVjdXRpb24tZ2Fwcy0zNTI5d2xjeC9DQUQwMDAxQS9zb3VyY2VzL2V4YW1wbGVzL2NvbXBsZW1lbnRhcmVzL0NBRDAwMDFBLmNibDoxNTU6MTM6IENBTExfTk9UX0ZPVU5EOiBDQUxMICdTT1JUMDAxQSc6IHRhcmdldCB1bmF2YWlsYWJsZSBvciBpbmNvbXBhdGlibGUuCg=="
+          },
+          "signal": null,
+          "files": {
+            "SEQENT01.dat": {
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base64": ""
+            }
+          },
+          "executable_sha256": "eb35e9cc64c2455dd45d36fd69bf096083e0ecc4be28fccadd352f801131dc69"
+        },
+        "reference": {
+          "returncode": 1,
+          "timeout": false,
+          "stdout": {
+            "bytes": 199,
+            "sha256": "610aea9d389ecdb9d4cab0b9b3c3620dac3725c41308fa42841d84fb66b2aa73",
+            "base64": "IAo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgICAgICAgQ0FEQVNUUk8gREUgVVNVw4FSSU8gICAgICAgICAgICAgICAgIAo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KIApEaWdpdGUgJ0ZJTScgbm8gY2FtcG8gTm9tZSBwYXJhIHNhaXIuCk5vbWUuLi4uLi4uLi4uLjogCg=="
+          },
+          "stderr": {
+            "bytes": 43,
+            "sha256": "2fb625a804205a90ba4e891a92eb7eeadb17ec352d2cb9d44d46a287ef118eeb",
+            "base64": "bGliY29iOiBlcnJvcjogbW9kdWxlICdTT1JUMDAxQScgbm90IGZvdW5kCg=="
+          },
+          "signal": null,
+          "files": {
+            "SEQENT01.dat": {
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "base64": ""
+            }
+          },
+          "executable_sha256": "a1597a6cbe7d34fb868806820e9092860568c4c9d5ebfb31d39d98121c35dfb3"
+        },
+        "stdin": {
+          "bytes": 4,
+          "sha256": "4a5051399fc919de398bc28e70eaa5389de225fd3b37b422a289936aebea5209",
+          "base64": "RklNCg=="
+        },
+        "fixtures": {
+          "SEQENT01.dat": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "base64": ""
+          }
+        },
+        "target": "SORT001A",
+        "unverified": "Execução com a implementação externa disponível.",
+        "comparison": {
+          "stdout": true,
+          "stderr": false,
+          "files": true,
+          "returncode": true
+        },
+        "source": "examples/complementares/CAD0001A.cbl",
+        "source_sha256": "e42b893bbf7a7a2076f6329b4538d3b8c36921b8d0ba5ec4164cc244b9025856",
+        "sources": {
+          "examples/complementares/CAD0001A.cbl": {
+            "bytes": 7713,
+            "sha256": "e42b893bbf7a7a2076f6329b4538d3b8c36921b8d0ba5ec4164cc244b9025856"
+          },
+          "examples/complementares/GRAV001A.cbl": {
+            "bytes": 5119,
+            "sha256": "8c7990c754a0d593ac6e1c4be7f3ad8ecd87adcdc91d4554a35b87191e743892"
+          },
+          "examples/complementares/LER0001A.cbl": {
+            "bytes": 4769,
+            "sha256": "a6a393853336ab63753fe9de492affee159330270c66a39036f8555f511d27d1"
+          },
+          "examples/complementares/PROGTIME.cbl": {
+            "bytes": 3750,
+            "sha256": "e22b4967ec99d1a53735c7cbd6e4a4603f7f1f5ea5952dffc34e0e4ae482f0a0"
+          },
+          "examples/complementares/REL0001A.cbl": {
+            "bytes": 13527,
+            "sha256": "2bda21de732daaaaac3063776d690f6c1665da96312eb00ab94a0a0a60127c71"
+          },
+          "examples/dependencias/COD001A.cpy": {
+            "bytes": 1684,
+            "sha256": "ca830df93cbb4f45a2444a89ddf2376c7b4ca393e4064c8f948f532599205047"
+          },
+          "examples/dependencias/COPY002A.cpy": {
+            "bytes": 1808,
+            "sha256": "56b99d3ee335b667a0eeb01115811001ea9055074865e296606571f7dac410c5"
+          },
+          "examples/dependencias/PROGDATA.cbl": {
+            "bytes": 6636,
+            "sha256": "6f2fe45a88c62c71ffd40db09b1414303c5db122b100e7a9d2593acbbdd9909d"
+          },
+          "examples/oficiais/CAD0002A.cbl": {
+            "bytes": 17648,
+            "sha256": "4e1c81cb5e18fe298a51d602f6d331357034a30545873022db8f95b2edfb7bff"
+          }
+        }
+      },
+      "CALCMD01": {
+        "scenario": "calcmd-zero-divisor",
+        "scope": "zero_divisor",
+        "builds": {
+          "ours": {
+            "success": true,
+            "generated_c": true,
+            "absent_before": true,
+            "api_call": {
+              "function": "cobol_compiler.driver.compile_file",
+              "source": "$GAPS/CALCMD01/sources/examples/oficiais/CALCMD01.cbl",
+              "output": "$GAPS/CALCMD01/ours/program",
+              "include_dirs": [
+                "$GAPS/CALCMD01/sources/examples/dependencias"
+              ],
+              "source_paths": [],
+              "emit_c": "$GAPS/CALCMD01/ours/program.c",
+              "module": false,
+              "dialect": "gnucobol"
+            },
+            "phases": {
+              "preprocessor": true,
+              "parser": true,
+              "semantic": true,
+              "c_generation": true,
+              "native_build": true,
+              "link": "success"
+            },
+            "started_ns": 1795127363815803437,
+            "c_regenerated": true,
+            "gcc_executed": true,
+            "artifact_fresh": true,
+            "command": [
+              "/usr/bin/gcc",
+              "-std=c11",
+              "-Wall",
+              "-Wextra",
+              "-I",
+              "$REPO/runtime",
+              "-rdynamic",
+              "$GAPS/CALCMD01/ours/.cobol-build-hdcaohz6/program.c",
+              "$REPO/runtime/decimal.c",
+              "$REPO/runtime/fields.c",
+              "$REPO/runtime/files.c",
+              "$REPO/runtime/calls.c",
+              "-ldl",
+              "-o",
+              "$GAPS/CALCMD01/ours/.cobol-build-hdcaohz6/program"
+            ],
+            "gcc_stdout": "",
+            "gcc_stderr": "",
+            "diagnostics": [],
+            "c": {
+              "bytes": 19197,
+              "sha256": "97cfd14d61980eee9fa3a10071b17118dd775b314425b3922f1d0f9bacd87029"
+            },
+            "artifact": {
+              "bytes": 99688,
+              "sha256": "1c858a88109c5ec1d0de1cf7dcd807161d98d95922ad4cbb3caca6844295d26e"
+            }
+          },
+          "reference": {
+            "available": true,
+            "temporary_directory": "$GAPS/CALCMD01/gnu",
+            "analysis": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/CALCMD01/sources/examples/dependencias",
+                "-fsyntax-only",
+                "$GAPS/CALCMD01/sources/examples/oficiais/CALCMD01.cbl"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": "$GAPS/CALCMD01/sources/examples/oficiais/CALCMD01.cbl:171: warning: line not terminated by a newline [-Wmissing-newline]\n  169 |       *> cobol-lint CL002 9999-end\n  170 |        9999-END.                       EXIT.\n  171 >       *----------------------------------------------------------------*<EOF>\n"
+            },
+            "object_build": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/CALCMD01/sources/examples/dependencias",
+                "-c",
+                "$GAPS/CALCMD01/sources/examples/oficiais/CALCMD01.cbl",
+                "-o",
+                "$GAPS/CALCMD01/gnu/unit.o"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": "$GAPS/CALCMD01/sources/examples/oficiais/CALCMD01.cbl:171: warning: line not terminated by a newline [-Wmissing-newline]\n  169 |       *> cobol-lint CL002 9999-end\n  170 |        9999-END.                       EXIT.\n  171 >       *----------------------------------------------------------------*<EOF>\n"
+            },
+            "object_compiled": true,
+            "build": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/CALCMD01/sources/examples/dependencias",
+                "-x",
+                "$GAPS/CALCMD01/sources/examples/oficiais/CALCMD01.cbl",
+                "-o",
+                "$GAPS/CALCMD01/gnu/program"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": "$GAPS/CALCMD01/sources/examples/oficiais/CALCMD01.cbl:171: warning: line not terminated by a newline [-Wmissing-newline]\n  169 |       *> cobol-lint CL002 9999-end\n  170 |        9999-END.                       EXIT.\n  171 >       *----------------------------------------------------------------*<EOF>\n"
+            },
+            "compiled": true,
+            "linked": true,
+            "mode": "dynamic-executable",
+            "artifact_sha256": "24c3e322f36cb3038b4bdc4e1ae6f03788bdd20bb45d0b328588e10318b30c67",
+            "artifact": "$GAPS/CALCMD01/gnu/program",
+            "executed": false
+          }
+        },
+        "validated": true,
+        "ours": {
+          "returncode": 1,
+          "timeout": false,
+          "stdout": {
+            "bytes": 281,
+            "sha256": "6ef05019b7716959ec8e8797321555207a977a832d1ac4e8cca7cec3a558e127",
+            "base64": "RElHSVRFIE8gUFJJTUVJUk8gVkFMT1IgKDAgQSA5OSkKRElHSVRFIE8gU0VHVU5ETyBWQUxPUiAoMCBBIDk5KQpESUdJVEUgTyBURVJDRUlSTyBWQUxPUiAoMCBBIDk5KQpQT1IgUVVBTlRPIE9TIFZBTE9SRVMgU0VSQU8gRElWSURPUzogCioqLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKioKVkFMT1IgMDE6IDAwMDAwMSwwMApWQUxPUiAwMjogMDAwMDAyLDAwClZBTE9SIDAzOiAwMDAwMDMsMDAKLS0tLS0tLS0tLS0tLQpUT1RBTCAgIDogMDAwMDAwMDYsMDAwMAo="
+          },
+          "stderr": {
+            "bytes": 127,
+            "sha256": "8dd9cd9cc7e6516f05e3e8976eac11e43de12b7afaa680e0ee3b86e8a54654de",
+            "base64": "L3RtcC9jb2JvbC1leGVjdXRpb24tZ2Fwcy0zNTI5d2xjeC9DQUxDTUQwMS9zb3VyY2VzL2V4YW1wbGVzL29maWNpYWlzL0NBTENNRDAxLmNibDoxMzU6MTU6IERJVklTSU9OX0JZX1pFUk86IERpdmlzaW9uIGJ5IHplcm8uCg=="
+          },
+          "signal": null,
+          "files": {},
+          "executable_sha256": "1c858a88109c5ec1d0de1cf7dcd807161d98d95922ad4cbb3caca6844295d26e"
+        },
+        "reference": {
+          "returncode": 0,
+          "timeout": false,
+          "stdout": {
+            "bytes": 338,
+            "sha256": "a5060f426ed9c2efc81ae5b16bc0328373656e8be6514ef6c60efbc1938be25b",
+            "base64": "RElHSVRFIE8gUFJJTUVJUk8gVkFMT1IgKDAgQSA5OSkKRElHSVRFIE8gU0VHVU5ETyBWQUxPUiAoMCBBIDk5KQpESUdJVEUgTyBURVJDRUlSTyBWQUxPUiAoMCBBIDk5KQpQT1IgUVVBTlRPIE9TIFZBTE9SRVMgU0VSQU8gRElWSURPUzogCioqLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKioKVkFMT1IgMDE6IDAwMDAwMSwwMApWQUxPUiAwMjogMDAwMDAyLDAwClZBTE9SIDAzOiAwMDAwMDMsMDAKLS0tLS0tLS0tLS0tLQpUT1RBTCAgIDogMDAwMDAwMDYsMDAwMAotLS0tLS0tLS0tLS0tClZBTE9SIE1FRElPOiAwMDAwMDAwNiwwMDAwCkZJTSBERSBQUk9HUkFNQQo="
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "base64": ""
+          },
+          "signal": null,
+          "files": {},
+          "executable_sha256": "24c3e322f36cb3038b4bdc4e1ae6f03788bdd20bb45d0b328588e10318b30c67"
+        },
+        "stdin": {
+          "bytes": 8,
+          "sha256": "0678d240abcfe7b283c2ebf27bc77b82b1ee9099297094d381ad27a9d7fb6c84",
+          "base64": "MQoyCjMKMAo="
+        },
+        "fixtures": {},
+        "stdout_prefix": true,
+        "comparison": {
+          "stdout": false,
+          "stderr": false,
+          "files": true,
+          "returncode": false
+        },
+        "source": "examples/oficiais/CALCMD01.cbl",
+        "source_sha256": "b7d1d4694c6fe9f9f8152ff2c0b9360c9c4e27527dccbce91e80fea1fb968f47",
+        "sources": {
+          "examples/oficiais/CALCMD01.cbl": {
+            "bytes": 7094,
+            "sha256": "b7d1d4694c6fe9f9f8152ff2c0b9360c9c4e27527dccbce91e80fea1fb968f47"
+          }
+        }
+      },
+      "NCURSESDEMO": {
+        "scenario": "NCURSESDEMO",
+        "scope": "safe_prefix",
+        "cutoff": {
+          "line": 25,
+          "target": "scanw",
+          "original_sha256": "71b5040e8d409b640bfb1e19252c5db134c20e5c74620a8e0c07a6efb9cb0c42",
+          "prefix": {
+            "bytes": 795,
+            "sha256": "4590f9a417874a0f6d2a0f5a64bb3644fd561187a3b2f0a8418b3661e05a5b37",
+            "base64": "ICAgICAgIGlkZW50aWZpY2F0aW9uIGRpdmlzaW9uLgogICAgICAgcHJvZ3JhbS1pZC4gTkNVUlNFU0RFTU8uCgogICAgICAgZGF0YSBkaXZpc2lvbi4KICAgICAgIHdvcmtpbmctc3RvcmFnZSBzZWN0aW9uLgogICAgICAgMDEgV1MtTk9NRSAgICAgICAgUElDIFgoMzApLgogICAgICAgMDEgV1MtSURBREUgICAgICAgUElDIDkoMikuCiAgICAgICAwMSBXUy1LRVkgICAgICAgICBQSUMgOSgyKS4KCiAgICAgICBwcm9jZWR1cmUgZGl2aXNpb24uCiAgICAgICptYWluLXNlY3Rpb24uCiAgICAgICAgICAgQ0FMTCAiaW5pdHNjciIgICAgICAgICAqPiBJbmljaWEgbyBuY3Vyc2VzCiAgICAgICAgICAgQ0FMTCAiY2JyZWFrIiAgICAgICAgICAqPiBQZXJtaXRlIGVudHJhZGEgc2VtIHByZWNpc2FyIHByZXNzaW9uYXIgRU5URVIKICAgICAgICAgICBDQUxMICJub2VjaG8iICAgICAgICAgICo+IERlc2F0aXZhIGEgZXhpYmnDp8OjbyBhdXRvbcOhdGljYSBkZSBlbnRyYWRhCiAgICAgICAgICAgQ0FMTCAiY2xlYXIiCgogICAgICAgICAgICo+IEV4aWJlIG8gdMOtdHVsbwogICAgICAgICAgIENBTEwgIm12cHJpbnR3IiBVU0lORyBCWSBWQUxVRSAyIEJZIFZBTFVFIDEwIEJZCiAgICAgICAgICAgIFJFRkVSRU5DRSAiPT09IENBREFTVFJPID09PSIKCiAgICAgICAgICAgKj4gU29saWNpdGEgbyBub21lCiAgICAgICAgICAgQ0FMTCAibXZwcmludHciIFVTSU5HIEJZIFZBTFVFIDQgQlkgVkFMVUUgMTAgQlkKICAgICAgICAgICAgUkVGRVJFTkNFICJOb21lOiAiCiAgICAgICAgICAgQ0FMTCAicmVmcmVzaCIK"
+          },
+          "guard": {
+            "bytes": 80,
+            "sha256": "9164012b658d3d273832f821fc080d013dbf8b4281da2b320a44e158ae9b4b11",
+            "base64": "ICAgICAgICAgICBDQUxMICJlbmR3aW4iCiAgICAgICAgICAgTU9WRSA3NyBUTyBSRVRVUk4tQ09ERQogICAgICAgICAgIFNUT1AgUlVOLgo="
+          },
+          "derived_sha256": "8eb2765539016ef80d721c540deeda5b45a78021a006c8dc1a4ebc299f2c15ba"
+        },
+        "stdin": {
+          "bytes": 6,
+          "sha256": "bb8e80cad66623f75482552d1b1d272e7d91fed1cbf10a7ea343cd157870fb6a",
+          "base64": "MQoyCngK"
+        },
+        "fixtures": {},
+        "builds": {
+          "ours": {
+            "success": true,
+            "generated_c": true,
+            "absent_before": true,
+            "api_call": {
+              "function": "cobol_compiler.driver.compile_file",
+              "source": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+              "output": "$GAPS/NCURSESDEMO/guarded-ours/program",
+              "include_dirs": [
+                "$GAPS/NCURSESDEMO/sources/examples/dependencias"
+              ],
+              "source_paths": [],
+              "emit_c": "$GAPS/NCURSESDEMO/guarded-ours/program.c",
+              "module": false,
+              "dialect": "gnucobol",
+              "libraries": [
+                "ncurses"
+              ]
+            },
+            "phases": {
+              "preprocessor": true,
+              "parser": true,
+              "semantic": true,
+              "c_generation": true,
+              "native_build": true,
+              "link": "success"
+            },
+            "started_ns": 1795127364317508969,
+            "c_regenerated": true,
+            "gcc_executed": true,
+            "artifact_fresh": true,
+            "command": [
+              "/usr/bin/gcc",
+              "-std=c11",
+              "-Wall",
+              "-Wextra",
+              "-I",
+              "$REPO/runtime",
+              "-rdynamic",
+              "$GAPS/NCURSESDEMO/guarded-ours/.cobol-build-kve_idfw/program.c",
+              "$REPO/runtime/decimal.c",
+              "$REPO/runtime/fields.c",
+              "$REPO/runtime/files.c",
+              "$REPO/runtime/calls.c",
+              "-ldl",
+              "-o",
+              "$GAPS/NCURSESDEMO/guarded-ours/.cobol-build-kve_idfw/program"
+            ],
+            "gcc_stdout": "",
+            "gcc_stderr": "",
+            "diagnostics": [
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL INITSCR: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 12,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 12,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL CBREAK: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 13,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 13,
+                    "column": 24,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL NOECHO: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 14,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 14,
+                    "column": 24,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL CLEAR: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 15,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 15,
+                    "column": 23,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 18,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 19,
+                    "column": 40,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 22,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 23,
+                    "column": 30,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL REFRESH: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 24,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 24,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL ENDWIN: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 25,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                    "line": 25,
+                    "column": 24,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              }
+            ],
+            "c": {
+              "bytes": 17283,
+              "sha256": "6639d87195d72694465112de77d4e208a91f229e3aef9bc26c15769ac5bc7d68"
+            },
+            "artifact": {
+              "bytes": 95968,
+              "sha256": "32b5b203bf407700050b70f8dce3c8c70705ec3b16d3c82759c0b98e06906f9a"
+            }
+          },
+          "reference": {
+            "available": true,
+            "temporary_directory": "$GAPS/NCURSESDEMO/guarded-gnu",
+            "analysis": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/NCURSESDEMO/sources/examples/dependencias",
+                "-fsyntax-only",
+                "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            "object_build": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/NCURSESDEMO/sources/examples/dependencias",
+                "-c",
+                "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                "-o",
+                "$GAPS/NCURSESDEMO/guarded-gnu/unit.o"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            "object_compiled": true,
+            "build": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/NCURSESDEMO/sources/examples/dependencias",
+                "-x",
+                "-fstatic-call",
+                "$GAPS/NCURSESDEMO/guarded-source/NCURSESDEMO.cbl",
+                "-l:libncurses.so.6",
+                "-l:libtinfo.so.6",
+                "-o",
+                "$GAPS/NCURSESDEMO/guarded-gnu/program"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            "compiled": true,
+            "linked": true,
+            "mode": "static-executable",
+            "artifact_sha256": "8714b91fe414265e0352f7d48fcdc483492156c5d300593601bcac422d2c1ebb",
+            "artifact": "$GAPS/NCURSESDEMO/guarded-gnu/program",
+            "executed": false
+          },
+          "original_ours": {
+            "success": true,
+            "generated_c": true,
+            "absent_before": true,
+            "api_call": {
+              "function": "cobol_compiler.driver.compile_file",
+              "source": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+              "output": "$GAPS/NCURSESDEMO/original-ours/program",
+              "include_dirs": [
+                "$GAPS/NCURSESDEMO/sources/examples/dependencias"
+              ],
+              "source_paths": [],
+              "emit_c": "$GAPS/NCURSESDEMO/original-ours/program.c",
+              "module": false,
+              "dialect": "gnucobol",
+              "libraries": [
+                "ncurses"
+              ]
+            },
+            "phases": {
+              "preprocessor": true,
+              "parser": true,
+              "semantic": true,
+              "c_generation": true,
+              "native_build": true,
+              "link": "success"
+            },
+            "started_ns": 1795127364799147483,
+            "c_regenerated": true,
+            "gcc_executed": true,
+            "artifact_fresh": true,
+            "command": [
+              "/usr/bin/gcc",
+              "-std=c11",
+              "-Wall",
+              "-Wextra",
+              "-I",
+              "$REPO/runtime",
+              "-rdynamic",
+              "$GAPS/NCURSESDEMO/original-ours/.cobol-build-dw_n9e0b/program.c",
+              "$REPO/runtime/decimal.c",
+              "$REPO/runtime/fields.c",
+              "$REPO/runtime/files.c",
+              "$REPO/runtime/calls.c",
+              "-ldl",
+              "-o",
+              "$GAPS/NCURSESDEMO/original-ours/.cobol-build-dw_n9e0b/program"
+            ],
+            "gcc_stdout": "",
+            "gcc_stderr": "",
+            "diagnostics": [
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL INITSCR: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 12,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 12,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL CBREAK: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 13,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 13,
+                    "column": 24,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL NOECHO: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 14,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 14,
+                    "column": 24,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL CLEAR: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 15,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 15,
+                    "column": 23,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 18,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 19,
+                    "column": 40,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 22,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 23,
+                    "column": 30,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL REFRESH: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 24,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 24,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL SCANW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 25,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 25,
+                    "column": 50,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 28,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 29,
+                    "column": 31,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL REFRESH: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 30,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 30,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL SCANW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 31,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 31,
+                    "column": 51,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL CLEAR: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 34,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 34,
+                    "column": 23,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 35,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 36,
+                    "column": 43,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 37,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 38,
+                    "column": 30,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 39,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 40,
+                    "column": 29,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 41,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 42,
+                    "column": 31,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 43,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 44,
+                    "column": 30,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL REFRESH: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 47,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 47,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL GETCH: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 50,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 50,
+                    "column": 49,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL ENDWIN: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 51,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/NCURSESDEMO/sources/examples/complementares/NCURSESDEMO.cbl",
+                    "line": 51,
+                    "column": 24,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              }
+            ],
+            "c": {
+              "bytes": 30163,
+              "sha256": "49ffd217b67349924e43d78935a3d4c0a08fbed3124547110414ada29578456c"
+            },
+            "artifact": {
+              "bytes": 104160,
+              "sha256": "86e611d6187b6ed7172e02f6492d25c9c8e5e7e5559af3f985cd0767ecf962be"
+            }
+          }
+        },
+        "validated": true,
+        "unverified": "CALL interrompido e tudo que o segue no original GnuCOBOL.",
+        "ours": {
+          "returncode": 77,
+          "timeout": false,
+          "stdout": {
+            "bytes": 59,
+            "sha256": "c81fd031b6b654290b4e06c92de614077cd280bab4d087f2b4dd2303a6942df4",
+            "base64": "G1swOzEwbRtbSBtbShtbMzsxMUg9PT0gQ0FEQVNUUk8gPT09G1s1OzExSE5vbWU6G1tJG1s0MDsxSA0="
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "base64": ""
+          },
+          "stdin": {
+            "bytes": 6,
+            "sha256": "bb8e80cad66623f75482552d1b1d272e7d91fed1cbf10a7ea343cd157870fb6a",
+            "base64": "MQoyCngK"
+          },
+          "terminal_encoding": "UTF-8",
+          "rows": 40,
+          "columns": 100,
+          "terminal_restored": true,
+          "environment": {
+            "TERM": "ansi",
+            "COB_EXIT_WAIT": "off"
+          },
+          "cells": [
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "          === CADASTRO ===                                                                          ",
+            "                                                                                                    ",
+            "          Nome:                                                                                     ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    "
+          ],
+          "executable_sha256": "32b5b203bf407700050b70f8dce3c8c70705ec3b16d3c82759c0b98e06906f9a",
+          "signal": null,
+          "files": {}
+        },
+        "reference": {
+          "returncode": 77,
+          "timeout": false,
+          "stdout": {
+            "bytes": 59,
+            "sha256": "c81fd031b6b654290b4e06c92de614077cd280bab4d087f2b4dd2303a6942df4",
+            "base64": "G1swOzEwbRtbSBtbShtbMzsxMUg9PT0gQ0FEQVNUUk8gPT09G1s1OzExSE5vbWU6G1tJG1s0MDsxSA0="
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "base64": ""
+          },
+          "stdin": {
+            "bytes": 6,
+            "sha256": "bb8e80cad66623f75482552d1b1d272e7d91fed1cbf10a7ea343cd157870fb6a",
+            "base64": "MQoyCngK"
+          },
+          "terminal_encoding": "UTF-8",
+          "rows": 40,
+          "columns": 100,
+          "terminal_restored": true,
+          "environment": {
+            "TERM": "ansi",
+            "COB_EXIT_WAIT": "off"
+          },
+          "cells": [
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "          === CADASTRO ===                                                                          ",
+            "                                                                                                    ",
+            "          Nome:                                                                                     ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    "
+          ],
+          "executable_sha256": "8714b91fe414265e0352f7d48fcdc483492156c5d300593601bcac422d2c1ebb",
+          "signal": null,
+          "files": {}
+        },
+        "comparison": {
+          "stdout": true,
+          "stderr": true,
+          "files": true,
+          "returncode": true
+        },
+        "original_ours": {
+          "returncode": 1,
+          "timeout": false,
+          "stdout": {
+            "bytes": 59,
+            "sha256": "c81fd031b6b654290b4e06c92de614077cd280bab4d087f2b4dd2303a6942df4",
+            "base64": "G1swOzEwbRtbSBtbShtbMzsxMUg9PT0gQ0FEQVNUUk8gPT09G1s1OzExSE5vbWU6G1tJG1s0MDsxSA0="
+          },
+          "stderr": {
+            "bytes": 172,
+            "sha256": "6ee906b2197fc9df1e7863185243d6b5dbfbd4a4ce7613732dec4cbffe07be55",
+            "base64": "L3RtcC9jb2JvbC1leGVjdXRpb24tZ2Fwcy0zNTI5d2xjeC9OQ1VSU0VTREVNTy9zb3VyY2VzL2V4YW1wbGVzL2NvbXBsZW1lbnRhcmVzL05DVVJTRVNERU1PLmNibDoyNToxMjogQ0FMTF9OQVRJVkVfRk9STUFUOiBDQUxMICdzY2Fudyc6IHRhcmdldCB1bmF2YWlsYWJsZSBvciBpbmNvbXBhdGlibGUuCg=="
+          },
+          "stdin": {
+            "bytes": 6,
+            "sha256": "bb8e80cad66623f75482552d1b1d272e7d91fed1cbf10a7ea343cd157870fb6a",
+            "base64": "MQoyCngK"
+          },
+          "terminal_encoding": "UTF-8",
+          "rows": 40,
+          "columns": 100,
+          "terminal_restored": true,
+          "environment": {
+            "TERM": "ansi",
+            "COB_EXIT_WAIT": "off"
+          },
+          "cells": [
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "          === CADASTRO ===                                                                          ",
+            "                                                                                                    ",
+            "          Nome:                                                                                     ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    "
+          ],
+          "executable_sha256": "86e611d6187b6ed7172e02f6492d25c9c8e5e7e5559af3f985cd0767ecf962be",
+          "signal": null,
+          "files": {}
+        },
+        "original_ours_stdout_equal": true,
+        "source": "examples/complementares/NCURSESDEMO.cbl",
+        "source_sha256": "71b5040e8d409b640bfb1e19252c5db134c20e5c74620a8e0c07a6efb9cb0c42",
+        "sources": {
+          "examples/complementares/NCURSESDEMO.cbl": {
+            "bytes": 1819,
+            "sha256": "71b5040e8d409b640bfb1e19252c5db134c20e5c74620a8e0c07a6efb9cb0c42"
+          }
+        }
+      },
+      "PROGTEST2": {
+        "scenario": "PROGTEST2",
+        "scope": "safe_prefix",
+        "cutoff": {
+          "line": 17,
+          "target": "keypad",
+          "original_sha256": "3825c2775ec8aa37ad1972cb597741f58b752266c5597daafb7daba14b054397",
+          "prefix": {
+            "bytes": 350,
+            "sha256": "0799a661e35e5d91ce78afe9d3cae8ab699dbca60c2fe3697736557cdfb0d6f1",
+            "base64": "ICAgICAgIElERU5USUZJQ0FUSU9OIERJVklTSU9OLgogICAgICAgUFJPR1JBTS1JRC4gUFJPR1RFU1QyLgoKICAgICAgIERBVEEgRElWSVNJT04uCiAgICAgICBXT1JLSU5HLVNUT1JBR0UgU0VDVElPTi4KCiAgICAgICAwMSBXUy1OT01FICBQSUMgWCgzMCkuCiAgICAgICAwMSBXUy1JREFERSBQSUMgOSgyKS4KICAgICAgIDAxIFdTLUtFWSAgIFBJQyA5KDIpLgoKICAgICAgIFBST0NFRFVSRSBESVZJU0lPTi4KICAgICAgKj4gY29ib2wtbGludCBDTDAwMiBtYWluLXByb2Nlc3MKICAgICAgIE1BSU4tUFJPQ0VTUy4KCiAgICAgICAgICAgKj4gSW5pY2lhIG5jdXJzZXMKICAgICAgICAgICBDQUxMICJpbml0c2NyIgo="
+          },
+          "guard": {
+            "bytes": 80,
+            "sha256": "9164012b658d3d273832f821fc080d013dbf8b4281da2b320a44e158ae9b4b11",
+            "base64": "ICAgICAgICAgICBDQUxMICJlbmR3aW4iCiAgICAgICAgICAgTU9WRSA3NyBUTyBSRVRVUk4tQ09ERQogICAgICAgICAgIFNUT1AgUlVOLgo="
+          },
+          "derived_sha256": "1ddcf5779a7e1dfad04c13d9f635fb35f6b4d45ffcc26165eed918c68f69dc09"
+        },
+        "stdin": {
+          "bytes": 6,
+          "sha256": "bb8e80cad66623f75482552d1b1d272e7d91fed1cbf10a7ea343cd157870fb6a",
+          "base64": "MQoyCngK"
+        },
+        "fixtures": {},
+        "builds": {
+          "ours": {
+            "success": true,
+            "generated_c": true,
+            "absent_before": true,
+            "api_call": {
+              "function": "cobol_compiler.driver.compile_file",
+              "source": "$GAPS/PROGTEST2/guarded-source/PROGTEST2.cbl",
+              "output": "$GAPS/PROGTEST2/guarded-ours/program",
+              "include_dirs": [
+                "$GAPS/PROGTEST2/sources/examples/dependencias"
+              ],
+              "source_paths": [],
+              "emit_c": "$GAPS/PROGTEST2/guarded-ours/program.c",
+              "module": false,
+              "dialect": "gnucobol",
+              "libraries": [
+                "ncurses"
+              ]
+            },
+            "phases": {
+              "preprocessor": true,
+              "parser": true,
+              "semantic": true,
+              "c_generation": true,
+              "native_build": true,
+              "link": "success"
+            },
+            "started_ns": 1795127365224446068,
+            "c_regenerated": true,
+            "gcc_executed": true,
+            "artifact_fresh": true,
+            "command": [
+              "/usr/bin/gcc",
+              "-std=c11",
+              "-Wall",
+              "-Wextra",
+              "-I",
+              "$REPO/runtime",
+              "-rdynamic",
+              "$GAPS/PROGTEST2/guarded-ours/.cobol-build-tq0sgzca/program.c",
+              "$REPO/runtime/decimal.c",
+              "$REPO/runtime/fields.c",
+              "$REPO/runtime/files.c",
+              "$REPO/runtime/calls.c",
+              "-ldl",
+              "-o",
+              "$GAPS/PROGTEST2/guarded-ours/.cobol-build-tq0sgzca/program"
+            ],
+            "gcc_stdout": "",
+            "gcc_stderr": "",
+            "diagnostics": [
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL INITSCR: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/guarded-source/PROGTEST2.cbl",
+                    "line": 16,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/guarded-source/PROGTEST2.cbl",
+                    "line": 16,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL ENDWIN: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/guarded-source/PROGTEST2.cbl",
+                    "line": 17,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/guarded-source/PROGTEST2.cbl",
+                    "line": 17,
+                    "column": 24,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              }
+            ],
+            "c": {
+              "bytes": 11687,
+              "sha256": "9c94cbccdfe11a9228cceef5dc725ce20621b5fa17a08849f33e20dde2c7b9c3"
+            },
+            "artifact": {
+              "bytes": 91872,
+              "sha256": "79e49c5fa316a69daa586b3a090c7ab2773e08009abb45e98166e6b5104c2d2a"
+            }
+          },
+          "reference": {
+            "available": true,
+            "temporary_directory": "$GAPS/PROGTEST2/guarded-gnu",
+            "analysis": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/PROGTEST2/sources/examples/dependencias",
+                "-fsyntax-only",
+                "$GAPS/PROGTEST2/guarded-source/PROGTEST2.cbl"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            "object_build": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/PROGTEST2/sources/examples/dependencias",
+                "-c",
+                "$GAPS/PROGTEST2/guarded-source/PROGTEST2.cbl",
+                "-o",
+                "$GAPS/PROGTEST2/guarded-gnu/unit.o"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            "object_compiled": true,
+            "build": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/PROGTEST2/sources/examples/dependencias",
+                "-x",
+                "-fstatic-call",
+                "$GAPS/PROGTEST2/guarded-source/PROGTEST2.cbl",
+                "-l:libncurses.so.6",
+                "-l:libtinfo.so.6",
+                "-o",
+                "$GAPS/PROGTEST2/guarded-gnu/program"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            "compiled": true,
+            "linked": true,
+            "mode": "static-executable",
+            "artifact_sha256": "037755742d9341bba7755b0f78e3dad9ee39a557529c41755b52df8ef78b01bc",
+            "artifact": "$GAPS/PROGTEST2/guarded-gnu/program",
+            "executed": false
+          },
+          "original_ours": {
+            "success": true,
+            "generated_c": true,
+            "absent_before": true,
+            "api_call": {
+              "function": "cobol_compiler.driver.compile_file",
+              "source": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+              "output": "$GAPS/PROGTEST2/original-ours/program",
+              "include_dirs": [
+                "$GAPS/PROGTEST2/sources/examples/dependencias"
+              ],
+              "source_paths": [],
+              "emit_c": "$GAPS/PROGTEST2/original-ours/program.c",
+              "module": false,
+              "dialect": "gnucobol",
+              "libraries": [
+                "ncurses"
+              ]
+            },
+            "phases": {
+              "preprocessor": true,
+              "parser": true,
+              "semantic": true,
+              "c_generation": true,
+              "native_build": true,
+              "link": "success"
+            },
+            "started_ns": 1795127365683054523,
+            "c_regenerated": true,
+            "gcc_executed": true,
+            "artifact_fresh": true,
+            "command": [
+              "/usr/bin/gcc",
+              "-std=c11",
+              "-Wall",
+              "-Wextra",
+              "-I",
+              "$REPO/runtime",
+              "-rdynamic",
+              "$GAPS/PROGTEST2/original-ours/.cobol-build-j_da6van/program.c",
+              "$REPO/runtime/decimal.c",
+              "$REPO/runtime/fields.c",
+              "$REPO/runtime/files.c",
+              "$REPO/runtime/calls.c",
+              "-ldl",
+              "-o",
+              "$GAPS/PROGTEST2/original-ours/.cobol-build-j_da6van/program"
+            ],
+            "gcc_stdout": "",
+            "gcc_stderr": "",
+            "diagnostics": [
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL INITSCR: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 16,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 16,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL KEYPAD: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 17,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 17,
+                    "column": 52,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL NOECHO: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 18,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 18,
+                    "column": 24,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL CLEAR: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 19,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 19,
+                    "column": 23,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 22,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 23,
+                    "column": 51,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 24,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 25,
+                    "column": 30,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 26,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 27,
+                    "column": 31,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL REFRESH: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 30,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 30,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVSCANW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 31,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 32,
+                    "column": 29,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVSCANW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 33,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 34,
+                    "column": 30,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL CLEAR: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 37,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 37,
+                    "column": 23,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 38,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 39,
+                    "column": 43,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 40,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 41,
+                    "column": 39,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 42,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 43,
+                    "column": 29,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 44,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 45,
+                    "column": 40,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 46,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 47,
+                    "column": 30,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL REFRESH: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 49,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 49,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL GETCH: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 50,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 50,
+                    "column": 49,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL ENDWIN: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 53,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST2/sources/examples/complementares/PROGTEST2.cbl",
+                    "line": 53,
+                    "column": 24,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              }
+            ],
+            "c": {
+              "bytes": 29849,
+              "sha256": "6a3b282b6156641812e9865b44df306119d7908e1034b11576304a24932b6173"
+            },
+            "artifact": {
+              "bytes": 104160,
+              "sha256": "8c2321ad47597694dca64bb52e8b63c23a09c3adcacc55a50de7a393a9b1aee2"
+            }
+          }
+        },
+        "validated": true,
+        "unverified": "CALL interrompido e tudo que o segue no original GnuCOBOL.",
+        "ours": {
+          "returncode": 77,
+          "timeout": false,
+          "stdout": {
+            "bytes": 15,
+            "sha256": "2dfeaba4fb97de227b7dbb0d1e5a55be49bf92978f9a4037b4d68c5cb71b404d",
+            "base64": "G1swOzEwbRtbNDA7MUgN"
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "base64": ""
+          },
+          "stdin": {
+            "bytes": 6,
+            "sha256": "bb8e80cad66623f75482552d1b1d272e7d91fed1cbf10a7ea343cd157870fb6a",
+            "base64": "MQoyCngK"
+          },
+          "terminal_encoding": "UTF-8",
+          "rows": 40,
+          "columns": 100,
+          "terminal_restored": true,
+          "environment": {
+            "TERM": "ansi",
+            "COB_EXIT_WAIT": "off"
+          },
+          "cells": [
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    "
+          ],
+          "executable_sha256": "79e49c5fa316a69daa586b3a090c7ab2773e08009abb45e98166e6b5104c2d2a",
+          "signal": null,
+          "files": {}
+        },
+        "reference": {
+          "returncode": 77,
+          "timeout": false,
+          "stdout": {
+            "bytes": 15,
+            "sha256": "2dfeaba4fb97de227b7dbb0d1e5a55be49bf92978f9a4037b4d68c5cb71b404d",
+            "base64": "G1swOzEwbRtbNDA7MUgN"
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "base64": ""
+          },
+          "stdin": {
+            "bytes": 6,
+            "sha256": "bb8e80cad66623f75482552d1b1d272e7d91fed1cbf10a7ea343cd157870fb6a",
+            "base64": "MQoyCngK"
+          },
+          "terminal_encoding": "UTF-8",
+          "rows": 40,
+          "columns": 100,
+          "terminal_restored": true,
+          "environment": {
+            "TERM": "ansi",
+            "COB_EXIT_WAIT": "off"
+          },
+          "cells": [
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    "
+          ],
+          "executable_sha256": "037755742d9341bba7755b0f78e3dad9ee39a557529c41755b52df8ef78b01bc",
+          "signal": null,
+          "files": {}
+        },
+        "comparison": {
+          "stdout": true,
+          "stderr": true,
+          "files": true,
+          "returncode": true
+        },
+        "original_ours": {
+          "returncode": 1,
+          "timeout": false,
+          "stdout": {
+            "bytes": 15,
+            "sha256": "2dfeaba4fb97de227b7dbb0d1e5a55be49bf92978f9a4037b4d68c5cb71b404d",
+            "base64": "G1swOzEwbRtbNDA7MUgN"
+          },
+          "stderr": {
+            "bytes": 171,
+            "sha256": "cba66ddc60cd4dc529fed9d0587c942bf4fb6d1d2d0530fd9fe4fd2d9b81ef2f",
+            "base64": "L3RtcC9jb2JvbC1leGVjdXRpb24tZ2Fwcy0zNTI5d2xjeC9QUk9HVEVTVDIvc291cmNlcy9leGFtcGxlcy9jb21wbGVtZW50YXJlcy9QUk9HVEVTVDIuY2JsOjE3OjEyOiBDQUxMX05BVElWRV9BUkdVTUVOVDogQ0FMTCAna2V5cGFkJzogdGFyZ2V0IHVuYXZhaWxhYmxlIG9yIGluY29tcGF0aWJsZS4K"
+          },
+          "stdin": {
+            "bytes": 6,
+            "sha256": "bb8e80cad66623f75482552d1b1d272e7d91fed1cbf10a7ea343cd157870fb6a",
+            "base64": "MQoyCngK"
+          },
+          "terminal_encoding": "UTF-8",
+          "rows": 40,
+          "columns": 100,
+          "terminal_restored": true,
+          "environment": {
+            "TERM": "ansi",
+            "COB_EXIT_WAIT": "off"
+          },
+          "cells": [
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    "
+          ],
+          "executable_sha256": "8c2321ad47597694dca64bb52e8b63c23a09c3adcacc55a50de7a393a9b1aee2",
+          "signal": null,
+          "files": {}
+        },
+        "original_ours_stdout_equal": true,
+        "source": "examples/complementares/PROGTEST2.cbl",
+        "source_sha256": "3825c2775ec8aa37ad1972cb597741f58b752266c5597daafb7daba14b054397",
+        "sources": {
+          "examples/complementares/PROGTEST2.cbl": {
+            "bytes": 1735,
+            "sha256": "3825c2775ec8aa37ad1972cb597741f58b752266c5597daafb7daba14b054397"
+          }
+        }
+      },
+      "PROGTEST3": {
+        "scenario": "PROGTEST3",
+        "scope": "safe_prefix",
+        "cutoff": {
+          "line": 22,
+          "target": "scanw",
+          "original_sha256": "291ee7b75f7fa8f27180f7b887c8568d1547e6903a55d4b96218114fe806c048",
+          "prefix": {
+            "bytes": 679,
+            "sha256": "561764fde559a659d15f2fba19f3c1ab4f04001575064910ef3a936e10ddc1f8",
+            "base64": "ICAgICAgIGlkZW50aWZpY2F0aW9uIGRpdmlzaW9uLgogICAgICAgcHJvZ3JhbS1pZC4gUFJPR1RFU1QzLgoKICAgICAgIGRhdGEgZGl2aXNpb24uCiAgICAgICB3b3JraW5nLXN0b3JhZ2Ugc2VjdGlvbi4KICAgICAgIDAxIFdTLU5PTUUgICAgICAgIFBJQyBYKDMwKSBWQUxVRSBTUEFDRVMuCiAgICAgICAwMSBXUy1JREFERSAgICAgICBQSUMgOSgyKSBWQUxVRSBaRVJPUy4KICAgICAgIDAxIFdTLUtFWSAgICAgICAgIFBJQyA5KDIpLgogICAgICAgMDEgV1MtSURBREUtU1RSICAgUElDIFgoMykuICo+IFN0cmluZyBwYXJhIGV4aWJpciBXUy1JREFERQoKICAgICAgIHByb2NlZHVyZSBkaXZpc2lvbi4KICAgICAgIG1haW4tc2VjdGlvbi4KICAgICAgICAgICBESVNQTEFZICdDT01Fw4dBJwogICAgICAgICAgIENBTEwgImluaXRzY3IiICo+IEluaWNpYSBvIG5jdXJzZXMKICAgICAgICAgICBDQUxMICJjbGVhciIKCiAgICAgICAgICAgQ0FMTCAibXZwcmludHciIFVTSU5HIEJZIFZBTFVFIDIgQlkgVkFMVUUgMTAgQlkKICAgICAgICAgICAgUkVGRVJFTkNFICI9PT0gQ0FEQVNUUk8gPT09IgogICAgICAgICAgIENBTEwgIm12cHJpbnR3IiBVU0lORyBCWSBWQUxVRSA0IEJZIFZBTFVFIDEwIEJZCiAgICAgICAgICAgIFJFRkVSRU5DRSAiTm9tZTogIgogICAgICAgICAgIENBTEwgInJlZnJlc2giCg=="
+          },
+          "guard": {
+            "bytes": 80,
+            "sha256": "9164012b658d3d273832f821fc080d013dbf8b4281da2b320a44e158ae9b4b11",
+            "base64": "ICAgICAgICAgICBDQUxMICJlbmR3aW4iCiAgICAgICAgICAgTU9WRSA3NyBUTyBSRVRVUk4tQ09ERQogICAgICAgICAgIFNUT1AgUlVOLgo="
+          },
+          "derived_sha256": "a84bcedd605a139a1479c48e53915e145edf0edcd46369dec3dc1616822c3724"
+        },
+        "stdin": {
+          "bytes": 6,
+          "sha256": "bb8e80cad66623f75482552d1b1d272e7d91fed1cbf10a7ea343cd157870fb6a",
+          "base64": "MQoyCngK"
+        },
+        "fixtures": {},
+        "builds": {
+          "ours": {
+            "success": true,
+            "generated_c": true,
+            "absent_before": true,
+            "api_call": {
+              "function": "cobol_compiler.driver.compile_file",
+              "source": "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+              "output": "$GAPS/PROGTEST3/guarded-ours/program",
+              "include_dirs": [
+                "$GAPS/PROGTEST3/sources/examples/dependencias"
+              ],
+              "source_paths": [],
+              "emit_c": "$GAPS/PROGTEST3/guarded-ours/program.c",
+              "module": false,
+              "dialect": "gnucobol",
+              "libraries": [
+                "ncurses"
+              ]
+            },
+            "phases": {
+              "preprocessor": true,
+              "parser": true,
+              "semantic": true,
+              "c_generation": true,
+              "native_build": true,
+              "link": "success"
+            },
+            "started_ns": 1795127366106476815,
+            "c_regenerated": true,
+            "gcc_executed": true,
+            "artifact_fresh": true,
+            "command": [
+              "/usr/bin/gcc",
+              "-std=c11",
+              "-Wall",
+              "-Wextra",
+              "-I",
+              "$REPO/runtime",
+              "-rdynamic",
+              "$GAPS/PROGTEST3/guarded-ours/.cobol-build-14r9o1ba/program.c",
+              "$REPO/runtime/decimal.c",
+              "$REPO/runtime/fields.c",
+              "$REPO/runtime/files.c",
+              "$REPO/runtime/calls.c",
+              "-ldl",
+              "-o",
+              "$GAPS/PROGTEST3/guarded-ours/.cobol-build-14r9o1ba/program"
+            ],
+            "gcc_stdout": "",
+            "gcc_stderr": "",
+            "diagnostics": [
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL INITSCR: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+                    "line": 14,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+                    "line": 14,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL CLEAR: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+                    "line": 15,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+                    "line": 15,
+                    "column": 23,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+                    "line": 17,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+                    "line": 18,
+                    "column": 40,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+                    "line": 19,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+                    "line": 20,
+                    "column": 30,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL REFRESH: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+                    "line": 21,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+                    "line": 21,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL ENDWIN: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+                    "line": 22,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+                    "line": 22,
+                    "column": 24,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              }
+            ],
+            "c": {
+              "bytes": 16261,
+              "sha256": "12467657afb35454451c932d917283f0d9e3965e9f15ee556178702a19e927b8"
+            },
+            "artifact": {
+              "bytes": 96000,
+              "sha256": "d7bc557cd0b87588996c3634b422b3a525b1e6fe92d286c4fb90e86ccde49415"
+            }
+          },
+          "reference": {
+            "available": true,
+            "temporary_directory": "$GAPS/PROGTEST3/guarded-gnu",
+            "analysis": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/PROGTEST3/sources/examples/dependencias",
+                "-fsyntax-only",
+                "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            "object_build": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/PROGTEST3/sources/examples/dependencias",
+                "-c",
+                "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+                "-o",
+                "$GAPS/PROGTEST3/guarded-gnu/unit.o"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            "object_compiled": true,
+            "build": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/PROGTEST3/sources/examples/dependencias",
+                "-x",
+                "-fstatic-call",
+                "$GAPS/PROGTEST3/guarded-source/PROGTEST3.cbl",
+                "-l:libncurses.so.6",
+                "-l:libtinfo.so.6",
+                "-o",
+                "$GAPS/PROGTEST3/guarded-gnu/program"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            "compiled": true,
+            "linked": true,
+            "mode": "static-executable",
+            "artifact_sha256": "606ad95d7d167ba118a08f1e302c33da9f1af81a1f436601677b6ed21e010525",
+            "artifact": "$GAPS/PROGTEST3/guarded-gnu/program",
+            "executed": false
+          },
+          "original_ours": {
+            "success": true,
+            "generated_c": true,
+            "absent_before": true,
+            "api_call": {
+              "function": "cobol_compiler.driver.compile_file",
+              "source": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+              "output": "$GAPS/PROGTEST3/original-ours/program",
+              "include_dirs": [
+                "$GAPS/PROGTEST3/sources/examples/dependencias"
+              ],
+              "source_paths": [],
+              "emit_c": "$GAPS/PROGTEST3/original-ours/program.c",
+              "module": false,
+              "dialect": "gnucobol",
+              "libraries": [
+                "ncurses"
+              ]
+            },
+            "phases": {
+              "preprocessor": true,
+              "parser": true,
+              "semantic": true,
+              "c_generation": true,
+              "native_build": true,
+              "link": "success"
+            },
+            "started_ns": 1795127366521825031,
+            "c_regenerated": true,
+            "gcc_executed": true,
+            "artifact_fresh": true,
+            "command": [
+              "/usr/bin/gcc",
+              "-std=c11",
+              "-Wall",
+              "-Wextra",
+              "-I",
+              "$REPO/runtime",
+              "-rdynamic",
+              "$GAPS/PROGTEST3/original-ours/.cobol-build-gprwh8pw/program.c",
+              "$REPO/runtime/decimal.c",
+              "$REPO/runtime/fields.c",
+              "$REPO/runtime/files.c",
+              "$REPO/runtime/calls.c",
+              "-ldl",
+              "-o",
+              "$GAPS/PROGTEST3/original-ours/.cobol-build-gprwh8pw/program"
+            ],
+            "gcc_stdout": "",
+            "gcc_stderr": "",
+            "diagnostics": [
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL INITSCR: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 14,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 14,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL CLEAR: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 15,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 15,
+                    "column": 23,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 17,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 18,
+                    "column": 40,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 19,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 20,
+                    "column": 30,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL REFRESH: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 21,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 21,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL SCANW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 22,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 22,
+                    "column": 50,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 24,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 25,
+                    "column": 31,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL REFRESH: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 26,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 26,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL SCANW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 27,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 27,
+                    "column": 51,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL CLEAR: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 37,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 37,
+                    "column": 23,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 38,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 39,
+                    "column": 43,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 40,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 41,
+                    "column": 30,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 42,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 43,
+                    "column": 29,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 44,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 45,
+                    "column": 31,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MVPRINTW: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 46,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 47,
+                    "column": 34,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL REFRESH: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 53,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 53,
+                    "column": 25,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL GETCH: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 57,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 57,
+                    "column": 49,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL ENDWIN: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 59,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/PROGTEST3/sources/examples/complementares/PROGTEST3.cbl",
+                    "line": 59,
+                    "column": 24,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              }
+            ],
+            "c": {
+              "bytes": 32445,
+              "sha256": "e1ae5c5a48c21c380cbcc866e6b639a04588a7d5c3c2939bb0cb0776b35ec8af"
+            },
+            "artifact": {
+              "bytes": 108288,
+              "sha256": "5147d31a5d684ba238355fe26a1d3642ef6a5b8add44189ae4776e672e7a0a5b"
+            }
+          }
+        },
+        "validated": true,
+        "unverified": "CALL interrompido e tudo que o segue no original GnuCOBOL.",
+        "ours": {
+          "returncode": 77,
+          "timeout": false,
+          "stdout": {
+            "bytes": 68,
+            "sha256": "8ce949ba70c4e6fe9487621b1bf84ce65bb1ac8dc4e398bb95aa8b57ecd78e54",
+            "base64": "Q09NRcOHQQ0KG1swOzEwbRtbSBtbShtbMzsxMUg9PT0gQ0FEQVNUUk8gPT09G1s1OzExSE5vbWU6G1tJG1s0MDsxSA0="
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "base64": ""
+          },
+          "stdin": {
+            "bytes": 6,
+            "sha256": "bb8e80cad66623f75482552d1b1d272e7d91fed1cbf10a7ea343cd157870fb6a",
+            "base64": "MQoyCngK"
+          },
+          "terminal_encoding": "UTF-8",
+          "rows": 40,
+          "columns": 100,
+          "terminal_restored": true,
+          "environment": {
+            "TERM": "ansi",
+            "COB_EXIT_WAIT": "off"
+          },
+          "cells": [
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "          === CADASTRO ===                                                                          ",
+            "                                                                                                    ",
+            "          Nome:                                                                                     ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    "
+          ],
+          "executable_sha256": "d7bc557cd0b87588996c3634b422b3a525b1e6fe92d286c4fb90e86ccde49415",
+          "signal": null,
+          "files": {}
+        },
+        "reference": {
+          "returncode": 77,
+          "timeout": false,
+          "stdout": {
+            "bytes": 68,
+            "sha256": "8ce949ba70c4e6fe9487621b1bf84ce65bb1ac8dc4e398bb95aa8b57ecd78e54",
+            "base64": "Q09NRcOHQQ0KG1swOzEwbRtbSBtbShtbMzsxMUg9PT0gQ0FEQVNUUk8gPT09G1s1OzExSE5vbWU6G1tJG1s0MDsxSA0="
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "base64": ""
+          },
+          "stdin": {
+            "bytes": 6,
+            "sha256": "bb8e80cad66623f75482552d1b1d272e7d91fed1cbf10a7ea343cd157870fb6a",
+            "base64": "MQoyCngK"
+          },
+          "terminal_encoding": "UTF-8",
+          "rows": 40,
+          "columns": 100,
+          "terminal_restored": true,
+          "environment": {
+            "TERM": "ansi",
+            "COB_EXIT_WAIT": "off"
+          },
+          "cells": [
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "          === CADASTRO ===                                                                          ",
+            "                                                                                                    ",
+            "          Nome:                                                                                     ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    "
+          ],
+          "executable_sha256": "606ad95d7d167ba118a08f1e302c33da9f1af81a1f436601677b6ed21e010525",
+          "signal": null,
+          "files": {}
+        },
+        "comparison": {
+          "stdout": true,
+          "stderr": true,
+          "files": true,
+          "returncode": true
+        },
+        "original_ours": {
+          "returncode": 1,
+          "timeout": false,
+          "stdout": {
+            "bytes": 68,
+            "sha256": "8ce949ba70c4e6fe9487621b1bf84ce65bb1ac8dc4e398bb95aa8b57ecd78e54",
+            "base64": "Q09NRcOHQQ0KG1swOzEwbRtbSBtbShtbMzsxMUg9PT0gQ0FEQVNUUk8gPT09G1s1OzExSE5vbWU6G1tJG1s0MDsxSA0="
+          },
+          "stderr": {
+            "bytes": 168,
+            "sha256": "109797830a8eaf01ec440fe25387a9430f559ff2c1a9f588bd9a33bea38de62e",
+            "base64": "L3RtcC9jb2JvbC1leGVjdXRpb24tZ2Fwcy0zNTI5d2xjeC9QUk9HVEVTVDMvc291cmNlcy9leGFtcGxlcy9jb21wbGVtZW50YXJlcy9QUk9HVEVTVDMuY2JsOjIyOjEyOiBDQUxMX05BVElWRV9GT1JNQVQ6IENBTEwgJ3NjYW53JzogdGFyZ2V0IHVuYXZhaWxhYmxlIG9yIGluY29tcGF0aWJsZS4K"
+          },
+          "stdin": {
+            "bytes": 6,
+            "sha256": "bb8e80cad66623f75482552d1b1d272e7d91fed1cbf10a7ea343cd157870fb6a",
+            "base64": "MQoyCngK"
+          },
+          "terminal_encoding": "UTF-8",
+          "rows": 40,
+          "columns": 100,
+          "terminal_restored": true,
+          "environment": {
+            "TERM": "ansi",
+            "COB_EXIT_WAIT": "off"
+          },
+          "cells": [
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "          === CADASTRO ===                                                                          ",
+            "                                                                                                    ",
+            "          Nome:                                                                                     ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    ",
+            "                                                                                                    "
+          ],
+          "executable_sha256": "5147d31a5d684ba238355fe26a1d3642ef6a5b8add44189ae4776e672e7a0a5b",
+          "signal": null,
+          "files": {}
+        },
+        "original_ours_stdout_equal": true,
+        "source": "examples/complementares/PROGTEST3.cbl",
+        "source_sha256": "291ee7b75f7fa8f27180f7b887c8568d1547e6903a55d4b96218114fe806c048",
+        "sources": {
+          "examples/complementares/PROGTEST3.cbl": {
+            "bytes": 1998,
+            "sha256": "291ee7b75f7fa8f27180f7b887c8568d1547e6903a55d4b96218114fe806c048"
+          }
+        }
+      },
+      "main": {
+        "scenario": "main",
+        "scope": "missing_target",
+        "builds": {
+          "ours": {
+            "success": true,
+            "generated_c": true,
+            "absent_before": true,
+            "api_call": {
+              "function": "cobol_compiler.driver.compile_file",
+              "source": "$GAPS/main/sources/examples/complementares/main.cbl",
+              "output": "$GAPS/main/ours/program",
+              "include_dirs": [
+                "$GAPS/main/sources/examples/dependencias"
+              ],
+              "source_paths": [],
+              "emit_c": "$GAPS/main/ours/program.c",
+              "module": false,
+              "dialect": "gnucobol"
+            },
+            "phases": {
+              "preprocessor": true,
+              "parser": true,
+              "semantic": true,
+              "c_generation": true,
+              "native_build": true,
+              "link": "success"
+            },
+            "started_ns": 1795127366915213799,
+            "c_regenerated": true,
+            "gcc_executed": true,
+            "artifact_fresh": true,
+            "command": [
+              "/usr/bin/gcc",
+              "-std=c11",
+              "-Wall",
+              "-Wextra",
+              "-I",
+              "$REPO/runtime",
+              "-rdynamic",
+              "$GAPS/main/ours/.cobol-build-o9o74osv/program.c",
+              "$REPO/runtime/decimal.c",
+              "$REPO/runtime/fields.c",
+              "$REPO/runtime/files.c",
+              "$REPO/runtime/calls.c",
+              "-ldl",
+              "-o",
+              "$GAPS/main/ours/.cobol-build-o9o74osv/program"
+            ],
+            "gcc_stdout": "",
+            "gcc_stderr": "",
+            "diagnostics": [
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL EXIBIR_TELA: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/main/sources/examples/complementares/main.cbl",
+                    "line": 13,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/main/sources/examples/complementares/main.cbl",
+                    "line": 13,
+                    "column": 66,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              }
+            ],
+            "c": {
+              "bytes": 3956,
+              "sha256": "7c8d6c5eaaecc0f921f5ff2cb80815ae979dfbe005000bab0bf69b5fe0eebd34"
+            },
+            "artifact": {
+              "bytes": 87248,
+              "sha256": "93b603bfc271b134a10031233466e240bf37d4680e49d3ef4a9f486cdc061a1f"
+            }
+          },
+          "reference": {
+            "available": true,
+            "temporary_directory": "$GAPS/main/gnu",
+            "analysis": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/main/sources/examples/dependencias",
+                "-fsyntax-only",
+                "$GAPS/main/sources/examples/complementares/main.cbl"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            "object_build": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/main/sources/examples/dependencias",
+                "-c",
+                "$GAPS/main/sources/examples/complementares/main.cbl",
+                "-o",
+                "$GAPS/main/gnu/unit.o"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            "object_compiled": true,
+            "build": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/main/sources/examples/dependencias",
+                "-x",
+                "$GAPS/main/sources/examples/complementares/main.cbl",
+                "-o",
+                "$GAPS/main/gnu/program"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            "compiled": true,
+            "linked": true,
+            "mode": "dynamic-executable",
+            "artifact_sha256": "b4f2123caf446fe4d9664b2a8627576ed40cc896f9d76f8e5b80df2164392e9f",
+            "artifact": "$GAPS/main/gnu/program",
+            "executed": false
+          }
+        },
+        "validated": true,
+        "ours": {
+          "returncode": 1,
+          "timeout": false,
+          "stdout": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "base64": ""
+          },
+          "stderr": {
+            "bytes": 160,
+            "sha256": "52e905893d9e5afe5cbf01e7b4127391da9a1d1ed337a2f843731252cf391da4",
+            "base64": "L3RtcC9jb2JvbC1leGVjdXRpb24tZ2Fwcy0zNTI5d2xjeC9tYWluL3NvdXJjZXMvZXhhbXBsZXMvY29tcGxlbWVudGFyZXMvbWFpbi5jYmw6MTM6MTI6IENBTExfTk9UX0ZPVU5EOiBDQUxMICdleGliaXJfdGVsYSc6IHRhcmdldCB1bmF2YWlsYWJsZSBvciBpbmNvbXBhdGlibGUuCg=="
+          },
+          "signal": null,
+          "files": {},
+          "executable_sha256": "93b603bfc271b134a10031233466e240bf37d4680e49d3ef4a9f486cdc061a1f"
+        },
+        "reference": {
+          "returncode": 1,
+          "timeout": false,
+          "stdout": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "base64": ""
+          },
+          "stderr": {
+            "bytes": 46,
+            "sha256": "2de4976ec56ea4731d4b693080846b293880a90d860d3fa650ee1f4fa4325b1f",
+            "base64": "bGliY29iOiBlcnJvcjogbW9kdWxlICdleGliaXJfdGVsYScgbm90IGZvdW5kCg=="
+          },
+          "signal": null,
+          "files": {},
+          "executable_sha256": "b4f2123caf446fe4d9664b2a8627576ed40cc896f9d76f8e5b80df2164392e9f"
+        },
+        "stdin": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "base64": ""
+        },
+        "fixtures": {},
+        "target": "exibir_tela",
+        "unverified": "Execução com a implementação externa disponível.",
+        "comparison": {
+          "stdout": true,
+          "stderr": false,
+          "files": true,
+          "returncode": true
+        },
+        "source": "examples/complementares/main.cbl",
+        "source_sha256": "1ea8470ae1a40fc824294a43a9372f9e336d9fe31d79494396c2b7958023d1ba",
+        "sources": {
+          "examples/complementares/main.cbl": {
+            "bytes": 548,
+            "sha256": "1ea8470ae1a40fc824294a43a9372f9e336d9fe31d79494396c2b7958023d1ba"
+          }
+        }
+      },
+      "ncurses_demo": {
+        "scenario": "ncurses_demo",
+        "scope": "missing_target",
+        "builds": {
+          "ours": {
+            "success": true,
+            "generated_c": true,
+            "absent_before": true,
+            "api_call": {
+              "function": "cobol_compiler.driver.compile_file",
+              "source": "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl",
+              "output": "$GAPS/ncurses_demo/ours/program",
+              "include_dirs": [
+                "$GAPS/ncurses_demo/sources/examples/dependencias"
+              ],
+              "source_paths": [],
+              "emit_c": "$GAPS/ncurses_demo/ours/program.c",
+              "module": false,
+              "dialect": "gnucobol"
+            },
+            "phases": {
+              "preprocessor": true,
+              "parser": true,
+              "semantic": true,
+              "c_generation": true,
+              "native_build": true,
+              "link": "success"
+            },
+            "started_ns": 1795127367407982681,
+            "c_regenerated": true,
+            "gcc_executed": true,
+            "artifact_fresh": true,
+            "command": [
+              "/usr/bin/gcc",
+              "-std=c11",
+              "-Wall",
+              "-Wextra",
+              "-I",
+              "$REPO/runtime",
+              "-rdynamic",
+              "$GAPS/ncurses_demo/ours/.cobol-build-b0lwmiso/program.c",
+              "$REPO/runtime/decimal.c",
+              "$REPO/runtime/fields.c",
+              "$REPO/runtime/files.c",
+              "$REPO/runtime/calls.c",
+              "-ldl",
+              "-o",
+              "$GAPS/ncurses_demo/ours/.cobol-build-b0lwmiso/program"
+            ],
+            "gcc_stdout": "",
+            "gcc_stderr": "",
+            "diagnostics": [
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL NCURSES_WRAPPER.C: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl",
+                    "line": 10,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl",
+                    "line": 10,
+                    "column": 35,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL MOSTRAR_MENSAGEM: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl",
+                    "line": 12,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl",
+                    "line": 12,
+                    "column": 44,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL ESPERAR_TECLA: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl",
+                    "line": 14,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl",
+                    "line": 14,
+                    "column": 31,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              },
+              {
+                "code": "EXTERNAL_CALL_PENDING",
+                "message": "CALL FINALIZAR_NCURSES: resolução em execução no perfil gnucobol.",
+                "span": {
+                  "start": {
+                    "file": "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl",
+                    "line": 16,
+                    "column": 12,
+                    "inclusion_stack": []
+                  },
+                  "end": {
+                    "file": "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl",
+                    "line": 16,
+                    "column": 35,
+                    "inclusion_stack": []
+                  }
+                },
+                "phase": "semantic",
+                "expected": null,
+                "unexpected": null,
+                "severity": "I",
+                "related": []
+              }
+            ],
+            "c": {
+              "bytes": 5695,
+              "sha256": "6bb1cbd8bde535b5b34a712febad759d005171453620a1be4bcf3528a8f3dade"
+            },
+            "artifact": {
+              "bytes": 87216,
+              "sha256": "fe4a98066d0be9443cbc92ac643b60fdce673606f435736acf5c79d36bf987d9"
+            }
+          },
+          "reference": {
+            "available": true,
+            "temporary_directory": "$GAPS/ncurses_demo/gnu",
+            "analysis": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/ncurses_demo/sources/examples/dependencias",
+                "-fsyntax-only",
+                "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl:18: warning: line not terminated by a newline [-Wmissing-newline]\n   16 |            CALL \"finalizar_ncurses\"\n   17 | \n   18 >            STOP RUN.<EOF>\n"
+            },
+            "object_build": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/ncurses_demo/sources/examples/dependencias",
+                "-c",
+                "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl",
+                "-o",
+                "$GAPS/ncurses_demo/gnu/unit.o"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl:18: warning: line not terminated by a newline [-Wmissing-newline]\n   16 |            CALL \"finalizar_ncurses\"\n   17 | \n   18 >            STOP RUN.<EOF>\n"
+            },
+            "object_compiled": true,
+            "build": {
+              "command": [
+                "/usr/bin/cobc",
+                "-fixed",
+                "-std=default",
+                "-fnot-reserved=ID",
+                "-freserved=VALUES:VALUE",
+                "-I",
+                "$GAPS/ncurses_demo/sources/examples/dependencias",
+                "-x",
+                "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl",
+                "-o",
+                "$GAPS/ncurses_demo/gnu/program"
+              ],
+              "returncode": 0,
+              "stdout": "",
+              "stderr": "$GAPS/ncurses_demo/sources/examples/complementares/ncurses_demo.cbl:18: warning: line not terminated by a newline [-Wmissing-newline]\n   16 |            CALL \"finalizar_ncurses\"\n   17 | \n   18 >            STOP RUN.<EOF>\n"
+            },
+            "compiled": true,
+            "linked": true,
+            "mode": "dynamic-executable",
+            "artifact_sha256": "0cfbd88c7825f3ae6b44c8600e08458d248c01110cdafe2f0985bf82e635f6a9",
+            "artifact": "$GAPS/ncurses_demo/gnu/program",
+            "executed": false
+          }
+        },
+        "validated": true,
+        "ours": {
+          "returncode": 1,
+          "timeout": false,
+          "stdout": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "base64": ""
+          },
+          "stderr": {
+            "bytes": 182,
+            "sha256": "86255a72ba8cd7cfa958c3e8917087742a947f485fa4e8ff521d7e8b2c37df95",
+            "base64": "L3RtcC9jb2JvbC1leGVjdXRpb24tZ2Fwcy0zNTI5d2xjeC9uY3Vyc2VzX2RlbW8vc291cmNlcy9leGFtcGxlcy9jb21wbGVtZW50YXJlcy9uY3Vyc2VzX2RlbW8uY2JsOjEwOjEyOiBDQUxMX05PVF9GT1VORDogQ0FMTCAnbmN1cnNlc193cmFwcGVyLmMnOiB0YXJnZXQgdW5hdmFpbGFibGUgb3IgaW5jb21wYXRpYmxlLgo="
+          },
+          "signal": null,
+          "files": {},
+          "executable_sha256": "fe4a98066d0be9443cbc92ac643b60fdce673606f435736acf5c79d36bf987d9"
+        },
+        "reference": {
+          "returncode": 1,
+          "timeout": false,
+          "stdout": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "base64": ""
+          },
+          "stderr": {
+            "bytes": 52,
+            "sha256": "0a93d1bc0ae590e6bb2845305d70662ae76bd89b52824bcc74c8fe5f511ceddb",
+            "base64": "bGliY29iOiBlcnJvcjogbW9kdWxlICduY3Vyc2VzX3dyYXBwZXIuYycgbm90IGZvdW5kCg=="
+          },
+          "signal": null,
+          "files": {},
+          "executable_sha256": "0cfbd88c7825f3ae6b44c8600e08458d248c01110cdafe2f0985bf82e635f6a9"
+        },
+        "stdin": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "base64": ""
+        },
+        "fixtures": {},
+        "target": "ncurses_wrapper.c",
+        "unverified": "Execução com a implementação externa disponível.",
+        "comparison": {
+          "stdout": true,
+          "stderr": false,
+          "files": true,
+          "returncode": true
+        },
+        "source": "examples/complementares/ncurses_demo.cbl",
+        "source_sha256": "78ad9231305bf88922239be6cc96437806968287ce235bae32faa2927b4a2ac1",
+        "sources": {
+          "examples/complementares/ncurses_demo.cbl": {
+            "bytes": 462,
+            "sha256": "78ad9231305bf88922239be6cc96437806968287ce235bae32faa2927b4a2ac1"
+          }
+        }
+      }
+    },
+    "success": true
   }
 }

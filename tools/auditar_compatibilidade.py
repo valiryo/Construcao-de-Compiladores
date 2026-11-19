@@ -1,5 +1,6 @@
 """Auditar todo original contra GnuCOBOL, sem reparos ou derivados de fontes."""
 import argparse
+import base64
 from collections import Counter
 import json
 from pathlib import Path
@@ -12,6 +13,7 @@ from tools.backend_scenarios import ROOT
 from tools.compatibility_corpus import audit_compilation
 from tools.compatibility_scenarios import run_batch,run_screens
 from tools.auditar_funcional import audit_functional
+from tools.execution_gaps import audit_execution_gaps
 from tools.functional_execution import digest
 
 
@@ -105,6 +107,8 @@ def audit(*,compile_only=False):
             'new_scenarios_validated':sum(c['validated'] for c in batch['scenarios'].values())+sum(c['validated'] for c in screens['scenarios'].values()),
             'game_scope':'Uma saída por Q; posição de comida/RANDOM difere; não atesta jogabilidade ou equivalência integral.'}
         report['success']=complete_build and len(probes)==len(DEFERRED) and all(p['validated'] for p in probes.values()) and baseline['summary']['validated_programs']==60 and all(r['validated'] and r['oracle_match'] for r in batch['scenarios'].values()) and all(r['validated'] for r in screens['scenarios'].values())
+        report['execution_gaps']=audit_execution_gaps()
+        report['success']=report['success'] and report['execution_gaps']['success']
     else:report['success']=complete_build
     report['suite_tests_discovered']=unittest.TestLoader().discover(str(ROOT/'tests')).countTestCases()
     report['implementation_hashes']={str(p.relative_to(ROOT)):digest(p.read_bytes()) for folder in ['cobol_lexer','cobol_compiler','runtime','tools'] for p in sorted((ROOT/folder).rglob('*')) if p.suffix in {'.py','.c','.h'}}
@@ -115,7 +119,7 @@ def audit(*,compile_only=False):
 def markdown(report):
     s=report['summary'];c=s['compilation'];m=s['mains'];m2=s['modules'];f=s.get('functional')
     lines=['# Compatibilidade com GnuCOBOL — Etapa 8','',
-        'Gerado por `python -m tools.auditar_compatibilidade --write`. [Dados completos e comandos](compatibilidade-gnucobol.json).',
+        'Gerado por `python -m tools.auditar_compatibilidade --write`. A revisão de execução pode ser refeita isoladamente. [Dados completos e comandos](compatibilidade-gnucobol.json).',
         f"Snapshot `{report['snapshot']}`; **{report['original_files']} arquivos originais**, bytes e hashes preservados. Modo: `{report['mode']}`.",
         'A cópia corrigida de CAD0005A continua nos testes oficiais, mas não entra no denominador dos originais. Não foram criadas novas versões corrigidas.',
         '', '## Cobertura de compilação','', '| Unidades comparáveis | Nosso C + GCC | GnuCOBOL | Cobertura |','|---|---:|---:|---:|',
@@ -132,7 +136,7 @@ def markdown(report):
             'CBREAKEX confere entrada vazia, mudanças de cidade/estado, totais, zero e valores negativos, todos os bytes dos registros de 80 posições. PROG042A confere inclusão, reabertura, cliente/produto ausente e quantidade zero, ligando PROG042B intacto.',
             'PROGTEST confere Backspace, Tab, entrada parcial numérica (7 em PIC 99 resulta em 70), nome de 30 posições e zero. TESTE002 confere CRT STATUS/posição. GAMESNAK exercita saída por Q, moldura e conclusão; RANDOM produz comida em posições diferentes e não há ensaio completo de jogabilidade.',
             'No terminal, os protocolos ANSI brutos diferem e ficam preservados em base64. A comparação usa todas as células de texto de um PTY 40x100, incluindo padding; não remove espaços, valores ou posições. Atributos visuais não são objeto da equivalência de texto. Um escape desconhecido falha a interpretação.',
-            f"A suíte contém **{report['suite_tests_discovered']} testes descobertos**. A suíte unittest é executada separadamente pelo comando de reprodução abaixo.",'']
+            f"O levantamento geral registrou **{report['suite_tests_discovered']} testes descobertos**. A suíte unittest é executada separadamente pelo comando de reprodução abaixo.",'']
     else:lines+=['Execução funcional omitida por `--compile-only`; nenhuma equivalência funcional foi inferida.','']
     lines+=['## Incompatibilidades corrigidas','']+['- **'+name+'**: '+text for name,text in FIXES.items()]
     lines+=['','## Matriz de todo o corpus','',
@@ -167,12 +171,13 @@ def markdown(report):
         '', '## Reprodução','', '```bash',
         'python -m unittest discover -s tests -v',
         'python -m tools.auditar_compatibilidade --write',
+        'python -m tools.auditar_compatibilidade --execution-gaps --write',
         'python -m tools.auditar_compatibilidade --compile-only --report /tmp/compat-compilacao.json',
         'python compiler.py examples/complementares/CBREAKEX.cbl --source-format free --dialect gnucobol -o build/cbreak',
         'python compiler.py examples/complementares/PROG042A.cbl --dialect gnucobol --source examples/complementares/PROG042B.cbl -o build/pedidos',
         'python compiler.py examples/complementares/PROGTEST.cbl --dialect gnucobol -o build/tela',
         '```','',
-        'Os comandos GCC/cobc efetivamente executados, diagnósticos completos, hashes de fontes/COPY/runtime, opções, entradas, saídas brutas e arquivos estão no JSON. `$REPO`, `$BUILD`, `$RUN` e `$SCREEN` representam diretórios declarados e temporários novos; os comandos podem ser refeitos substituindo essas raízes. O compilador não executa COBOL durante a compilação nem gera fixtures. GnuCOBOL continua exclusivamente oráculo.','']
+        'Os comandos GCC/cobc efetivamente executados, diagnósticos completos, hashes de fontes/COPY/runtime, opções, entradas, saídas brutas e arquivos estão no JSON. `$REPO`, `$BUILD`, `$RUN`, `$SCREEN` e `$GAPS` representam diretórios declarados e temporários novos; os comandos podem ser refeitos substituindo essas raízes. O compilador não executa COBOL durante a compilação nem gera fixtures. GnuCOBOL continua exclusivamente oráculo.','']
     probes=[(path,row['call_probe']) for path,row in report['files'].items() if 'call_probe' in row]
     if probes:
         table=['', '## Execução dos seis CALLs adiados', '',
@@ -184,16 +189,73 @@ def markdown(report):
         table+=['', 'Os casos ncurses atingiram a verificação de argumentos em terminal isolado. O retorno do GnuCOBOL aparece apenas nos casos de módulo ausente. Os logs JSON incluem os bytes, estado do terminal e sinal quando aplicável.', '']
         index=lines.index('## Fontes excluídos da meta executável')
         lines[index:index]=table
+    if 'execution_gaps' in report:
+        index=lines.index('## Fontes excluídos da meta executável')
+        lines[index:index]=gap_markdown(report['execution_gaps'])
     return '\n'.join(lines)
+
+
+def gap_markdown(gaps):
+    lines=['## Revisão final das lacunas de execução','',
+        f"Oráculo `{gaps['gnucobol']}`. A revisão inclui o divisor zero e reexecuta os seis CALLs adiados. GAMESNAK ficou fora desta rodada.",
+        '', '| Programa | Ponto observado | stdout | stderr | Arquivos | Retorno próprio / GnuCOBOL |',
+        '|---|---|---|---|---|---:|']
+    for name,row in gaps['cases'].items():
+        comparison=row.get('comparison')
+        if comparison is None:
+            lines.append(f'| {name} | Build interrompido | — | — | — | — |')
+            continue
+        if row['scope']=='safe_prefix':
+            cutoff=row['cutoff']
+            point=f"Antes de `{cutoff['target']}`, linha {cutoff['line']}"
+        elif row['scope']=='missing_target':
+            point=f"Até `{row['target']}` ausente"
+        else:
+            point='Divisor zero'
+        columns=['igual' if comparison[part] else 'diferente' for part in ('stdout','stderr','files')]
+        returns=f"{row['ours']['returncode']} / {row['reference']['returncode']}"
+        lines.append(f'| {name} | {point} | {" | ".join(columns)} | {returns} |')
+    lines.append('')
+    zero=gaps['cases']['CALCMD01']
+    if zero.get('stdout_prefix') and not zero['comparison']['stdout']:
+        ref_stdout=base64.b64decode(zero['reference']['stdout']['base64']).decode(errors='replace')
+        average=next((line.partition(':')[2].strip() for line in ref_stdout.splitlines()
+                      if line.startswith('VALOR MEDIO:')),None)
+        if average is not None:
+            lines.append(f'Em CALCMD01, as saídas coincidem até o total. O próprio aborta na divisão por zero. O GnuCOBOL prossegue até exibir a média `{average}`.')
+    original_match=sum(r.get('original_ours_stdout_equal',False) for r in gaps['cases'].values())
+    lines += [
+        'Os três destinos ausentes produziram diagnósticos com redações próprias de cada runtime. A execução com as implementações disponíveis permanece sem verificação.',
+        'O ensaio ncurses compila, nos dois compiladores, cópias temporárias do prefixo original até a linha indicada. Depois do prefixo, a cópia chama `endwin` e sai com o marcador 77. Esse retorno é do ensaio. A chamada incompatível e a execução subsequente ficam fora da comparação. Os fontes originais do corpus permanecem intactos.',
+        f'A saída do executável próprio original, encerrado pelo diagnóstico e com o terminal restaurado, coincidiu com a saída do prefixo em {original_match}/3 casos.',
+        'Os três casos com diferenças conhecidas de ABI já têm comparação de saída na auditoria funcional e ficaram fora desta rodada.',
+        'O JSON guarda os comandos de compilação, hashes, entradas, saídas brutas do PTY, arquivos e os bytes usados na derivação do prefixo. A revisão complementa os 152 cenários registrados acima.', '']
+    return lines
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--write',action='store_true')
-    parser.add_argument('--compile-only',action='store_true')
+    mode=parser.add_mutually_exclusive_group()
+    mode.add_argument('--compile-only',action='store_true')
+    mode.add_argument('--execution-gaps',action='store_true',help='comparar somente as lacunas da revisão final, sem executar GAMESNAK')
     parser.add_argument('--report',type=Path)
     args=parser.parse_args()
     if args.write and args.compile_only:parser.error('--write exige auditoria completa; use --report para compilação isolada')
+    if args.execution_gaps:
+        gaps=audit_execution_gaps()
+        if args.report:
+            args.report.write_text(json.dumps(gaps,ensure_ascii=False,indent=2)+'\n')
+        if args.write:
+            evidence=ROOT/'docs/compatibilidade-gnucobol.json'
+            report=json.loads(evidence.read_text())
+            if report['snapshot']!=gaps['snapshot']:
+                raise ValueError('Snapshot da revisão difere da auditoria existente.')
+            report['execution_gaps']=gaps
+            evidence.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+            (ROOT/'docs/compatibilidade-gnucobol.md').write_text(markdown(report))
+        print('\n'.join(gap_markdown(gaps)))
+        return 0 if gaps['success'] else 1
     report=audit(compile_only=args.compile_only)
     encoded=json.dumps(report,ensure_ascii=False,indent=2)+'\n'
     if args.write:

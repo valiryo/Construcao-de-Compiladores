@@ -1,6 +1,6 @@
 # Compatibilidade com GnuCOBOL — Etapa 8
 
-Gerado por `python -m tools.auditar_compatibilidade --write`. [Dados completos e comandos](compatibilidade-gnucobol.json).
+Gerado por `python -m tools.auditar_compatibilidade --write`. A revisão de execução pode ser refeita isoladamente. [Dados completos e comandos](compatibilidade-gnucobol.json).
 Snapshot `1ffb3bf279bbb1e596b1091f1dda1cf7ddf51295`; **85 arquivos originais**, bytes e hashes preservados. Modo: `compilation-and-functional`.
 A cópia corrigida de CAD0005A continua nos testes oficiais, mas não entra no denominador dos originais. Não foram criadas novas versões corrigidas.
 
@@ -23,7 +23,7 @@ O conjunto funcional das etapas anteriores executa 64 originais. **60/70 (85.71%
 CBREAKEX confere entrada vazia, mudanças de cidade/estado, totais, zero e valores negativos, todos os bytes dos registros de 80 posições. PROG042A confere inclusão, reabertura, cliente/produto ausente e quantidade zero, ligando PROG042B intacto.
 PROGTEST confere Backspace, Tab, entrada parcial numérica (7 em PIC 99 resulta em 70), nome de 30 posições e zero. TESTE002 confere CRT STATUS/posição. GAMESNAK exercita saída por Q, moldura e conclusão; RANDOM produz comida em posições diferentes e não há ensaio completo de jogabilidade.
 No terminal, os protocolos ANSI brutos diferem e ficam preservados em base64. A comparação usa todas as células de texto de um PTY 40x100, incluindo padding; não remove espaços, valores ou posições. Atributos visuais não são objeto da equivalência de texto. Um escape desconhecido falha a interpretação.
-A suíte contém **535 testes descobertos**. A suíte unittest é executada separadamente pelo comando de reprodução abaixo.
+O levantamento geral registrou **535 testes descobertos**. A suíte unittest é executada separadamente pelo comando de reprodução abaixo.
 
 ## Incompatibilidades corrigidas
 
@@ -149,6 +149,27 @@ Análise, construção e ligação ficam em campos distintos do JSON. Os seis pr
 
 Os casos ncurses atingiram a verificação de argumentos em terminal isolado. O retorno do GnuCOBOL aparece apenas nos casos de módulo ausente. Os logs JSON incluem os bytes, estado do terminal e sinal quando aplicável.
 
+## Revisão final das lacunas de execução
+
+Oráculo `cobc (GnuCOBOL) 3.2.0`. A revisão inclui o divisor zero e reexecuta os seis CALLs adiados. GAMESNAK ficou fora desta rodada.
+
+| Programa | Ponto observado | stdout | stderr | Arquivos | Retorno próprio / GnuCOBOL |
+|---|---|---|---|---|---:|
+| CAD0001A | Até `SORT001A` ausente | igual | diferente | igual | 1 / 1 |
+| CALCMD01 | Divisor zero | diferente | diferente | igual | 1 / 0 |
+| NCURSESDEMO | Antes de `scanw`, linha 25 | igual | igual | igual | 77 / 77 |
+| PROGTEST2 | Antes de `keypad`, linha 17 | igual | igual | igual | 77 / 77 |
+| PROGTEST3 | Antes de `scanw`, linha 22 | igual | igual | igual | 77 / 77 |
+| main | Até `exibir_tela` ausente | igual | diferente | igual | 1 / 1 |
+| ncurses_demo | Até `ncurses_wrapper.c` ausente | igual | diferente | igual | 1 / 1 |
+
+Em CALCMD01, as saídas coincidem até o total. O próprio aborta na divisão por zero. O GnuCOBOL prossegue até exibir a média `00000006,0000`.
+Os três destinos ausentes produziram diagnósticos com redações próprias de cada runtime. A execução com as implementações disponíveis permanece sem verificação.
+O ensaio ncurses compila, nos dois compiladores, cópias temporárias do prefixo original até a linha indicada. Depois do prefixo, a cópia chama `endwin` e sai com o marcador 77. Esse retorno é do ensaio. A chamada incompatível e a execução subsequente ficam fora da comparação. Os fontes originais do corpus permanecem intactos.
+A saída do executável próprio original, encerrado pelo diagnóstico e com o terminal restaurado, coincidiu com a saída do prefixo em 3/3 casos.
+Os três casos com diferenças conhecidas de ABI já têm comparação de saída na auditoria funcional e ficaram fora desta rodada.
+O JSON guarda os comandos de compilação, hashes, entradas, saídas brutas do PTY, arquivos e os bytes usados na derivação do prefixo. A revisão complementa os 152 cenários registrados acima.
+
 ## Fontes excluídos da meta executável
 
 Dez originais têm erros reais: seis conflitos (PROG002A, PROG010A, PROG023C, SORT001A, VALIDA1B e CAD0005A), ASCII001 com referência inexistente, CLIESQL01 vazio, PROG018A com destino inválido de ALTER e PROGVSAM com organização LINE SEQUENTIAL contraditória com chaves. GnuCOBOL também os rejeita; nenhum foi reparado.
@@ -170,10 +191,11 @@ Essas extensões dependem de `--dialect gnucobol`; o perfil padrão, suas rejei�
 ```bash
 python -m unittest discover -s tests -v
 python -m tools.auditar_compatibilidade --write
+python -m tools.auditar_compatibilidade --execution-gaps --write
 python -m tools.auditar_compatibilidade --compile-only --report /tmp/compat-compilacao.json
 python compiler.py examples/complementares/CBREAKEX.cbl --source-format free --dialect gnucobol -o build/cbreak
 python compiler.py examples/complementares/PROG042A.cbl --dialect gnucobol --source examples/complementares/PROG042B.cbl -o build/pedidos
 python compiler.py examples/complementares/PROGTEST.cbl --dialect gnucobol -o build/tela
 ```
 
-Os comandos GCC/cobc efetivamente executados, diagnósticos completos, hashes de fontes/COPY/runtime, opções, entradas, saídas brutas e arquivos estão no JSON. `$REPO`, `$BUILD`, `$RUN` e `$SCREEN` representam diretórios declarados e temporários novos; os comandos podem ser refeitos substituindo essas raízes. O compilador não executa COBOL durante a compilação nem gera fixtures. GnuCOBOL continua exclusivamente oráculo.
+Os comandos GCC/cobc efetivamente executados, diagnósticos completos, hashes de fontes/COPY/runtime, opções, entradas, saídas brutas e arquivos estão no JSON. `$REPO`, `$BUILD`, `$RUN`, `$SCREEN` e `$GAPS` representam diretórios declarados e temporários novos; os comandos podem ser refeitos substituindo essas raízes. O compilador não executa COBOL durante a compilação nem gera fixtures. GnuCOBOL continua exclusivamente oráculo.
