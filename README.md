@@ -105,5 +105,5 @@ docs/              guias técnicos e enunciado da disciplina
 - [Referência da CLI](docs/referencia-cli.md)
 - [Arquitetura e ABI](docs/arquitetura.md)
 - [Recursos suportados e limites](docs/recursos-suportados.md)
-- [Especificação da disciplina](docs/EspecificacaoCOBOL.md) e [instruções adicionais](docs/InstrucoesAdicionaisCOBOL.md)
+- [Especificação da disciplina](docs/enunciado/EspecificacaoCOBOL.md) e [instruções adicionais](docs/enunciado/InstrucoesAdicionaisCOBOL.md)
 - [Origem, créditos e licenças dos exemplos](examples/README.md)
