@@ -369,7 +369,7 @@ class UnitGenerator:
             if is_reference and parameter.mode in {'CONTENT','VALUE'}:
                 lines.append(f'unsigned char *copy_{i} = cb_alloc(rt, {field}.n);')
                 lines.append(f'memcpy(copy_{i}, {field}.p, {field}.n); {field}.p = copy_{i};')
-            shape=shape_text(info['arguments'][i]['shape'])
+            shape=shape_text(self.r.storage_shapes.get(self.nid(parameter.value)))
             args.append(f'{{{field}, {number}, {shape}, CB_{parameter.mode}, {int(is_number and isinstance(parameter.value,A.Literal))}}}')
         arguments='(cb_call_arg[]){'+', '.join(args)+'}' if args else 'NULL'
         result_kind=-1 if not node.returning else int(self.ann(node.returning).type.category=='pointer')
@@ -840,7 +840,8 @@ def generate_c(result,*,module=False,shared=False,static_call=None,signatures=()
                 formals=[]
                 for param in unit.parameters:
                     typ=param['type']
-                    formals.append(f'{{{typ["length"] or 0}, {descriptor(typ)}, {shape_text(param["shape"])}, CB_{param["mode"]}}}')
+                    shape=shape_text(unit.storage_shapes.get(param['node_id']))
+                    formals.append(f'{{{typ["length"] or 0}, {descriptor(typ)}, {shape}, CB_{param["mode"]}}}')
                 formal_table='NULL'
                 if formals:
                     formal_table=f'{generator.name}_formals'

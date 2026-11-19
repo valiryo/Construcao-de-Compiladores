@@ -41,6 +41,7 @@ class SemanticResult:
     calls: dict[str, dict] = field(default_factory=dict)
     controls: dict[str, dict] = field(default_factory=dict)
     parameters: list[dict] = field(default_factory=list)
+    storage_shapes: dict[str, list] = field(default_factory=dict)
     source_results: list["SemanticResult"] = field(default_factory=list)
 
     @property
@@ -261,8 +262,9 @@ class Analyzer:
             if symbol and (symbol.section != "LINKAGE" or symbol.parent is not None):
                 self.diagnostic("FORMAL_NOT_LINKAGE", "USING deve referenciar raiz da LINKAGE SECTION.", param.value, related=[symbol])
             self.r.parameters.append({"node_id": self.nid(param), "symbol_id": sid, "mode":param.mode,
-                                      "type":asdict(typ), "layout":asdict(self.r.layout.items[sid]) if sid in self.r.layout.items else None,
-                                      "shape":self.storage_signature(sid) if typ.category=="group" else None})
+                                      "type":asdict(typ), "layout":asdict(self.r.layout.items[sid]) if sid in self.r.layout.items else None})
+            if typ.category=="group":
+                self.r.storage_shapes[self.nid(param)]=self.storage_signature(sid)
 
     def place(self, item, area, offset, dimensions):
         symbol = self.table.symbols[self.declarations[id(item)]]
@@ -1154,10 +1156,11 @@ class Analyzer:
                 symbol=self.table.symbols.get(self.ann(parameter.value).symbol_id)
                 if symbol and symbol.namespace not in {"data","special","index"}:
                     self.diagnostic("INVALID_CALL_ARGUMENT", "Argumento não representa armazenamento de dados.",parameter)
+            if typ.category=="group" and isinstance(parameter.value,A.Reference):
+                self.r.storage_shapes[self.nid(parameter.value)]=self.storage_signature(
+                    self.ann(parameter.value).symbol_id,len(parameter.value.subscripts))
             arguments.append({"mode":parameter.mode,"node_id":self.nid(parameter.value),"symbol_id":self.ann(parameter.value).symbol_id,
                               "type":asdict(typ),"length":typ.length,
-                              "shape":self.storage_signature(self.ann(parameter.value).symbol_id,len(parameter.value.subscripts))
-                              if typ.category=="group" and isinstance(parameter.value,A.Reference) else None,
                               "temporary":isinstance(parameter.value,A.Literal) and parameter.mode!="VALUE"})
         returning_type=self.expr(node.returning,write=True) if node.returning else None
         if returning_type and (not self.compatibility or returning_type.category!="pointer"):
