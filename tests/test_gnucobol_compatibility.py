@@ -227,7 +227,7 @@ class CompatibilityOriginalScreenTests(unittest.TestCase):
 
 class CompatibilityAuditTests(unittest.TestCase):
     def test_compiler_temporary_files_are_isolated_across_concurrent_builds(self):
-        from tools.auditar_pendentes import command
+        from tools.functional_execution import command
         script='import os,sys,time; from pathlib import Path; p=Path(os.environ["TMPDIR"])/"cob-fixed.o"; p.write_text(sys.argv[1]); time.sleep(.1); print(p.read_text())'
         with tempfile.TemporaryDirectory() as td:
             directories=[Path(td)/name for name in ['first','second']]

@@ -531,7 +531,7 @@
     },
     {
       "upstream_path": "README.md",
-      "path": "examples/referencia/README.md",
+      "path": "examples/referencia/README.upstream.txt",
       "category": "referencia",
       "sha256": "27babbdd09e0a6320ca2df678798863e4dda11e1446f710c0ade1396a8c19428",
       "git_blob": "c7b29b130b7053ba3005e2c58fdf9ca7276536f5"

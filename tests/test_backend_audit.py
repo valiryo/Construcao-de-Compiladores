@@ -2,7 +2,8 @@
 import json
 import unittest
 from unittest.mock import patch
-from tools.auditar_backend import audit_backend,markdown,ROOT
+from regression_corpus import audit_backend, ROOT
+from tools.corpus_contracts import backend_contract, corpus_contracts
 
 
 class BackendAuditTests(unittest.TestCase):
@@ -11,12 +12,13 @@ class BackendAuditTests(unittest.TestCase):
         with patch('cobol_compiler.driver.subprocess.run') as run:
             cls.fresh=audit_backend(reference=False,execute=False,compile_code=False)
             run.assert_not_called()
-        cls.saved=json.loads((ROOT/'docs/auditoria-backend.json').read_text(encoding='utf-8'))
+        cls.contracts=corpus_contracts()
+        cls.saved=backend_contract(cls.contracts)
 
     def test_every_semantically_valid_program_is_checked_and_covers_saved_generation(self):
-        previous=json.loads((ROOT/'docs/auditoria-semantica.json').read_text())
-        self.assertEqual(set(self.fresh['files']),set(previous['files']))
-        valid={p for p,v in previous['files'].items() if v['success']}
+        previous=self.contracts['files']
+        self.assertEqual(set(self.fresh['files']),set(previous))
+        valid={p for p,v in previous.items() if v['semantic']['success']}
         self.assertEqual(len(valid),68)
         for path in valid:
             self.assertNotEqual(self.fresh['files'][path]['backend'],'not_run')
@@ -38,8 +40,8 @@ class BackendAuditTests(unittest.TestCase):
         self.assertTrue(any(row['gcc']=='success' and not row['functionally_validated'] for row in self.saved['files'].values()))
         self.assertFalse(any(row['functionally_validated'] and row['gcc']!='success' for row in self.saved['files'].values()))
 
-    def test_generated_markdown_is_fresh_and_artifact_paths_are_portable(self):
-        self.assertEqual((ROOT/'docs/auditoria-backend.md').read_text(encoding='utf-8'),markdown(self.saved))
+    def test_backend_evidence_paths_are_portable(self):
+        self.assertNotIn(str(ROOT),json.dumps(self.fresh))
         self.assertNotIn(str(ROOT),json.dumps(self.saved))
         for row in self.saved['files'].values():
             if row['gcc']=='success':self.assertEqual(row['gcc_stderr'],'')

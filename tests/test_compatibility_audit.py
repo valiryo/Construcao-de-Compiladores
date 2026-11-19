@@ -5,13 +5,13 @@ import unittest
 
 from tools.backend_scenarios import ROOT
 from tools.functional_execution import digest
-from tools.auditar_compatibilidade import markdown
+from tools.auditar_compatibilidade import gap_markdown
 from tools.terminal_probe import cells
 
 
 class CompatibilityEvidenceTests(unittest.TestCase):
     @classmethod
-    def setUpClass(cls):cls.report=json.loads((ROOT/'docs/compatibilidade-gnucobol.json').read_text())
+    def setUpClass(cls):cls.report=json.loads((ROOT/'tests/fixtures/compatibility-contracts.json').read_text())
 
     def test_coverage_uses_unique_original_programs_and_equivalent_artifacts(self):
         rows=self.report['files']
@@ -67,8 +67,14 @@ class CompatibilityEvidenceTests(unittest.TestCase):
                 self.assertEqual(digest(raw),run['stdout']['sha256'])
                 self.assertEqual(cells(raw,run['rows'],run['columns']),run['cells'])
 
-    def test_markdown_matches_structured_evidence(self):
-        self.assertEqual((ROOT/'docs/compatibilidade-gnucobol.md').read_text(),markdown(self.report))
+    def test_comparison_summary_exposes_safe_cutoffs_and_observed_differences(self):
+        gaps=self.report['execution_gaps']
+        rendered='\n'.join(gap_markdown(gaps))
+        for name,row in gaps['cases'].items():
+            self.assertIn(f'| {name} |',rendered)
+            if row['scope']=='safe_prefix':
+                self.assertIn(f"Antes de `{row['cutoff']['target']}`, linha {row['cutoff']['line']}",rendered)
+        self.assertIn('| CALCMD01 | Divisor zero | diferente | diferente | igual | 1 / 0 |',rendered)
 
     def test_final_comparison_preserves_raw_outputs_and_stops_ncurses_before_invalid_calls(self):
         gaps=self.report['execution_gaps']

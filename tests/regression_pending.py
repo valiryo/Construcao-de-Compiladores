@@ -1,14 +1,12 @@
-"""Auditoria isolada da coorte não compilada. Não altera nem executa COBOL."""
-import argparse
+"""Casos negativos e variantes temporárias usadas pelos testes de regressão."""
+
 from collections import Counter
 import ctypes.util
 from dataclasses import asdict
 import difflib
 import json
 from pathlib import Path
-import resource
 import shutil
-import subprocess
 import tempfile
 
 from cobol_compiler import ast as A
@@ -18,15 +16,15 @@ from cobol_compiler.semantic import check_file
 from cobol_lexer import CobolLexer
 from cobol_lexer.fixed_format import read_fixed_lines
 from tools.backend_scenarios import ROOT
-from tools.functional_execution import digest, environment
-from tools.pending_findings import FINDINGS
+from tools.corpus_contracts import backend_contract, corpus_contracts
+from tools.functional_execution import command, digest
 
 INCLUDES=[ROOT/'examples/dependencias']
-TREE=ROOT/'docs/evidencias-pendentes/arvore-upstream.json'
+TREE=ROOT/'tests/fixtures/upstream-tree.json'
 
 
 def pending_inventory():
-    previous=json.loads((ROOT/'docs/auditoria-backend.json').read_text())
+    previous=backend_contract(corpus_contracts())
     return {p:r for p,r in previous['files'].items() if r['gcc']!='success'},previous
 
 
@@ -50,20 +48,7 @@ def conflict_variants(text):
     return {"ours":''.join(ours),"theirs":''.join(theirs)},hunks
 
 
-def limits():
-    resource.setrlimit(resource.RLIMIT_CORE,(0,0))
-    resource.setrlimit(resource.RLIMIT_CPU,(20,20))
-    resource.setrlimit(resource.RLIMIT_FSIZE,(32*1024*1024,32*1024*1024))
 
-
-def command(command,directory):
-    try:
-        p=subprocess.run(command,cwd=directory,env=environment({'TMPDIR':str(Path(directory).resolve())}),capture_output=True,text=True,
-            encoding='utf-8',errors='replace',timeout=30,preexec_fn=limits)
-        return {'command':[str(c) for c in command],'returncode':p.returncode,'stdout':p.stdout,'stderr':p.stderr}
-    except subprocess.TimeoutExpired as e:
-        return {'command':[str(c) for c in command],'returncode':None,'timeout':True,
-            'stdout':(e.stdout or b'').decode(errors='replace'),'stderr':(e.stderr or b'').decode(errors='replace')}
 
 
 def gnu(source,directory,*,fmt='fixed',flags=(),deps=(),link=False,module=False):
@@ -160,7 +145,8 @@ def experiments(name,text):
 def audit(*,reference=True):
     pending,previous=pending_inventory()
     manifest=json.loads((ROOT/'examples/manifesto-coboldicas.json').read_text())
-    oldsem=json.loads((ROOT/'docs/auditoria-semantica.json').read_text())
+    contracts=corpus_contracts()
+    findings=contracts['pending_findings']
     originals={p:digest((ROOT/p).read_bytes()) for p in set(previous['files'])|{f['path'] for f in manifest['files']}}
     upstream=json.loads(TREE.read_text())
     assert upstream['sha']==manifest['commit'] and not upstream['truncated']
@@ -168,14 +154,13 @@ def audit(*,reference=True):
     for item in manifest['files']:
         assert originals[item['path']]==item['sha256']
         assert tree[item['upstream_path']]['sha']==item['git_blob']
-    assert {Path(p).name for p in pending}==set(FINDINGS)
+    assert {Path(p).name for p in pending}==set(findings)
     implementation={str(p.relative_to(ROOT)):digest(p.read_bytes()) for folder in ('cobol_compiler','cobol_lexer','runtime')
         for p in (ROOT/folder).rglob('*') if p.is_file() and p.suffix in {'.py','.c','.h'}}
     result={'snapshot':manifest['commit'],'implementation_sha256':implementation,
         'snapshot_tree':{'file':str(TREE.relative_to(ROOT)),'sha256':digest(TREE.read_bytes()),
         'url':f"https://api.github.com/repos/Coboldicas/codigo_fonte_cobol/git/trees/{manifest['commit']}?recursive=1",
         'checked_on':'2026-11-18','tracked_paths':sorted(tree),'native_c_sources':[p for p in tree if Path(p).suffix.lower() in {'.c','.h','.so'}]},
-        'baseline':{'command':'python -m unittest discover -s tests -v','tests_passed':476,'seconds':54.846},
         'toolchain':{},'native_libraries':{name:ctypes.util.find_library(name) for name in ('ncurses','ncursesw','tinfo')},
         'native_headers':{str(p):p.exists() for p in (Path('/usr/include/curses.h'),Path('/usr/include/ncurses.h'))},
         'previous_counts':dict(Counter(r['semantic_classification'] if r['backend']=='not_run' else r['backend'] for r in pending.values())),
@@ -192,8 +177,8 @@ def audit(*,reference=True):
         for path,old in pending.items():
             name=Path(path).name;original=ROOT/path;text=original.read_text();base=root/Path(path).stem;base.mkdir()
             src=base/name;src.write_bytes(original.read_bytes())
-            deps=[ROOT/p for p in oldsem['files'][path]['source_dependencies']]
-            row={'finding':FINDINGS[name],'original_diagnostics':old['diagnostics'],
+            deps=[ROOT/p for p in contracts['files'][path]['semantic']['source_dependencies']]
+            row={'finding':findings[name],'original_diagnostics':old['diagnostics'],
                 'previous_classification':old['semantic_classification'],'previous_backend':old['backend'],
                 'original':pipeline(src,base,deps=deps,copybook=src.suffix=='.cpy'),
                 'experiments':{},'conflicts':conflict_variants(text)[1] if '<<<<<<<' in text else []}
@@ -232,7 +217,7 @@ def audit(*,reference=True):
                     if oldrow['gcc']!='success':continue
                     front=parse_file(ROOT/consumer,include_dirs=INCLUDES)
                     if not any(d.resolved_file and Path(d.resolved_file).resolve()==original.resolve() for d in front.preprocessed.dependencies):continue
-                    ctx=check_file(ROOT/consumer,include_dirs=INCLUDES,source_paths=[ROOT/p for p in oldsem['files'][consumer]['source_dependencies']])
+                    ctx=check_file(ROOT/consumer,include_dirs=INCLUDES,source_paths=[ROOT/p for p in contracts['files'][consumer]['semantic']['source_dependencies']])
                     lengths={s.name:ctx.layout.items[s.id].total_size for s in ctx.table.symbols.values() if s.name in {'COD001A-REGISTRO','COPY002A-REGISTRO','COPY002A-HEADER'} and s.id in ctx.layout.items}
                     contexts[consumer]={'semantic_success':ctx.success,'root_layout_bytes':lengths}
                 row['contexts']=contexts
@@ -261,94 +246,3 @@ def audit(*,reference=True):
         'simple_recovery_new_programs':sum(r['finding']['feasibility']=='A' and Path(p).name!='CAD0005A.cbl' for p,r in result['files'].items()),
         'programs_executed':0,'compiler_or_runtime_modified':False,'originals_unchanged':True}
     return result
-
-
-def markdown(report):
-    lines=['# Auditoria dos arquivos pendentes — Etapa 6','',
-        'Gerado por `python -m tools.auditar_pendentes --write`. A coorte vem das linhas',
-        'sem GCC bem-sucedido da auditoria anterior, não de uma lista de métricas.',
-        f"Snapshot `{report['snapshot']}`. Nenhum fonte original, compilador ou runtime alterado.",'',
-        '## Resumo consolidado','',
-        'A auditoria investiga compilabilidade e custo de recuperação. **Nenhum programa',
-        'experimental foi executado ou declarado funcional.** Os 60 programas validados',
-        'na Etapa 5 permanecem como a coorte funcional; os experimentos não alteram esse total.','',
-        '```json',json.dumps(report['summary'],ensure_ascii=False,indent=2),'```','',
-        'A = simples; B = moderada; C = complexa; D = fora do escopo; E = fragmento.',
-        'Os nove A incluem CAD0005A, cuja derivada já está entre os 60: são oito',
-        'candidatos novos. Escolher um lado de conflito pode exigir decisão de intenção.',
-        'Os dez casos com fonte/merge como causa principal e os três contratos ncurses',
-        'defeituosos totalizam 13 arquivos com problemas de código; os 13 com limitações',
-        'do compilador incluem causas secundárias, uma restrição de dialeto deliberada',
-        'e o SORT da variante alternativa de PROG010A. Essas contagens se sobrepõem.','',
-        '## Reconciliação da classificação anterior','',
-        '```json',json.dumps(report['previous_counts'],ensure_ascii=False,indent=2),'```','',
-        'As quantidades anteriores se confirmam (6 ligação, 2 backend, 13 inválidos,',
-        '2 extensões, 1 parcial, 2 copybooks), mas os rótulos precisam de nuance:',
-        'CBREAKEX é válido em formato livre, PROG042A é válido no dialeto padrão do',
-        'GnuCOBOL, TELABMS é macrofonte BMS e CAD0001A tem dependência COBOL recuperável.',
-        'Os cinco restantes de ligação exigem interfaces nativas ou wrappers não fornecidos.','',
-        '## Tabela individual','',
-        '| Arquivo | Falha anterior | Causa-raiz confirmada | Fonte válido? | Primeira fase bloqueada | Recuperável? | Correção necessária | Esforço | Prioridade | Classe |',
-        '|---|---|---|---|---|---|---|---|---|---|']
-    for path,row in report['files'].items():
-        f=row['finding'];old=sorted({d['code'] for d in row['original_diagnostics'] if d['severity'] in {'E','S'}})
-        if not old:old=[row['previous_classification']]
-        lines.append(f"| [{path}](../{path}) | {', '.join(old)} | {f['analysis']} | {f['validity']} | {row['original']['first_blocker'] or 'nenhuma; fragmento contextual'} | {f['recovery']} | {f['required_change']} | {f['effort']} | {f['priority']} | {f['feasibility']} |")
-    lines.extend(['','## Evidências por arquivo',''])
-    for path,row in report['files'].items():
-        lines.extend(['### '+Path(path).name,'',row['finding']['analysis'],'',
-            'Fases do original: '+', '.join(f"{phase}={row['original'][phase].get('status',row['original'][phase].get('success'))}" for phase in ('lexer','preprocessor','parser','semantic','backend','gcc'))+'.',''])
-        for key in ('gnu_original','gnu_free','gnu_limit30','gnu_static_link','gnu_ncurses_devel','gnu_ncurses_runtime'):
-            if key in row:
-                g=row[key]
-                lines.extend([f"- {key}: retorno `{g.get('returncode','indisponível')}`; formato `{g.get('format','—')}`."])
-        for label,trial in row['experiments'].items():
-            p=trial['pipeline'];codes=sorted({d['code'] for d in p.get('diagnostics',[]) if d['severity'] in {'E','S'}})
-            lines.append(f"- Experimento **{label}**: {trial['description']} C `{p['backend']['status']}`, GCC `{p['gcc']['status']}`; bloqueios: {', '.join(codes) or 'nenhum'}. GnuCOBOL: `{trial.get('gnu',{}).get('returncode','não consultado')}`.")
-        for h in row['conflicts']:
-            lines.append(f"- Conflito {h['start_line']}–{h['end_line']}: {len(h['ours'].splitlines())} linhas HEAD / {len(h['theirs'].splitlines())} linhas do outro lado. Os conteúdos e patches completos estão no JSON.")
-        for name,ctx in row.get('contexts',{}).items():lines.append(f"- COPY em {name}: semântica `{ctx['semantic_success']}`, layouts `{ctx['root_layout_bytes']}`.")
-        lines.append('')
-    lines.extend(['## Diagnóstico, contratos e plano de recuperação','',
-        'A interpretação detalhada, custo dos recursos, contratos nativos e prioridades',
-        'estão em [plano de recuperação](recuperacao-pendentes.md). O [JSON completo](auditoria-pendentes.json)',
-        'guarda todos os diagnósticos atuais e anteriores, comandos GnuCOBOL/GCC, formatos,',
-        'dependências, contratos de CALL, SHA-256, patches experimentais e lados de cada conflito.','',
-        '## Método e reprodução','',
-        f"Preparação: {report['baseline']['tests_passed']} testes aprovados em {report['baseline']['seconds']} s.",
-        'Cada original é copiado byte a byte para temporário. O lexer roda novamente;',
-        'o pré-processador/parser e a semântica usam as APIs reais. compile_result emite',
-        'C e chama GCC somente quando as fases anteriores aprovam. Fases posteriores',
-        'a um bloqueio são not_run, não sucessos presumidos. Dependências são explícitas.',
-        'As cópias experimentais têm diff completo; originais e os 60 validados têm hashes',
-        'verificados antes/depois. Não se executa nenhum binário, não se usam stubs,',
-        'não se acessa rede durante a auditoria. As consultas/compilações do oráculo têm',
-        'timeout de 30 s, CPU de 20 s, arquivos de até 32 MiB e core dumps desabilitados.',
-        'A compilação GCC própria conserva o timeout de 120 s do driver existente.',
-        'GnuCOBOL é oráculo de sintaxe/compilação, nunca backend. -fsyntax-only não prova',
-        'a presença de CALL dinâmico; por isso há ligação -fstatic-call nos experimentos',
-        'nativos e em CAD0001A. Uma ligação bem-sucedida tampouco valida a assinatura C.',
-        'As opções de vocabulário são as mesmas da Etapa 5; formato/dialeto e dependências',
-        'ficam registrados em cada comando. Paths temporários aparecem como $AUDIT.','',
-        '```bash','python -m tools.auditar_pendentes --write','python -m tools.auditar_pendentes --write --no-gnu',
-        'python -m unittest discover -s tests -v','```','',
-        'A árvore completa e imutável do snapshot foi consultada pela API do GitHub e',
-        'preservada em [evidência da árvore](evidencias-pendentes/arvore-upstream.json).',
-        'Seus blobs COBOL coincidem com o manifesto; não há .c/.h/.so nem implementações',
-        'de exibir_tela ou ncurses_wrapper nessa árvore. A ferramenta usa essa evidência offline.',''])
-    return '\n'.join(lines)
-
-
-def main():
-    parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--write',action='store_true')
-    parser.add_argument('--no-gnu',action='store_true')
-    args=parser.parse_args()
-    result=audit(reference=not args.no_gnu)
-    if args.write:
-        (ROOT/'docs/auditoria-pendentes.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
-        (ROOT/'docs/auditoria-pendentes.md').write_text(markdown(result))
-    print(json.dumps(result['summary'],ensure_ascii=False,indent=2))
-
-
-if __name__=='__main__':main()

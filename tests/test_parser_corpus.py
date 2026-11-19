@@ -1,13 +1,13 @@
 """Toda a coorte da etapa léxica é exercitada; negativos não são excluídos."""
 
-import json
 from pathlib import Path
 import unittest
 
 from cobol_compiler import parse_file, parse_source
 from cobol_compiler import ast as A
 from cobol_compiler.validation import validate_ast
-from tools.auditar_parser import audit_corpus, markdown
+from regression_corpus import check_parser_corpus
+from tools.corpus_contracts import corpus_contracts, fingerprint
 from test_parser import program
 
 
@@ -23,7 +23,7 @@ OFFICIALS = {
 class ParserCorpusTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.report = audit_corpus()
+        cls.report = check_parser_corpus()
 
     def official(self, name):
         path = ROOT / "examples" / ("corrigidos" if name == "CAD0005A" else "oficiais") / (name + ".cbl")
@@ -40,11 +40,11 @@ class ParserCorpusTests(unittest.TestCase):
         self.assertEqual(summary["previously_accepted_by_lexer"], 77)
         self.assertEqual(summary["previously_accepted_submitted_to_parser"], 77)
         self.assertEqual(summary["unexpected_failures"], [])
-        old = json.loads((ROOT / "docs/auditoria-lexer-depois.json").read_text())["files"]
+        old = corpus_contracts()["files"]
         self.assertEqual(set(old), set(self.report["files"]))
         for path, item in self.report["files"].items():
             with self.subTest(path=path):
-                if not old[path]["diagnostics"]:
+                if old[path]["lexer"]["accepted"]:
                     self.assertNotEqual(item["parsing"], "not_run")
 
     def test_known_failures_are_individual_and_explicit(self):
@@ -165,10 +165,8 @@ class ParserCorpusTests(unittest.TestCase):
         display.span = result.ast.span
         self.assertTrue(any("SourceSpan" in e for e in validate_ast(result.ast, result.preprocessed.tokens).errors))
 
-    def test_generated_reports_are_current(self):
-        saved = json.loads((ROOT / "docs/auditoria-parser.json").read_text(encoding="utf-8"))
-        self.assertEqual(saved, self.report)
-        self.assertEqual((ROOT / "docs/auditoria-parser.md").read_text(encoding="utf-8"), markdown(self.report))
+    def test_parser_corpus_matches_regression_fingerprint(self):
+        self.assertEqual(fingerprint(self.report), corpus_contracts()["parser_sha256"])
 
 
 if __name__ == "__main__":

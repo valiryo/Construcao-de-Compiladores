@@ -8,6 +8,7 @@ from cobol_compiler import ast as A
 from cobol_compiler.semantic import check_file
 from tools.backend_scenarios import ROOT, inputs_for as previous_inputs
 from tools.functional_execution import run_cases, digest
+from tools.corpus_contracts import backend_contract, corpus_contracts
 from tools.functional_scenarios import SCENARIOS
 
 OFFICIALS={'BUSCA01A','CAD0002A','CAD0004A','CAD0005A','CAIXAREG','CALCMD01','PROG024A'}
@@ -36,13 +37,13 @@ SOURCE_NOTES={
 
 
 def discover_programs():
-    """A coorte vem das linhas reais da auditoria anterior, nunca de uma lista 49."""
-    backend=json.loads((ROOT/'docs/auditoria-backend.json').read_text(encoding='utf-8'))
-    semantic=json.loads((ROOT/'docs/auditoria-semantica.json').read_text(encoding='utf-8'))
+    """Seleciona os programas com cenários e revalida suas dependências."""
+    contracts=corpus_contracts()
+    backend=backend_contract(contracts)
     result={}
     for path,old in backend['files'].items():
         if old['gcc']!='success':continue
-        deps=semantic['files'][path]['source_dependencies']
+        deps=contracts['files'][path]['semantic']['source_dependencies']
         analyzed=check_file(ROOT/path,include_dirs=[ROOT/'examples/dependencias'],source_paths=[ROOT/p for p in deps])
         if not analyzed.success:raise ValueError(f'Inventário antes compilado regrediu: {path}')
         program=analyzed.ast.identification.program_id
@@ -154,57 +155,18 @@ def audit_functional(*,reference=True,programs=None,case_names=None,seed=None,of
 
 
 def markdown(report):
+    execution=report['execution']
     s=report['summary']
-    lines=['# Auditoria funcional — Etapa 5','',
-        'Gerado por `python -m tools.auditar_funcional --write`. Fontes originais preservados;',
-        f"snapshot `{report['snapshot']}`. GnuCOBOL é apenas oráculo independente.",'',
-        '## Métricas','',*['- '+key+': **'+str(value)+'**.' for key,value in s.items()], '',
-        f"A contagem direta das definições confirma **{report['baseline']['official_scenarios_in_code']} cenários oficiais**. Não há divergência com os 25 relatados.",
-        'Cada programa é recompilado em diretório independente com fontes/COPY copiados e hashes registrados.',
-        'C e artefato devem estar ausentes antes e ser criados pela compilação atual; GCC é invocado de novo.',
-        'Cada cenário começa em diretório vazio, com apenas suas fixtures. Persistência é preparada explicitamente,',
-        'sem herdar arquivos de outro cenário. As entradas e todos os bytes de stdout, stderr e arquivos',
-        'estão no JSON (base64, tamanho e SHA-256), junto aos comandos e evidências de construção.','']
-    for title,official in [('Sete oficiais',True),('Demais programas compilados',False)]:
-        lines.extend(['## '+title,'','| Programa | Compilação | Execução | Cenários | GnuCOBOL | Resultado | Pendências |','|---|---|---|---:|---|---|---|'])
-        for name,row in report['inventory'].items():
-            if (name in OFFICIALS)!=official:continue
-            cases=[report['execution']['scenarios'][n] for n in row['scenarios']]
-            equal=sum(c['oracle_match'] is True for c in cases);different=sum(c['oracle_match'] is False and not c['abi_expected'] for c in cases);abi=sum(c['abi_expected'] for c in cases)
-            lines.append(f"| [{row['path']}](../{row['path']}) ({name}, {row['kind']}) | {'GCC OK' if row['compiled'] else 'não compilado'} | {'executado' if row['executed'] else 'bloqueado'} | {len(cases)} | {equal} iguais / {abi} ABI previstas / {different} inesperadas | {row['result']} | {row['pending']} |")
-    lines.extend(['','## Cenários individuais','','| Cenário | Programa | Retorno | Expectativa própria | Oráculo |','|---|---|---:|---|---|'])
-    for name,row in report['execution']['scenarios'].items():
-        status='igual' if row['oracle_match'] is True else 'ABI prevista' if row['abi_expected'] else 'divergente' if row['oracle_match'] is False else 'não comparado'
-        lines.append(f"| {name} | {row['program']} | {row.get('returncode','—')} | {'OK' if row['validated'] else '; '.join(row['errors'])} | {status} |")
-    lines.extend(['','## Inventário de execução',''])
-    for name,row in report['inventory'].items():
-        lines.extend([f"### {name}",'',f"- Classe: `{row['classification']}`; parâmetros: `{json.dumps(row['parameters'],ensure_ascii=False)}`.",
-            f"- COPY: {', '.join(row['copy']) or 'nenhum'}; fontes CALL: {', '.join(row['call_sources']) or 'nenhuma'}.",
-            f"- ACCEPT: `{json.dumps(row['accepts'],ensure_ascii=False)}`; relógio: {'controlado' if row['clock'] else 'não utilizado'}.",
-            f"- Arquivos: `{json.dumps(row['files'],ensure_ascii=False)}`.",f"- Construções: {', '.join(row['features'])}.",
-            '- Riscos: '+(' '.join(row['execution_risks']) or 'Sem entrada interativa ou recurso externo; limites de execução mantidos.') ,
-            '- Execução: '+row['execution_contract']+'.',*(['- Observação do fonte: '+row['source_notes']] if row['source_notes'] else []),''])
-    lines.extend(['## Divergências e correções',''])
-    for name,row in report['execution']['scenarios'].items():
-        if row['differences']:lines.append(f"- {name}: `{json.dumps(row['differences'],ensure_ascii=False)}`")
-        if row['oracle_note']:lines.append(f"  Justificativa e expectativa independente: {row['oracle_note']}")
-        if row['errors']:lines.append(f"- {name}: `{json.dumps(row['errors'],ensure_ascii=False)}`")
-    for issue in report['corrections']:lines.append('- '+json.dumps(issue,ensure_ascii=False))
-    lines.extend(['','O GnuCOBOL é configurado com `-fnot-reserved=ID -freserved=VALUES:VALUE`,',
-        'compatibilizando o vocabulário do projeto sem editar os fontes: ID é um nome de campo',
-        'e VALUES é aceito como sinônimo de VALUE. Os comandos completos ficam no JSON.',
-        'O relógio de referência usa `COB_CURRENT_DATE=2026111712345600`: os dois últimos',
-        'dígitos fixam os centésimos, que permaneciam reais com a configuração de 14 dígitos.',
-        'Os três casos de ABI têm expectativas binárias completas para ambos os lados;',
-        'as diferenças permanecem nos logs e não são contadas como comparações idênticas.',
-        'O cenário de divisor zero conserva a expectativa de erro do projeto e não usa o oráculo.'])
-    lines.extend(['','## Reprodução','', '```bash','python -m tools.auditar_funcional --write',
-        'python -m tools.auditar_funcional --officials','python -m tools.auditar_funcional --program PROG036A',
-        'python -m tools.auditar_funcional --failed-from docs/auditoria-funcional.json',
-        'python -m tools.auditar_funcional --seed 2026','python -m unittest discover -s tests -v','```','',
-        'GCC/C11 e Python 3.11+ são necessários; GnuCOBOL é opcional (`--no-oracle`).',
-        'Filtros não sobrescrevem o relatório integral: `--write` com seleção grava em build/.',
-        'O corpus fora da coorte compilada permanece separado no JSON, sem alegação de execução.',''])
+    lines=['# Validação funcional','',
+           f"Snapshot `{report['snapshot']}`. Oráculo `{execution['oracle_version'] or 'desativado'}`.",'',
+           f"{s['validated_programs']}/{s['selected_programs']} programas e "
+           f"{s['validated_scenarios']}/{s['executed_scenarios']} cenários validados.",'',
+           '| Programa | Cenário | Expectativa | Comparação |','|---|---|---|---|']
+    for name,row in execution['scenarios'].items():
+        compare='ABI documentada' if row['abi_expected'] else 'igual' if row['oracle_match'] else (
+            'divergente' if row['oracle_compared'] else '—')
+        lines.append(f"| {row['program']} | {name} | {'OK' if row['validated'] else 'falhou'} | {compare} |")
+    lines += ['', 'Comandos, entradas, arquivos e diferenças detalhadas estão no JSON.', '']
     return '\n'.join(lines)
 
 
@@ -238,7 +200,7 @@ def main():
     except ValueError as error:parser.error(str(error))
     if args.write or args.report:
         partial=bool(args.program or args.officials or names is not None)
-        stem=args.report or ROOT/('build/auditoria-funcional-selecao' if partial else 'docs/auditoria-funcional')
+        stem=args.report or ROOT/('build/validacao-funcional-selecao' if partial else 'build/validacao-funcional')
         stem.parent.mkdir(parents=True,exist_ok=True)
         stem.with_suffix('.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
         stem.with_suffix('.md').write_text(markdown(report),encoding='utf-8')

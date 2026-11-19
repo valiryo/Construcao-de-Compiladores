@@ -8,7 +8,8 @@ import unittest
 from cobol_lexer import CobolLexer
 from test_extended_lexer import run_cli
 from test_lexer import fixed
-from tools.auditar_corpus import audit_file, dependencies, OFFICIAL_NAMES
+from regression_corpus import audit_file, dependencies, OFFICIAL_NAMES
+from tools.corpus_contracts import corpus_contracts, fingerprint
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -110,12 +111,13 @@ class CorpusTests(unittest.TestCase):
                             self.assertEqual(lines[t.line - 1][t.column - 1:t.end_column], t.lexeme)
 
     def test_generated_audit_is_current(self):
-        report = json.loads((ROOT / "docs/auditoria-lexer-depois.json").read_text())
-        baseline = json.loads((ROOT / "docs/auditoria-lexer-antes.json").read_text())["files"]
-        sources = {Path(p).name.upper(): p for p in report["files"] if "corrigidos" not in p}
-        for path, item in report["files"].items():
+        files = corpus_contracts()["files"]
+        sources = {Path(p).name.upper(): p for p in files if "corrigidos" not in p}
+        for path, item in files.items():
             with self.subTest(path=path):
-                self.assertEqual(item, audit_file(ROOT / path, sources, baseline.get(path, {})))
+                contract = item["lexer"]
+                result = audit_file(ROOT / path, sources, contract["baseline"])
+                self.assertEqual(fingerprint(result), contract["sha256"])
 
 
 class CorpusFeatureTests(unittest.TestCase):

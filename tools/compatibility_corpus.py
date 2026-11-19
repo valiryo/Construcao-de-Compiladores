@@ -10,7 +10,7 @@ from cobol_compiler import ast as A
 from cobol_compiler.frontend import parse_file
 from tools.backend_scenarios import ROOT
 from tools.functional_execution import digest,copy_sources,clean_compile
-from tools.auditar_pendentes import command
+from tools.functional_execution import command
 from tools.call_probes import MISSING_CASES, NATIVE_CASES, check_deferred
 
 # Opção de entrada documentada, nunca uma transformação de bytes do fonte.

@@ -232,3 +232,19 @@ def run_cases(scenarios,input_resolver,*,reference=True,module_sources=None,seed
         'oracle_compared':sum(p['oracle_compared'] for p in report['scenarios'].values()),
         'oracle_matched':sum(p['oracle_match'] is True for p in report['scenarios'].values())}
     return report
+
+
+def limits():
+    resource.setrlimit(resource.RLIMIT_CORE,(0,0))
+    resource.setrlimit(resource.RLIMIT_CPU,(20,20))
+    resource.setrlimit(resource.RLIMIT_FSIZE,(32*1024*1024,32*1024*1024))
+
+
+def command(command,directory):
+    try:
+        p=subprocess.run(command,cwd=directory,env=environment({'TMPDIR':str(Path(directory).resolve())}),capture_output=True,text=True,
+            encoding='utf-8',errors='replace',timeout=30,preexec_fn=limits)
+        return {'command':[str(c) for c in command],'returncode':p.returncode,'stdout':p.stdout,'stderr':p.stderr}
+    except subprocess.TimeoutExpired as e:
+        return {'command':[str(c) for c in command],'returncode':None,'timeout':True,
+            'stdout':(e.stdout or b'').decode(errors='replace'),'stderr':(e.stderr or b'').decode(errors='replace')}

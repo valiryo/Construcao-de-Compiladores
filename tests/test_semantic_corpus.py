@@ -7,27 +7,26 @@ import unittest
 
 from cobol_compiler import check_file
 from cobol_compiler import ast as A
-from tools.auditar_semantica import audit_corpus, markdown
-from tools.auditar_parser import ROOT
-from tools.auditar_corpus import OFFICIAL_NAMES
+from regression_corpus import ROOT, OFFICIAL_NAMES, check_semantic_corpus
+from tools.corpus_contracts import corpus_contracts, fingerprint
 
 
 class SemanticCorpusTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.report=audit_corpus()
+        cls.report=check_semantic_corpus()
         cls.official={name:check_file(ROOT/'examples'/('corrigidos' if name=='CAD0005A.cbl' else 'oficiais')/name,
             include_dirs=[ROOT/'examples/dependencias'],source_paths=[ROOT/'examples/dependencias/PROGDATA.cbl'])
             for name in OFFICIAL_NAMES}
 
     def test_every_previous_parser_program_was_analyzed(self):
-        previous=json.loads((ROOT/'docs/auditoria-parser.json').read_text())
-        expected={p for p,item in previous['files'].items() if item['classification']=='program'}
+        previous=corpus_contracts()['files']
+        expected={p for p,item in previous.items() if item['parser']['classification']=='program'}
         actual={p for p,item in self.report['files'].items() if item['semantic']!='not_run'}
         self.assertEqual(actual,expected)
         self.assertEqual(len(actual),72)
         self.assertEqual(self.report['summary']['unexpected_failures'],[])
-        self.assertEqual(set(self.report['files']),set(previous['files']))
+        self.assertEqual(set(self.report['files']),set(previous))
 
     def test_seven_officials_are_valid_and_every_expression_is_typed(self):
         for name,r in self.official.items():
@@ -107,7 +106,5 @@ class SemanticCorpusTests(unittest.TestCase):
         self.assertEqual(original['semantic'],'not_run')
 
     def test_report_artifacts_are_fresh_and_portable(self):
-        saved=json.loads((ROOT/'docs/auditoria-semantica.json').read_text(encoding='utf-8'))
-        self.assertEqual(saved,self.report)
-        self.assertEqual((ROOT/'docs/auditoria-semantica.md').read_text(encoding='utf-8'),markdown(self.report))
-        self.assertNotIn(str(ROOT),json.dumps(saved))
+        self.assertEqual(fingerprint(self.report),corpus_contracts()['semantic_sha256'])
+        self.assertNotIn(str(ROOT),json.dumps(self.report))

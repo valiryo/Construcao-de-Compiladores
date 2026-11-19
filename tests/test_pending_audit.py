@@ -1,10 +1,10 @@
 """Evidências da auditoria: recuperação não pode esconder o próximo bloqueio."""
-import json
 from pathlib import Path
 import unittest
 
 from cobol_lexer import CobolLexer
-from tools.auditar_pendentes import audit, conflict_variants, markdown, pending_inventory
+from regression_pending import audit, conflict_variants, pending_inventory
+from tools.corpus_contracts import corpus_contracts
 from tools.backend_scenarios import ROOT
 from tools.functional_execution import digest
 
@@ -83,12 +83,9 @@ class PendingAuditTests(unittest.TestCase):
             self.assertNotEqual(names['gnu_limit30']['returncode'],0)
         self.assertEqual(names['experiments']['rename-31']['pipeline']['gcc']['status'],'success')
 
-    def test_report_matches_renderer_and_native_calls_are_never_executed(self):
-        saved=json.loads((ROOT/'docs/auditoria-pendentes.json').read_text())
-        self.assertEqual((ROOT/'docs/auditoria-pendentes.md').read_text(),markdown(saved))
-        self.assertEqual(set(saved['files']),set(self.report['files']))
-        self.assertEqual(saved['summary']['simple_recovery_new_programs'],8)
-        self.assertEqual(saved['summary']['experimental_gcc_files'],10)
+    def test_variant_counts_and_native_calls_are_never_executed(self):
+        expected=corpus_contracts()['pending_summary']
+        self.assertEqual({key:self.report['summary'][key] for key in expected},expected)
         for row in self.report['files'].values():
             self.assertFalse(row['original']['executed'])
             for trial in row['experiments'].values():self.assertFalse(trial['pipeline']['executed'])

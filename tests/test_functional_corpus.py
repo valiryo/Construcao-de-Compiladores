@@ -13,7 +13,8 @@ import sys
 import tempfile
 import unittest
 
-from tools.auditar_funcional import discover_programs,input_resolver,markdown,OFFICIALS
+from tools.auditar_funcional import discover_programs,input_resolver,OFFICIALS
+from tools.corpus_contracts import corpus_contracts
 from tools.functional_execution import run_cases,digest
 from tools.functional_scenarios import SCENARIOS
 from tools.backend_scenarios import ROOT
@@ -110,12 +111,13 @@ class FunctionalAuditContracts(unittest.TestCase):
             self.assertEqual(a['stdout_sha256'],b['stdout_sha256'])
             self.assertEqual(a['files'],b['files'])
 
-    def test_saved_report_is_generated_and_source_fingerprints_match(self):
-        report=json.loads((ROOT/'docs/auditoria-funcional.json').read_text())
-        self.assertEqual((ROOT/'docs/auditoria-funcional.md').read_text(),markdown(report))
-        for row in report['inventory'].values():
+    def test_corpus_sources_and_scenario_ids_match_contract(self):
+        contracts=corpus_contracts()
+        self.assertEqual(set(contracts['functional_sources']),set(inventory()))
+        for name,row in contracts['functional_sources'].items():
+            self.assertEqual(row['path'],inventory()[name]['path'])
             self.assertEqual(row['source_sha256'],digest((ROOT/row['path']).read_bytes()))
-        self.assertEqual(set(report['execution']['scenarios']),{s.name for s in SCENARIOS})
+        self.assertEqual(set(contracts['functional_scenarios']),{s.name for s in SCENARIOS})
 
     def test_cli_selects_real_program_from_unrelated_working_directory(self):
         with tempfile.TemporaryDirectory() as td:
