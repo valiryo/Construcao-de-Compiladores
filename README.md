@@ -68,6 +68,11 @@ touch build/biblioteca-dados/BIBLIOTECA.dat build/biblioteca-dados/BIBLIOTECA.tx
 (cd build/biblioteca-dados && printf '9\n' | ../biblioteca)
 ```
 
+## Observações sobre os programas oficiais
+
+- **CAD0005A.** O [arquivo original fornecido](examples/oficiais/CAD0005A.cbl) contém marcadores de conflito Git não resolvidos que impedem sua compilação. O original foi preservado. Os testes e a validação funcional usam a [versão corrigida](examples/corrigidos/CAD0005A.cbl).
+- **Cláusula `VALUE`.** O [enunciado](docs/enunciado/EspecificacaoCOBOL.md#33-data-division-opcional--estrutural) exige `VALUE` nas declarações elementares, mas alguns programas oficiais omitem a cláusula. Para manter a compatibilidade com os fontes fornecidos, o compilador aceita essa omissão por padrão. A opção `--strict` habilita a exigência.
+
 ## Testes e alcance
 
 ```bash
