@@ -20,10 +20,19 @@ def main(*, compile_default=False):
     output.add_argument("--dump-symbols", action="store_true", help="símbolos e vínculos semânticos em JSON")
     output.add_argument("--dump-layout", action="store_true", help="layout físico em JSON")
     output.add_argument("--check-backend", action="store_true", help="verificar geração C e ligação sem invocar GCC")
-    parser.add_argument("-o", "--output", help="executável ou objeto de saída")
+    parser.add_argument("-o", "--output", help="executável, objeto ou biblioteca de saída")
     parser.add_argument("--emit-c", help="preservar C gerado neste caminho")
     parser.add_argument("--keep-c", action="store_true", help="preservar C junto à saída")
-    parser.add_argument("--module", action="store_true", help="produzir objeto chamável, sem main")
+    parser.add_argument("--module", action="store_true", help="produzir objeto chamável, ou módulo compartilhado com saída .so")
+    parser.add_argument("--shared", action="store_true", help="produzir módulo COBOL compartilhado")
+    call_policy=parser.add_mutually_exclusive_group()
+    call_policy.add_argument("--static-call", dest="static_call", action="store_true", default=None,
+                             help="exigir CALL resolvido entre os fontes fornecidos")
+    call_policy.add_argument("--dynamic-call", dest="static_call", action="store_false",
+                             help="permitir resolução em execução no perfil project")
+    parser.add_argument("--module-dir", action="append", default=[], help="diretório de módulos próprios, repetível")
+    parser.add_argument("--library", action="append", default=[], help="ativar contratos de biblioteca nativa conhecidos, como ncurses")
+    parser.add_argument("--ffi-manifest", action="append", default=[], help="manifesto de assinaturas C, repetível")
     parser.add_argument("--source", action="append", default=[], help="fonte de programa chamado; pode se repetir")
     parser.add_argument("--strict", action="store_true", help="exigir VALUE em itens elementares")
     parser.add_argument("--copybook", action="store_true", default=None, help="analisar fragmento de dados (automático em .cpy)")
@@ -32,18 +41,20 @@ def main(*, compile_default=False):
     parser.add_argument('--dialect',choices=('project','gnucobol'),default='project',help='perfil explícito de compatibilidade; padrão preserva a disciplina')
     args = parser.parse_args()
     static = args.check or args.dump_symbols or args.dump_layout or args.check_syntax or args.dump_ast
-    if args.check_backend or args.output or args.emit_c or args.keep_c or args.module or compile_default and not static:
+    if args.check_backend or args.output or args.emit_c or args.keep_c or args.module or args.shared or compile_default and not static:
         from .driver import compile_file
         result = compile_file(args.file, args.output, include_dirs=args.include_dirs,
             source_paths=args.source, strict=args.strict, debug_lines=args.debug_lines,
             emit_c=args.emit_c, keep_c=args.keep_c, module=args.module, check_backend=args.check_backend,
-            source_format=args.source_format,dialect=args.dialect)
+            source_format=args.source_format,dialect=args.dialect,shared=args.shared,static_call=args.static_call,
+            module_dirs=args.module_dir,libraries=args.library,ffi_manifests=args.ffi_manifest)
         for diagnostic in result.diagnostics:
             print(diagnostic.format(), file=sys.stderr)
         if result.gcc_stderr:
             print(result.gcc_stderr, file=sys.stderr, end="")
         if result.success:
-            print("Backend válido." if args.check_backend else f"{'Objeto' if args.module else 'Executável'} gerado: {result.output}")
+            kind="Módulo" if args.shared or args.module and args.output and args.output.endswith('.so') else "Objeto" if args.module else "Executável"
+            print("Backend válido." if args.check_backend else f"{kind} gerado: {result.output}")
         return 0 if result.success else 1
     if args.check or args.dump_symbols or args.dump_layout:
         result = check_file(args.file, include_dirs=args.include_dirs, source_paths=args.source,

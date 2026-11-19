@@ -50,6 +50,7 @@ void cb_origin(cb_runtime *rt,const char *file,int line,int column) {
 }
 _Noreturn void cb_fail(const char *code,const char *message) {
     restore_terminal();
+    if(active&&active->terminal_shutdown)active->terminal_shutdown();
     if(active&&active->file)fprintf(stderr,"%s:%d:%d: ",active->file,active->line,active->column);
     fprintf(stderr,"%s: %s\n",code,message);
     exit(1);
@@ -74,6 +75,7 @@ void cb_release(cb_runtime *rt,cb_mem *mark) {
 }
 void cb_runtime_destroy(cb_runtime *rt) {
     restore_terminal();
+    if(rt->terminal_shutdown)rt->terminal_shutdown();
     for(cb_file *f=rt->files;f;) {
         cb_file *next=f->next;
         if(f->fp) {
@@ -86,6 +88,8 @@ void cb_runtime_destroy(cb_runtime *rt) {
     }
     rt->files=NULL;
     cb_release(rt,NULL);
+    cb_libraries_close(rt);
+    active=NULL;
 }
 cb_slice cb_slice_literal(const char *s,size_t n) {
     return (cb_slice) {

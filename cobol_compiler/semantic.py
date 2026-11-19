@@ -6,6 +6,7 @@ A AST permanece sintática. IDs em pré-ordem são determinísticos para a mesma
 
 from dataclasses import dataclass, field, asdict, replace
 from decimal import Decimal, InvalidOperation
+from struct import calcsize
 
 from . import ast as A
 from .diagnostics import Diagnostic, RelatedLocation
@@ -56,7 +57,7 @@ class SemanticResult:
 
     @property
     def backend_ready(self):
-        return self.success and not self.pending_externals
+        return self.success and (self.frontend.preprocessed.dialect=="gnucobol" or not self.pending_externals)
 
     def annotation(self, node):
         return self.annotations[self.node_ids[id(node)]]
@@ -260,7 +261,8 @@ class Analyzer:
             if symbol and (symbol.section != "LINKAGE" or symbol.parent is not None):
                 self.diagnostic("FORMAL_NOT_LINKAGE", "USING deve referenciar raiz da LINKAGE SECTION.", param.value, related=[symbol])
             self.r.parameters.append({"node_id": self.nid(param), "symbol_id": sid, "mode":param.mode,
-                                      "type":asdict(typ), "layout":asdict(self.r.layout.items[sid]) if sid in self.r.layout.items else None})
+                                      "type":asdict(typ), "layout":asdict(self.r.layout.items[sid]) if sid in self.r.layout.items else None,
+                                      "shape":self.storage_signature(sid) if typ.category=="group" else None})
 
     def place(self, item, area, offset, dimensions):
         symbol = self.table.symbols[self.declarations[id(item)]]
@@ -295,8 +297,8 @@ class Analyzer:
             if usage:
                 self.unsupported("GROUP_USAGE", usage)
         elif usage and usage.usage in {"INDEX", "POINTER"}:
-            typ = INDEX if usage.usage == "INDEX" else CobolType("pointer", 8, usage="POINTER", representation="opaque-pointer")
-            if usage.usage == "POINTER":
+            typ = INDEX if usage.usage == "INDEX" else CobolType("pointer", calcsize("P"), usage="POINTER", representation="opaque-pointer")
+            if usage.usage == "POINTER" and not self.compatibility:
                 self.unsupported("POINTER", usage)
         elif symbol.id in self.screen:
             literal = value.values[0].lower if value and value.values else None
@@ -954,11 +956,13 @@ class Analyzer:
             if node.depending: self.require_integer(node.depending)
             ann.details["goto"]={"targets":[self.ann(t).symbol_id for t in node.targets],"depending":self.nid(node.depending) if node.depending else None,"stack":"preserve-perform-until-limit"}
         elif isinstance(node,A.Exit):
+            if node.returning:self.require_integer(node.returning)
             if node.scope=="PERFORM" and not inline: self.diagnostic("EXIT_CONTEXT", "EXIT PERFORM exige PERFORM inline.",node)
             if node.scope=="SECTION" and not section: self.diagnostic("EXIT_CONTEXT", "EXIT SECTION exige seção.",node)
             if node.scope=="PARAGRAPH" and not paragraph: self.diagnostic("EXIT_CONTEXT", "EXIT PARAGRAPH exige parágrafo.",node)
             ann.details["exit"]={"effect":"noop" if node.scope is None else node.scope.lower(),"section":section,"paragraph":paragraph}
         elif isinstance(node,(A.Continue,A.StopRun,A.Goback,A.NextSentence)):
+            if isinstance(node,A.Goback) and node.returning:self.require_integer(node.returning)
             ann.details["effect"]={A.Continue:"noop",A.StopRun:"terminate-run-unit",A.Goback:"return-caller-or-host",A.NextSentence:"next-sentence"}[type(node)]
             if isinstance(node,A.NextSentence):
                 next_sentence=next((s for s in sorted((n for n in A.walk(self.root.procedure) if isinstance(n,A.Sentence)),key=lambda s:s.token_start) if s.token_start>node.token_end),None)
@@ -1152,8 +1156,12 @@ class Analyzer:
                     self.diagnostic("INVALID_CALL_ARGUMENT", "Argumento não representa armazenamento de dados.",parameter)
             arguments.append({"mode":parameter.mode,"node_id":self.nid(parameter.value),"symbol_id":self.ann(parameter.value).symbol_id,
                               "type":asdict(typ),"length":typ.length,
+                              "shape":self.storage_signature(self.ann(parameter.value).symbol_id,len(parameter.value.subscripts))
+                              if typ.category=="group" and isinstance(parameter.value,A.Reference) else None,
                               "temporary":isinstance(parameter.value,A.Literal) and parameter.mode!="VALUE"})
-        if node.returning: self.require_integer(node.returning,write=True)
+        returning_type=self.expr(node.returning,write=True) if node.returning else None
+        if returning_type and (not self.compatibility or returning_type.category!="pointer"):
+            self.require_integer(node.returning,write=True)
         candidates=self.units.get(name,[]) if name else []
         info={"name":name,"original_name":node.program.value if isinstance(node.program,A.Literal) else None,
               "status":"dynamic" if name is None else "external","arguments":arguments,
@@ -1166,6 +1174,8 @@ class Analyzer:
             info["status"]="resolved"
             info["callee_program"]=callee.root.identification.program_id
             info["callee_file"]=callee.root.span.start.file
+            if returning_type and returning_type.category=="pointer":
+                self.diagnostic("INVALID_CALL_RETURN_TYPE","Subprograma COBOL deste perfil retorna inteiro.",node.returning)
             formal=callee.r.parameters
             if len(formal)!=len(arguments):
                 self.diagnostic("CALL_ARITY", f"CALL {name}: {len(arguments)} argumentos para {len(formal)} parâmetros.",node)
@@ -1173,7 +1183,8 @@ class Analyzer:
             for argument,param in zip(arguments,formal):
                 actual=CobolType(**argument["type"]);expected=CobolType(**param["type"])
                 argnode=self.nodes[argument["node_id"]]
-                if argument["mode"]!=param["mode"]:
+                content_copy=self.compatibility and argument["mode"]=="CONTENT" and param["mode"]=="REFERENCE"
+                if argument["mode"]!=param["mode"] and not content_copy:
                     self.diagnostic("CALL_MODE_MISMATCH", "Modos de passagem incompatíveis.",argnode);info["status"]="invalid"
                 literal_numeric = isinstance(argnode,A.Literal) and actual.numeric and expected.numeric
                 by_value_numeric = argument["mode"]=="VALUE" and actual.numeric and expected.numeric
@@ -1187,7 +1198,8 @@ class Analyzer:
                     self.validate_initial(argnode,expected)
                 info.setdefault("parameter_bindings",[]).append({"actual_symbol":argument["symbol_id"],"formal_symbol":param["symbol_id"],"formal_type":param["type"],"actual_node":argument["node_id"],"mode":argument["mode"]})
         else:
-            self.diagnostic("EXTERNAL_CALL_PENDING", f"CALL {name or '(dinâmico)'}: assinatura pendente para ligação.",node,"I")
+            policy="resolução em execução no perfil gnucobol" if self.compatibility else "assinatura pendente para ligação"
+            self.diagnostic("EXTERNAL_CALL_PENDING", f"CALL {name or '(dinâmico)'}: {policy}.",node,"I")
         self.r.calls[self.nid(node)]=info
         self.ann(node).details["call"]=info
 

@@ -385,6 +385,7 @@ class GoTo(Statement):
 @dataclass(slots=True)
 class Exit(Statement):
     scope: str | None
+    returning: Expr | None = None
 
 
 @dataclass(slots=True)
@@ -399,7 +400,7 @@ class StopRun(Statement):
 
 @dataclass(slots=True)
 class Goback(Statement):
-    pass
+    returning: Expr | None = None
 
 
 @dataclass(slots=True)

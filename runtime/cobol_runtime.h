@@ -12,7 +12,7 @@
 typedef struct { int len; unsigned char v[CB_DIGITS]; } cb_big;
 typedef struct { int sign; cb_big n, d; } cb_num;
 typedef struct { unsigned char *p; size_t n; } cb_slice;
-/* category: text=0 numeric=1 group=2 edited=3; usage: display=0 binary=1 packed=2 */
+/* category: text=0 numeric=1 group=2 edited=3 pointer=4; usage: display=0 binary=1 packed=2 */
 typedef struct { int category, digits, scale, signedness, usage; char decimal; const char *pic; } cb_desc;
 typedef struct { unsigned char *p; size_t n; const cb_desc *desc; } cb_field;
 typedef struct { int kind; cb_field f; cb_num num; cb_slice text; int repeat; } cb_value;
@@ -21,6 +21,7 @@ typedef struct cb_file { FILE *fp; int mode, line; cb_field record, status; stru
 typedef struct { int ret, limit; } cb_frame;
 typedef struct { int id, exit_pc, depth; long long remaining; } cb_loop;
 typedef struct { cb_field field, target; long long line, column; } cb_screen_field;
+struct cb_library;
 typedef struct cb_runtime {
     unsigned char return_code[4], sort_return[4];
     int stop, raw_terminal, call_depth; uint32_t random;
@@ -29,7 +30,52 @@ typedef struct cb_runtime {
     int terminal_active; long long terminal_line, terminal_column;
     cb_field cursor_field, crt_status_field;
     int terminal_stream; long long text_line, text_column;
+    struct cb_library *libraries;
+    const struct cb_program *linked_programs;
+    size_t linked_count;
+    const char *module_dirs;
+    int (*terminal_shutdown)(void);
 } cb_runtime;
+
+/* Shared modules are built for this exact runtime ABI. Bump on incompatible changes. */
+#define CB_MODULE_ABI 1u
+enum { CB_REFERENCE, CB_CONTENT, CB_VALUE };
+enum { CB_RESULT_INT, CB_RESULT_POINTER, CB_RESULT_VOID };
+typedef struct {
+    cb_field field;
+    const cb_value *number;
+    const char *shape;
+    int mode, numeric_literal;
+} cb_call_arg;
+typedef struct { size_t size; cb_desc desc; const char *shape; int mode; } cb_formal;
+typedef struct cb_program {
+    const char *name;
+    int (*entry)(cb_runtime *,cb_field *,size_t);
+    const cb_formal *formals;
+    size_t count;
+} cb_program;
+typedef struct {
+    unsigned int version;
+    size_t runtime_size, count;
+    const cb_program *programs;
+} cb_module;
+typedef struct { const char *error; int status; void *pointer; int kind; } cb_call_result;
+typedef struct {
+    const char *name, *library;
+    cb_call_result (*invoke)(cb_runtime *, void *, cb_call_arg *, size_t);
+    int result_kind, terminal;
+} cb_native;
+
+cb_call_result cb_call(cb_runtime *, cb_slice, cb_call_arg *, size_t, int,
+    const cb_program *, size_t, const cb_native *, size_t, const char *,
+    const char *const *, size_t);
+_Noreturn void cb_call_fail(cb_runtime *, cb_slice, const char *);
+void cb_libraries_close(cb_runtime *);
+void cb_pointer_store(cb_field, void *);
+void *cb_pointer_load(cb_field);
+int cb_native_int(cb_call_arg *, int *);
+const char *cb_native_string(cb_runtime *, cb_call_arg *);
+int cb_native_format(const char *, const char *, int);
 
 extern const cb_desc cb_text_desc;
 void cb_runtime_init(cb_runtime *rt);

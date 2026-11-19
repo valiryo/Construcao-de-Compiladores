@@ -314,7 +314,8 @@ class StatementParser:
         start = self.i; self.expect("EXIT"); scope = None
         if self.at("PERFORM", "PARAGRAPH", "SECTION", "PROGRAM"):
             scope = self.take().value
-        return self.node(A.Exit, start, scope=scope)
+        returning = self.expression() if scope=="PROGRAM" and self.match("RETURNING", "GIVING") else None
+        return self.node(A.Exit, start, scope=scope, returning=returning)
 
     def simple(self):
         start = self.i; op = self.take().value
@@ -324,6 +325,8 @@ class StatementParser:
             self.expect("SENTENCE"); cls = A.NextSentence
         else:
             cls = A.Continue if op == "CONTINUE" else A.Goback
+        if cls is A.Goback and self.match("RETURNING", "GIVING"):
+            return self.node(A.Goback, start, returning=self.expression())
         return self.node(cls, start)
 
     def open_statement(self):

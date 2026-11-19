@@ -2,8 +2,11 @@
 sem bytecode, interpretação de COBOL ou representação intermediária executável.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 import hashlib
+import json
+
+from . import native
 
 from . import ast as A
 from .diagnostics import Diagnostic
@@ -16,6 +19,18 @@ def c_string(value, *, encoding='latin-1'):
 
 def function_name(name):
     return 'cob_p_'+hashlib.sha256(name.upper().encode()).hexdigest()[:16]
+
+
+def descriptor(typ):
+    category = {'numeric':1, 'index':1, 'group':2, 'numeric-edited':3, 'pointer':4}.get(typ['category'],0)
+    usage = {'binary-le':1, 'packed-decimal':2}.get(typ['representation'],0)
+    return ('{'+f'{category}, {typ["precision"] or 0}, {typ["scale"] or 0}, {int(typ["signed"])}, '
+            f'{usage}, {ord(typ["decimal_point"])}, {c_string(typ["expanded_picture"] or "")}'+'}')
+
+
+def shape_text(shape):
+    if shape is None:return 'NULL'
+    return c_string(hashlib.sha256(json.dumps(shape).encode()).hexdigest())
 
 
 @dataclass(slots=True)
@@ -36,7 +51,7 @@ class CodegenError(Exception):
 
 
 class UnitGenerator:
-    def __init__(self,result,*,is_main=False):
+    def __init__(self,result,*,is_main=False,native_count=0,module_dirs=(),library_count=0):
         self.r=result
         self.is_main=is_main
         self.root=result.ast
@@ -54,6 +69,9 @@ class UnitGenerator:
         self.inline_ranges=[]
         self.compatibility=result.frontend.preprocessed.dialect=='gnucobol'
         self.screen_index=0
+        self.native_count=native_count
+        self.module_dirs=module_dirs
+        self.library_count=library_count
 
     def error(self,resource,node,message=None):
         raise CodegenError('UNSUPPORTED_BACKEND_'+resource,message or f'Backend não implementado: {resource}.',node)
@@ -251,6 +269,9 @@ class UnitGenerator:
                 alias=alias or (p.redefines if p else None)
                 parent=self.symbols[parent].parent
             if alias:continue
+            if symbol.type.category=='pointer':
+                lines.extend(self.for_field(sid,lambda f:f'cb_pointer_store({f}, NULL);'))
+                continue
             source=self.int_value(1) if symbol.namespace=='index' else self.int_value(0) if symbol.type.numeric or symbol.type.edited else 'cb_fill(32)'
             lines.extend(self.for_field(sid,lambda f:f'cb_move(rt, {source}, {f});'))
         # Default initialization precedes all explicit VALUE clauses, in source order.
@@ -301,6 +322,72 @@ class UnitGenerator:
                 if handler.negated:no=entry
                 else:yes=entry
         return [f'pc = ({positive}) ? {yes} : ({negative}) ? {no} : {next_pc};']
+
+    def call_targets(self,node,next_pc):
+        target={handler.negated:self.body(handler.body,next_pc) for handler in node.handlers}
+        return target.get(False),target.get(True,next_pc)
+
+    def program_return(self,expression):
+        if not expression:return ''
+        return f'cb_move(rt, {self.value(expression)}, cb_field_at(return_code, 4, 0, 4, &d_s1));'
+
+    def call_return(self,node,status):
+        lines=[]
+        if node.returning and self.ann(node.returning).type.category=='pointer':
+            lines.append(f'if (!rt->stop) cb_pointer_store({self.field(node.returning)}, call_result.pointer);')
+            return lines
+        lines.append(f'char return_text[32]; snprintf(return_text, sizeof return_text, "%d", {status});')
+        if node.returning:
+            lines.append(f'if (!rt->stop) cb_move(rt, cb_number(return_text), {self.field(node.returning)});')
+        if not node.returning or not self.compatibility:
+            lines.append('cb_store(cb_field_at(return_code, 4, 0, 4, &d_s1), cb_decimal(return_text), 0, 0);')
+        else:
+            lines.append('if (rt->stop) cb_store(cb_field_at(return_code, 4, 0, 4, &d_s1), cb_decimal(return_text), 0, 0);')
+        return lines
+
+    def dynamic_call(self,node,info,next_pc):
+        lines=[f'cb_slice call_name = cb_bytes(rt, {self.value(node.program)});']
+        args=[]
+        for i,parameter in enumerate(node.parameters):
+            typ=info['arguments'][i]['type']
+            is_reference=isinstance(parameter.value,A.Reference)
+            is_number=typ['category'] in {'numeric','index','numeric-edited'}
+            field='{0}'
+            number='NULL'
+            if is_reference:
+                lines.append(f'cb_field actual_{i} = {self.field(parameter.value)};')
+                field=f'actual_{i}'
+            elif not is_number:
+                lines.append(f'cb_slice bytes_{i} = cb_bytes(rt, {self.value(parameter.value)});')
+                lines.append(f'cb_field actual_{i} = {{cb_alloc(rt, bytes_{i}.n), bytes_{i}.n, &cb_text_desc}};')
+                lines.append(f'memcpy(actual_{i}.p, bytes_{i}.p, bytes_{i}.n);')
+                field=f'actual_{i}'
+            if is_number:
+                expr=f'cb_field_value(actual_{i})' if is_reference else self.value(parameter.value)
+                lines.append(f'cb_value number_{i} = {expr};')
+                number=f'&number_{i}'
+            if is_reference and parameter.mode in {'CONTENT','VALUE'}:
+                lines.append(f'unsigned char *copy_{i} = cb_alloc(rt, {field}.n);')
+                lines.append(f'memcpy(copy_{i}, {field}.p, {field}.n); {field}.p = copy_{i};')
+            shape=shape_text(info['arguments'][i]['shape'])
+            args.append(f'{{{field}, {number}, {shape}, CB_{parameter.mode}, {int(is_number and isinstance(parameter.value,A.Literal))}}}')
+        arguments='(cb_call_arg[]){'+', '.join(args)+'}' if args else 'NULL'
+        result_kind=-1 if not node.returning else int(self.ann(node.returning).type.category=='pointer')
+        table='cb_native_entries' if self.native_count else 'NULL'
+        libraries='cb_native_libraries' if self.library_count else 'NULL'
+        dirs=c_string(':'.join(self.module_dirs),encoding='utf-8') if self.module_dirs else 'NULL'
+        lines.append(f'cb_call_result call_result = cb_call(rt, call_name, {arguments}, {len(args)}, {result_kind}, cb_programs, sizeof cb_programs/sizeof *cb_programs, {table}, {self.native_count}, {dirs}, {libraries}, {self.library_count});')
+        failure,success=self.call_targets(node,next_pc)
+        loc=node.span.start
+        lines.append(f'cb_origin(rt, {c_string(loc.file,encoding="utf-8")}, {loc.line}, {loc.column});')
+        failed=f'pc = {failure};' if failure is not None else 'cb_call_fail(rt, call_name, call_result.error);'
+        lines += ['if (call_result.error) {',failed,'} else {']
+        if node.returning:
+            lines += self.call_return(node,'call_result.status')
+        else:
+            lines += ['if (call_result.kind == CB_RESULT_INT) {',*self.call_return(node,'call_result.status'),'}']
+        lines += [f'pc = {success};','}']
+        return self.simple(lines,'pc',node)
 
     def statement(self,node,next_pc):
         lines=[]
@@ -410,14 +497,15 @@ class UnitGenerator:
                 context=self.sections if node.scope=='SECTION' else self.paragraphs
                 return self.simple([],f'END_{context[-1]}',node)
             if node.scope=='PROGRAM':
-                return self.simple([f'if ({int(not self.is_main)} || rt->call_depth > 1) {{ depth = 0; pc = -1; }} else pc = {next_pc};'],'pc',node)
+                result=self.program_return(node.returning)
+                return self.simple([f'if ({int(not self.is_main)} || rt->call_depth > 1) {{ {result} depth = 0; pc = -1; }} else pc = {next_pc};'],'pc',node)
         elif isinstance(node,A.Continue):pass
-        elif isinstance(node,A.Goback):return self.simple(['depth = 0;'], -1,node)
+        elif isinstance(node,A.Goback):return self.simple([self.program_return(node.returning),'depth = 0;'], -1,node)
         elif isinstance(node,A.StopRun):return self.simple(['rt->stop = 1;'],-1,node)
         elif isinstance(node,A.NextSentence):return self.simple([],self.sentence_next,node)
         elif isinstance(node,A.Call):
             info=self.r.calls[self.nid(node)]
-            if info['status']!='resolved':raise CodegenError('LINK_UNRESOLVED_CALL',f'Implementação ausente para CALL {info["original_name"] or "dinâmico"}.',node)
+            if info["status"]!="resolved":return self.dynamic_call(node,info,next_pc)
             fields=[]
             for i,parameter in enumerate(node.parameters):
                 formal=info['parameter_bindings'][i]['formal_type']
@@ -444,13 +532,8 @@ class UnitGenerator:
                 fields.append(f)
             args=f'(cb_field[]){{{", ".join(fields)}}}' if fields else 'NULL'
             lines.append(f'int return_status = {function_name(info["callee_program"])}(rt, {args}, {len(fields)});')
-            lines.append('char return_text[32]; snprintf(return_text, sizeof return_text, "%d", return_status); cb_store(cb_field_at(return_code, 4, 0, 4, &d_s1), cb_decimal(return_text), 0, 0);')
-            if node.returning:lines.append(f'cb_move(rt, cb_number(return_text), {self.field(node.returning)});')
-            for handler in node.handlers:
-                if not handler.negated:self.error('CALL_EXCEPTION_HANDLER',handler)
-            if node.handlers:
-                body=[s for h in node.handlers if h.negated for s in h.body]
-                next_pc=self.body(body,next_pc)
+            lines.extend(self.call_return(node,'return_status'))
+            _,next_pc=self.call_targets(node,next_pc) if node.handlers else (None,next_pc)
         elif isinstance(node,A.Open):
             modes={'INPUT':1,'OUTPUT':2,'EXTEND':3,'I-O':4}
             for group in node.groups:
@@ -663,9 +746,7 @@ class UnitGenerator:
         for sid,symbol in self.symbols.items():
             typ=symbol.type
             if symbol.namespace not in {'data','filler','index','special'}:continue
-            category=1 if typ.numeric else 3 if typ.edited else 2 if typ.category=='group' else 0
-            usage=1 if typ.representation=='binary-le' else 2 if typ.representation=='packed-decimal' else 0
-            global_lines.append(f'static const cb_desc {self.desc(sid)} = {{{category}, {typ.precision or 0}, {typ.scale or 0}, {int(typ.signed)}, {usage}, {c_string(typ.decimal_point)}[0], {c_string(typ.expanded_picture or "")}}};')
+            global_lines.append(f'static const cb_desc {self.desc(sid)} = {descriptor(asdict(typ))};')
             global_lines.append(f'(void)&{self.desc(sid)};')
         area_lines=[];reset=[]
         for area,name in self.areas.items():
@@ -718,7 +799,7 @@ class UnitGenerator:
         return '\n'.join(lines)
 
 
-def generate_c(result,*,module=False):
+def generate_c(result,*,module=False,shared=False,static_call=None,signatures=(),module_dirs=(),libraries=()):
     diagnostics=[]
     if not result.success:return CodegenResult(None,list(result.diagnostics))
     units=[];seen=set()
@@ -726,11 +807,17 @@ def generate_c(result,*,module=False):
         path=unit.frontend.preprocessed.root_file
         if path not in seen:
             units.append(unit);seen.add(path)
+    if static_call is None:
+        static_call=result.frontend.preprocessed.dialect!='gnucobol' and not shared
+    pending=False
     for unit in units:
         for node in A.walk(unit.ast):
             if isinstance(node,A.Call):
                 info=unit.calls[unit.node_ids[id(node)]]
-                if info['status']!='resolved':diagnostics.append(Diagnostic('LINK_UNRESOLVED_CALL',f'Implementação ausente para CALL {info["original_name"] or "dinâmico"}.',node.span,'link'))
+                if info['status']=='resolved':continue
+                pending=True
+                if static_call:
+                    diagnostics.append(Diagnostic('LINK_UNRESOLVED_CALL',f'Implementação ausente para CALL {info["original_name"] or "dinâmico"}.',node.span,'link'))
     program_names=set()
     for unit in units:
         name=unit.ast.identification.program_id.upper()
@@ -741,14 +828,42 @@ def generate_c(result,*,module=False):
         diagnostics.append(Diagnostic('MAIN_REQUIRES_USING','Programa com USING deve ser compilado com --module ou chamado por um programa principal.',result.ast.procedure.span,'backend'))
     if diagnostics:return CodegenResult(None,diagnostics)
     try:
-        generators=[UnitGenerator(unit,is_main=unit is result and not module) for unit in units]
+        generators=[UnitGenerator(unit,is_main=unit is result and not module,native_count=len(signatures),
+                                  module_dirs=module_dirs,library_count=len(libraries)) for unit in units]
         definitions=[generator.generate() for generator in generators]
         prototypes=[f'int {generator.name}(cb_runtime *, cb_field *, size_t);' for generator in generators]
         source=['/* Generated from validated COBOL AST. Project runtime; no COBOL interpreter. */',
-            '#include "cobol_runtime.h"','#include <string.h>','#include <stdio.h>',*prototypes,*definitions]
+            '#include "cobol_runtime.h"','#include <string.h>','#include <stdio.h>',*prototypes]
+        if pending or shared:
+            entries=[]
+            for unit,generator in zip(units,generators):
+                formals=[]
+                for param in unit.parameters:
+                    typ=param['type']
+                    formals.append(f'{{{typ["length"] or 0}, {descriptor(typ)}, {shape_text(param["shape"])}, CB_{param["mode"]}}}')
+                formal_table='NULL'
+                if formals:
+                    formal_table=f'{generator.name}_formals'
+                    source.append(f'static const cb_formal {formal_table}[] = {{'+', '.join(formals)+'};')
+                entries.append(f'{{{c_string(unit.ast.identification.program_id.upper())}, {generator.name}, {formal_table}, {len(formals)}}}')
+            source.append('static const cb_program cb_programs[] = {\n'+',\n'.join(entries)+'\n};')
+        if pending:
+            source.extend(native.emit(signatures,c_string))
+            if libraries:
+                source.append('static const char *const cb_native_libraries[] = {'+
+                              ', '.join(c_string(p,encoding='utf-8') for p in libraries)+'};')
+        if shared:
+            source.append('__attribute__((visibility("default"))) const cb_module cobol_project_module_v1 = '
+                          '{CB_MODULE_ABI, sizeof(cb_runtime), sizeof cb_programs/sizeof *cb_programs, cb_programs};')
+        source.extend(definitions)
         if not module:
-            source.extend(['int main(void) {','cb_runtime runtime; cb_runtime_init(&runtime);',
-                f'int status = {generators[0].name}(&runtime, NULL, 0);','cb_runtime_destroy(&runtime);','return status;','}'])
+            source.extend(['int main(void) {','cb_runtime runtime; cb_runtime_init(&runtime);'])
+            if pending:
+                source.append('runtime.linked_programs = cb_programs; runtime.linked_count = sizeof cb_programs/sizeof *cb_programs;')
+                if module_dirs:
+                    source.append(f'runtime.module_dirs = {c_string(":".join(module_dirs),encoding="utf-8")};')
+            source.extend([f'int status = {generators[0].name}(&runtime, NULL, 0);',
+                           'cb_runtime_destroy(&runtime);','return status;','}'])
         return CodegenResult('\n\n'.join(source)+'\n',[],[u.ast.identification.program_id for u in units],generators[0].name)
     except CodegenError as error:
         return CodegenResult(None,[Diagnostic(error.code,error.message,error.node.span,'backend')])
