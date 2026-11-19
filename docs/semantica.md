@@ -28,6 +28,11 @@ Os diagnósticos padrão e os layouts/strides existentes são preservados.
 Veja a [auditoria da Etapa 7](compatibilidade-gnucobol.md) para métricas, limites
 e comandos; as contagens anteriores desta página são históricas.
 
+No perfil gnucobol da Etapa 8, CALLs pendentes passam à geração C com
+metadados de tipo, aridade e modo. Assinaturas conhecidas entre fontes
+continuam verificadas estaticamente. A validação de módulos carregados e os
+receptores USAGE POINTER estão descritos no [guia de CALL e FFI](call-dinamico-ffi.md).
+
 ## API e CLI
 
 ```bash

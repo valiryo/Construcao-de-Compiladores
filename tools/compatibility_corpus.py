@@ -11,7 +11,7 @@ from cobol_compiler.frontend import parse_file
 from tools.backend_scenarios import ROOT
 from tools.functional_execution import digest,copy_sources,clean_compile
 from tools.auditar_pendentes import command
-from tools.terminal_probe import run_terminal
+from tools.call_probes import MISSING_CASES, NATIVE_CASES, check_deferred
 
 # Opção de entrada documentada, nunca uma transformação de bytes do fonte.
 FORMATS={'CBREAKEX.cbl':'free'}
@@ -71,7 +71,7 @@ def gnu_build(source,deps,include,directory,*,fmt,module,strict=False,libraries=
         'artifact':str(artifact) if success else None,'executed':False}
 
 
-def audit_compilation(*,native_probes=True):
+def audit_compilation(*,call_probes=True):
     entries,manifest,fronts,index=discover();rows={}
     before={e['path']:digest((ROOT/e['path']).read_bytes()) for e in entries}
     for e in entries:assert before[e['path']]==e['sha256']
@@ -101,12 +101,14 @@ def audit_compilation(*,native_probes=True):
                 if missing and all(n.lower() in NCURSES for n in missing) and ncurses:
                     libs=['-l:'+ncurses]+(['-l:'+tinfo] if tinfo else [])
                 record['gnu_resolved_link']=gnu_build(source,dep_sources,include,directory/'gnu-resolved',fmt=fmt,module=False,strict=True,libraries=libs)
-                if native_probes and libs and record['gnu_resolved_link']['compiled']:
-                    run_dir=directory/'native-library-probe';run_dir.mkdir()
-                    record['gnu_native_probe']=run_terminal(record['gnu_resolved_link']['artifact'],b'1\n2\nx\n',run_dir)
-                    record['gnu_native_probe']['scope']='Tentativa isolada; não atesta correção do contrato FFI do fonte.'
-            _,native=clean_compile(source,dep_sources,include,directory/'ours',module=module,
-                compiler_options={'source_format':fmt,'dialect':'gnucobol'})
+            stem=Path(path).stem
+            options={'source_format':fmt,'dialect':'gnucobol'}
+            if stem in NATIVE_CASES:
+                options['libraries']=['ncurses']
+            native_result,native=clean_compile(source,dep_sources,include,directory/'ours',module=module,
+                                               compiler_options=options)
+            if call_probes and native_result.success and ref['compiled'] and stem in MISSING_CASES|NATIVE_CASES:
+                record['call_probe']=check_deferred(stem,native_result.output,ref['artifact'],directory)
             record['ours']=native
             _,project=clean_compile(source,dep_sources,include,directory/'project',module=module,
                 compiler_options={'source_format':fmt,'dialect':'project'})

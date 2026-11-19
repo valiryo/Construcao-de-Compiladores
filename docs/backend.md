@@ -11,6 +11,15 @@ compilados**, em **140 cenários**, com **476 testes** na suíte. Seus resultado
 estão na [auditoria funcional](auditoria-funcional.md); os números da Etapa 4
 abaixo são o registro histórico da implantação do backend.
 
+## CALL dinâmico — Etapa 8
+
+`--dialect gnucobol` adia CALLs externos até a execução. `--static-call` exige
+destinos COBOL resolvidos no build. `--module -o NOME.so` ou `--shared` gera
+módulo compartilhado próprio. Um `--module` convencional continua gerando
+objeto. O executável exporta o runtime para os módulos carregados. A FFI gera
+adaptadores C tipados a partir de `--ffi-manifest` e `--library ncurses`.
+Veja a busca, as assinaturas e os limites no [guia de CALL e FFI](call-dinamico-ffi.md).
+
 ## Compatibilidade e terminal — Etapa 7
 
 O perfil `--dialect gnucobol` acrescenta cinco originais sem alterações nos fontes.
@@ -86,7 +95,10 @@ a compilação. As opções estáticas `--check-syntax`, `--dump-ast`, `--check`
 | Opção | Efeito |
 |---|---|
 | `-I diretório` | Busca configurada de COPY; repetível |
-| `--source arquivo` | Unidade COBOL adicional para CALL; repetível |
+| `--source arquivo` | Unidade COBOL adicional para CALL direto. Repetível |
+| `--module-dir diretório` | Busca de módulos próprios em execução. Repetível |
+| `--ffi-manifest arquivo` | Assinaturas para funções C. Repetível |
+| `--library nome` | Conjunto ncurses, caminho ou SONAME de biblioteca C. Repetível |
 | `-o caminho` | Executável ou objeto; padrão é o nome do fonte em minúsculas, sem extensão |
 | `--emit-c caminho` | Preserva o C gerado e compila |
 | `--keep-c` | Preserva C em `<saída>.c` e compila |
@@ -138,7 +150,7 @@ O objeto exporta uma função C com nome estável derivado do PROGRAM-ID por
 `c_codegen.function_name`, assinatura
 `int programa(cb_runtime *, cb_field *, size_t)`. Um host inicializa
 `cb_runtime_init`, fornece views com tamanhos corretos, chama a função e encerra
-com `cb_runtime_destroy`; deve ligar os três arquivos do runtime. O teste de ABI
+com `cb_runtime_destroy`. Deve ligar os quatro arquivos do runtime e libdl. O teste de ABI
 inclui um host C real. A ferramenta de cenários usa um driver **COBOL** que aloca
 COPY002A-REGISTRO, chama o CAD0002A original e verifica as alterações após GOBACK.
 O objeto não inventa main nem armazenamento local para LINKAGE.

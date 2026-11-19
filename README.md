@@ -6,6 +6,23 @@ com extensões para os corpora [ebasso](examples/ebasso/README.md) e
 [COBOL Dicas](examples/README.md): COPY → lexer → parser → AST → semântica/layout → C11 + runtime próprio → GCC →
 executável nativo. GnuCOBOL é usado somente como oráculo opcional de testes.
 
+## Etapa 8 — CALL dinâmico e FFI C
+
+O perfil `--dialect gnucobol` resolve CALLs externos na execução. O compilador
+produz módulos próprios `.so` e gera adaptadores C tipados para bibliotecas
+configuradas. O corpus alcançou **70/70 unidades compiladas**, com **63/63
+principais** e **7/7 módulos**. Seis probes registram chamadas ausentes ou
+argumentos ncurses incompatíveis. Os 152 cenários anteriores continuam validados.
+
+```bash
+python compiler.py MAIN.cbl --dialect gnucobol --module-dir build/modules -o build/main
+python compiler.py SUBPROG.cbl --module -o build/modules/SUBPROG.so
+python -m tools.auditar_compatibilidade --write
+```
+
+[Guia de CALL dinâmico, módulos e FFI](docs/call-dinamico-ffi.md) ·
+[Auditoria do corpus](docs/compatibilidade-gnucobol.md)
+
 ## Etapa 7: compatibilidade com GnuCOBOL
 
 O corpus original inteiro foi reavaliado sem alterações nos fontes. Dos **70

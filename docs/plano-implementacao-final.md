@@ -1,6 +1,6 @@
 # Plano técnico do compilador COBOL final
 
-## Objetivo e estado após a Etapa 7
+## Objetivo e estado após a Etapa 8
 
 Implementar em Python 3.11+ um compilador com pipeline:
 
@@ -64,6 +64,14 @@ estão na [auditoria de compatibilidade](compatibilidade-gnucobol.md), com
 recuperar fontes inválidos nem criar novas cópias corrigidas. As metas anteriores
 abaixo são históricas; a Etapa 7 prevalece sobre propostas antigas de recuperação.
 
+A **Etapa 8** acrescenta CALL adiado, módulos próprios versionados e FFI C
+tipada em Linux. A cobertura de compilação é **70/70** com o perfil gnucobol.
+Os três originais com dependências ausentes alcançam seus CALLs em execução.
+Os três originais ncurses compilam e recebem diagnóstico antes de invocar
+uma função com contrato incompatível. A arquitetura e os comandos estão no
+[guia de CALL dinâmico e FFI](call-dinamico-ffi.md). Os [resultados por unidade](compatibilidade-gnucobol.md)
+distinguem os 152 cenários anteriores dos seis probes de resolução.
+
 ## Inventário que orienta a arquitetura
 
 | Domínio | Oficiais/dependências | Ampliação identificada |
@@ -105,7 +113,7 @@ deverão ser executados na avaliação.
 | `validation.py`, `tools/auditar_parser.py` | Implementados: invariantes da AST e auditoria integral |
 | `symbols.py`, `types.py`, `semantic.py`, `layout.py` | Implementados: resolução, PIC/tipos, layout e vínculos em tabelas laterais da AST |
 | `c_codegen.py` | Visitante da AST validada, dispatcher C e origem COBOL por comando |
-| `runtime/cobol_runtime.h`, `decimal.c`, `fields.c`, `files.c` | Campos, decimal exato, MOVE, edição, terminal, arquivos, controle e chamadas |
+| `runtime/cobol_runtime.h`, `decimal.c`, `fields.c`, `files.c`, `calls.c` | Campos, decimal exato, MOVE, edição, terminal, arquivos, controle e chamadas |
 | `tests/test_preprocessor.py`, `test_parser.py`, `test_parser_corpus.py` | Implementados: unitários, oficiais e corpus completo |
 | Testes semânticos e auditoria | Implementados: 96 testes novos, sete oficiais e todos os 72 programas parseáveis |
 | Runtime e integração executável | 81 testes novos; sete oficiais, PROGDATA, três complementares e oráculo opcional |

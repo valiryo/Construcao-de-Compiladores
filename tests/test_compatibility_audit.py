@@ -25,7 +25,24 @@ class CompatibilityEvidenceTests(unittest.TestCase):
             self.assertEqual(metric['percent'],round(100*metric['ours']/metric['gnucobol'],4))
             for row in valid:
                 self.assertEqual(row['gnu']['mode'],'module-object' if row['kind']=='module' else 'dynamic-executable')
-        self.assertEqual(self.report['summary']['compilation']['ours'],64)
+        self.assertEqual(self.report['summary']['compilation']['ours'],70)
+
+    def test_six_deferred_calls_have_fresh_build_and_explicit_execution_outcomes(self):
+        probes={p:r for p,r in self.report['files'].items() if 'call_probe' in r}
+        self.assertEqual(len(probes),6)
+        for path,row in probes.items():
+            probe=row['call_probe']
+            self.assertTrue(probe['validated'],path)
+            self.assertTrue(row['ours']['success'],path)
+            self.assertEqual(probe['ours']['returncode'],1)
+            self.assertEqual(probe['ours']['executable_sha256'],row['ours']['artifact']['sha256'])
+            self.assertTrue(row['unresolved_calls'])
+            if probe['status']=='native_contract_rejected':
+                self.assertTrue(row['gnu_resolved_link']['compiled'],path)
+                self.assertTrue(probe['ours']['terminal_restored'],path)
+            else:
+                self.assertEqual(probe['reference']['executable_sha256'],row['gnu']['artifact_sha256'])
+                self.assertEqual(probe['reference']['returncode'],1)
 
     def test_hashes_and_fresh_build_proofs_are_real(self):
         for path,row in self.report['files'].items():
