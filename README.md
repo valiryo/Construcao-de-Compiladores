@@ -1,6 +1,10 @@
 # Compilador COBOL acadêmico
 
-O repositório oficial no GitHub é [valiryo/Construcao-de-Compiladores](https://github.com/valiryo/Construcao-de-Compiladores).
+**Disciplina:** Construção de Compiladores\
+**Integrantes:** Filipe Valeriano Batista de Oliveira - 14570701\
+Felipe Teixeira Rodrigues - 13672213\
+Pedro Henrique Resnitzky Barbedo - 14657691\
+**Repositório (público):** <https://github.com/valiryo/Construcao-de-Compiladores>
 
 Compilador para o subconjunto COBOL da disciplina de Construção de Compiladores, com extensões para os programas do corpus COBOL Dicas. O front-end expande `COPY`, tokeniza o fonte, constrói a AST, valida símbolos e tipos e calcula o layout dos dados. O backend gera C11 e usa GCC para produzir executáveis, objetos e módulos compartilhados. Os binários usam o runtime deste projeto. GnuCOBOL é um oráculo opcional de testes.
 
@@ -186,6 +190,7 @@ docs/              guias técnicos e enunciado da disciplina
 
 ## Referências do projeto
 
+- [Relatório do analisador léxico da Entrega 1](docs/relatorio-lexer.md)
 - [Referência da CLI](docs/referencia-cli.md)
 - [Arquitetura e ABI](docs/arquitetura.md)
 - [Recursos suportados e limites](docs/recursos-suportados.md)
