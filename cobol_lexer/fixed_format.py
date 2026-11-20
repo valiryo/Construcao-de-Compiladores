@@ -1,6 +1,7 @@
 """Leitura de linhas físicas COBOL em formato fixo (colunas 1 a 80)."""
 
 from dataclasses import dataclass
+import re
 from typing import Iterator
 
 from .model import Diagnostic
@@ -12,6 +13,11 @@ class FixedLine:
     indicator: str
     code: str
     tab_column: int | None = None
+    conflict_column: int | None = None
+    raw_code: str = ''
+
+
+CONFLICT_RE = re.compile(r"^(?:<{7,}|={7,}|>{7,}|\|{7,})(?:\s|$)")
 
 
 def read_fixed_lines(source: str) -> Iterator[FixedLine]:
@@ -27,7 +33,13 @@ def read_fixed_lines(source: str) -> Iterator[FixedLine]:
 
         tab_index = raw[:72].find("\t")
         tab_column = tab_index + 1 if tab_index >= 0 else None
-        yield FixedLine(n, raw[6], raw[7:72].rstrip(" "), tab_column)
+        code = raw[7:72].rstrip(" ")
+        conflict_column = None
+        if CONFLICT_RE.match(raw):
+            conflict_column = 1
+        elif raw[6] in (" ", "-") and CONFLICT_RE.match(code.lstrip(" ")):
+            conflict_column = 8 + len(code) - len(code.lstrip(" "))
+        yield FixedLine(n, raw[6], code, tab_column, conflict_column, raw[7:72])
 
 
 @dataclass(frozen=True, slots=True)
@@ -38,11 +50,23 @@ class LogicalLine:
     positions: tuple[tuple[int, int], ...]
 
 
-def _quote_after(code: str, quote: str | None) -> str | None:
+def read_free_lines(source: str, diagnostics: list[Diagnostic]) -> Iterator[LogicalLine]:
+    """Formato livre sem deslocar colunas ou descartar o conteúdo após coluna 72."""
+    for number, raw in enumerate(source.splitlines(), 1):
+        if CONFLICT_RE.match(raw):
+            diagnostics.append(Diagnostic('MERGE_CONFLICT', 'Marcador de conflito Git não resolvido no fonte.', number, 1))
+            continue
+        code, _ = _without_inline_comment(raw.replace('\t', ' '), None)
+        yield LogicalLine(code, tuple((number, i+1) for i in range(len(code))))
+
+
+def _without_inline_comment(code: str, quote: str | None) -> tuple[str, str | None]:
     index = 0
     while index < len(code):
         character = code[index]
         if quote is None:
+            if code.startswith("*>", index):
+                return code[:index].rstrip(" "), quote
             if character in ("'", '"'):
                 quote = character
         elif character == quote:
@@ -51,27 +75,39 @@ def _quote_after(code: str, quote: str | None) -> str | None:
             else:
                 quote = None
         index += 1
-    return quote
+    return code, quote
 
 
 def read_logical_lines(
-    source: str, diagnostics: list[Diagnostic], *, debug_lines: bool = False
+    source: str, diagnostics: list[Diagnostic], *, debug_lines: bool = False,
+    preserve_literal_padding: bool = False,
 ) -> Iterator[LogicalLine]:
     """Une linhas com '-' e preserva um mapa das coordenadas originais.
 
     Espaços finais e a indentação da continuação são descartados. Uma aspa
     repetida no início da continuação de uma string aberta também é removida.
     Comentários e linhas de debugging desabilitadas não interrompem a união.
+    Com preserve_literal_padding, literais abertos preservam os espaços até a
+    coluna 72 (inclusive colunas implícitas). O frontend habilita essa opção;
+    o padrão mantém a API léxica histórica.
     """
     chunks: list[str] = []
     positions: list[tuple[int, int]] = []
     quote: str | None = None
 
     for physical in read_fixed_lines(source):
+        if physical.conflict_column is not None and not (
+            physical.indicator == "-" and quote is not None
+        ):
+            diagnostics.append(Diagnostic(
+                "MERGE_CONFLICT", "Marcador de conflito Git não resolvido no fonte.",
+                physical.line_number, physical.conflict_column,
+            ))
+            continue
         indicator = physical.indicator.upper()
         if indicator in ("*", "/") or (indicator == "D" and not debug_lines):
             continue
-        if physical.tab_column is not None:
+        if physical.tab_column is not None and physical.tab_column <= 7:
             diagnostics.append(Diagnostic(
                 "TAB_IN_SOURCE", "TAB não permitido em formato fixo; use espaços.",
                 physical.line_number, physical.tab_column,
@@ -85,7 +121,7 @@ def read_logical_lines(
             ))
             continue
 
-        code = physical.code
+        code = physical.raw_code.ljust(65) if preserve_literal_padding else physical.code
         if not code.strip():
             continue
         start = 0
@@ -97,19 +133,31 @@ def read_logical_lines(
                 ))
                 continue
             start = len(code) - len(code.lstrip(" "))
-            if quote is not None and code[start] == quote:
+            if quote is not None and start < len(code) and code[start] == quote:
                 start += 1
-        else:
+        fragment, next_quote = _without_inline_comment(
+            code[start:], quote if indicator == "-" else None,
+        )
+        if preserve_literal_padding and next_quote is None:
+            fragment=fragment.rstrip(' ')
+        if physical.tab_column is not None and physical.tab_column <= start + len(fragment) + 7:
+            diagnostics.append(Diagnostic(
+                "TAB_IN_SOURCE", "TAB não permitido em formato fixo; use espaços.",
+                physical.line_number, physical.tab_column,
+            ))
+            continue
+        if not fragment.strip():
+            continue
+        if indicator != "-":
             if chunks:
                 yield LogicalLine("".join(chunks), tuple(positions))
             chunks = []
             positions = []
             quote = None
 
-        fragment = code[start:]
         chunks.append(fragment)
-        positions.extend((physical.line_number, index + 8) for index in range(start, len(code)))
-        quote = _quote_after(fragment, quote)
+        positions.extend((physical.line_number, index + 8) for index in range(start, start + len(fragment)))
+        quote = next_quote
 
     if chunks:
         yield LogicalLine("".join(chunks), tuple(positions))

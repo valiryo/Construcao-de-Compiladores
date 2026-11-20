@@ -8,3 +8,13 @@ venv/
 *.egg-info/
 dist/
 build/
+
+# Artefatos do driver fora do diretório build/ recomendado
+.cobol-build-*/
+*.failed.c
+/*.o
+/*.so
+/*.out
+/*.exe
+/*.log
+/*.dat

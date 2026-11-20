@@ -1,116 +1,198 @@
-# Compilador COBOL — Entrega 1: Analisador léxico
+# Compilador COBOL acadêmico
 
-Primeira etapa do trabalho de Construção de Compiladores. Implementa o **lexer** para o subconjunto COBOL em **formato fixo** definido na seção 2 da [especificação do professor](docs/EspecificacaoCOBOL.pdf), com extensões para os programas de [ebasso/cobol-exemplos](examples/ebasso/README.md).
+**Disciplina:** Construção de Compiladores\
+**Integrantes:** Filipe Valeriano Batista de Oliveira - 14570701\
+Felipe Teixeira Rodrigues - 13672213\
+Pedro Henrique Resnitzky Barbedo - 14657691\
+**Repositório (público):** <https://github.com/valiryo/Construcao-de-Compiladores>
 
-## Relatório da entrega
+Compilador para o subconjunto COBOL da disciplina de Construção de Compiladores, com extensões para os programas do corpus COBOL Dicas. O front-end expande `COPY`, tokeniza o fonte, constrói a AST, valida símbolos e tipos e calcula o layout dos dados. O backend gera C11 e usa GCC para produzir executáveis, objetos e módulos compartilhados. Os binários usam o runtime deste projeto. GnuCOBOL é um oráculo opcional de testes.
 
-O **relatório da Entrega 1** está na pasta `docs/`: **[abrir o relatório completo](docs/relatorio-lexer.md)**.
+O runtime implementa campos de largura fixa, aritmética decimal exata, arquivos sequenciais, entrada e saída, controle de fluxo, `CALL` e `LINKAGE`. O perfil `gnucobol` amplia o subconjunto com recursos de terminal e resolução dinâmica. Chamadas a bibliotecas C usam adaptadores de FFI com assinaturas explícitas.
 
-O documento apresenta a introdução ao COBOL, a implementação e o uso de IA, os fluxos de tokens dos programas de teste e os resultados dos exemplos com erros léxicos.
+## Instalação no Linux
 
-## Requisitos
+Use **Python 3.11 ou posterior** e **GCC com suporte a C11**, com os headers de desenvolvimento da libc e o carregador POSIX (`libdl`). Use Git para obter o repositório e binutils para a suíte completa, que usa `nm`. O comando de clonagem abaixo seleciona a [branch `main`](https://github.com/valiryo/Construcao-de-Compiladores/tree/main).
 
-- Python **3.11+** (sem bibliotecas externas).
-- Arquivos-fonte usando o **COBOL Fixed Format**, não o formato livre.
-
-## Executar
-
-Na raiz deste repositório, usando Terminal, PowerShell ou CMD:
-
-```bash
-python -m cobol_lexer examples/hello.cob
-python -m cobol_lexer examples/hello.cob --json
-python -m cobol_lexer examples/hello.cob --stream
-python -m cobol_lexer examples/hello.cob --debug-lines
-python -m cobol_lexer examples/ebasso/prog003_calculadora.cob --json
-python -m cobol_lexer examples/erros/prog004_folha_pgto_erros.cob --stream
-```
-
-O programa lista os tokens, com linha e coluna (contadas desde 1), e os diagnósticos. Em caso de erro léxico, o processo termina com código 1; erro de leitura resulta no código 2; sucesso, 0. Com `--json`, a saída é adequada para integração futura com o parser. Com `--stream`, os tokens são agrupados por linha física no formato `<TIPO, lexema>`, com os erros intercalados na linha em que ocorrem; é o formato usado no [relatório](docs/relatorio-lexer.md).
-
-## Executar testes
+Em Debian ou Ubuntu com Python 3.11 ou posterior disponível, execute os comandos abaixo.
 
 ```bash
-python -m unittest discover -s tests -v
+sudo apt install git python3 gcc libc6-dev binutils
+git clone --branch main https://github.com/valiryo/Construcao-de-Compiladores.git
+cd Construcao-de-Compiladores
+python3 --version
+gcc --version
 ```
 
-No Windows, `py -3 -m cobol_lexer examples/hello.cob` também funciona caso `python` não esteja no PATH.
+O projeto usa apenas a biblioteca padrão do Python. Para comparar resultados com o oráculo, instale GnuCOBOL 3.2 e confira `cobc -V`. Os cenários de FFI com ncurses precisam do runtime `libncurses.so.6`. A auditoria de compatibilidade usa também `libtinfo.so.6` e um terminal POSIX com a definição `ansi`.
 
-## Escopo implementado
+## Como executar os programas oficiais
 
-> **Compatibilidade com os exemplos fornecidos pelo professor:** foi necessário
-> aceitar underscore (`_`) no interior de identificadores, como `PROG007_LOJA`,
-> para analisar os programas do repositório ebasso sem modificar seus fontes.
-> Essa é uma extensão deliberada à seção 2.2 da especificação, que lista apenas
-> letras, dígitos e hífen. O limite de 30 caracteres e a proibição de underscore
-> no início ou no fim do identificador continuam válidos.
+Compile e execute a partir da raiz do repositório. Os binários ficam em `build/`. Prepare os arquivos de dados indicados na raiz e digite cada entrada no terminal, seguida de Enter.
 
-- **Colunas 1-6:** ignoradas; **7:** indicador; **8-11:** área A; **12-72:** área B; **73 em diante:** ignoradas.
-- Comentários em linhas com `*` ou `/` na coluna 7; continuação de strings, palavras, números e máscaras `PIC` com `-` na coluna 7.
-- Linha `D` de debugging: ignorada normalmente; opcionalmente analisada com `--debug-lines`.
-- As **14 palavras reservadas** da seção 2.2 e palavras adicionais usadas nos exemplos, como `PROGRAM-ID`, `PIC`, `VALUE`, `COMPUTE`, `INSPECT`, `READ` e `END-IF`, sem diferenciar maiúsculas de minúsculas. A lista implementada está em `RESERVED_WORDS`, no módulo `scanner.py`.
-- Números inteiros, decimais com ponto, sinais `+` e `-`.
-- Strings entre aspas simples ou duplas; aspas duplicadas dentro do texto. Em continuação, aceitamos repetir a aspa de abertura no início da próxima linha.
-- Identificadores com letras ASCII A-Z, números, hífen e underscore internos (até 30 caracteres).
-- Pontuação: `.`, `,`, `;`, `(` e `)`.
-- Operadores aritméticos `+`, `-`, `*`, `/`, `**` e relacionais `=`, `<`, `>`, `<=`, `>=`, `<>`, com preferência pelo operador mais longo.
-- Máscaras após `PIC` ou `PICTURE`, com `IS` opcional, reconhecidas como um único token `PICTURE`: por exemplo, `X(10)`, `S9(05)V99` e `-ZZZZZZZZZ9.99`. O ponto final da declaração permanece um token `PERIOD` separado; da mesma forma, uma vírgula ou um ponto-e-vírgula logo após a máscara é emitido como separador.
-- Diagnósticos com linha e coluna físicas; recuperação parcial após erro.
+| Programa | Compilação |
+|---|---|
+| [CAD0004A](#cad0004a) | Direta |
+| [CALCMD01](#calcmd01) | Direta |
+| [CAIXAREG](#caixareg) | Direta |
+| [BUSCA01A](#busca01a) | Direta |
+| [CAD0005A](#cad0005a) | Direta com o fonte corrigido |
+| [PROG024A](#prog024a) | Executável com `COD001A.cpy` e `PROGDATA.cbl` |
+| [CAD0002A](#cad0002a) | Subprograma com `COPY002A.cpy` e um chamador |
 
-Linhas com até seis caracteres ocupam apenas a área de sequência e são
-ignoradas, preservando a numeração física das linhas seguintes. Isso inclui
-`000100` e também `MOVE` sem indentação: comandos precisam começar na área de
-código do formato fixo.
+### CAD0004A
 
-Comentários identificados por `*` ou `/` na coluna 7 são descartados antes da
-validação de TAB. Linhas `D` recebem o mesmo tratamento quando o debugging está
-desabilitado; com `--debug-lines`, seu conteúdo é validado como código. TAB em
-linhas analisadas continua gerando erro. Linhas ignoradas não interrompem
-continuações de tokens.
+```bash
+python3 compiler.py examples/oficiais/CAD0004A.cbl -o build/cad0004a
+./build/cad0004a
+```
 
-Tipos (`kind`) de token: `KEYWORD`, `IDENTIFIER`, `NUMBER`, `STRING`, `PICTURE`, `PERIOD`, `COMMA`, `SEMICOLON`, `LPAREN`, `RPAREN`, `PLUS`, `MINUS`, `MULTIPLY`, `DIVIDE`, `POWER`, `EQUAL`, `LESS_THAN`, `GREATER_THAN`, `LESS_EQUAL`, `GREATER_EQUAL` e `NOT_EQUAL`.
+Para cadastrar uma pessoa, digite `Ana`, `25`, `111.222.333-44` e `N`. O programa grava `CADASTRO.dat` e recria o arquivo se ele já existir.
 
-Cada token inclui `kind`, `lexeme`, `value`, `line`, `column`, `area`, `end_line` e `end_column`. Os `value` de palavras-chave, identificadores e máscaras são normalizados para maiúsculas; os valores dos números são mantidos como strings para evitar perda de precisão. O `lexeme` de tokens continuados é reconstruído sem indicadores nem quebras de linha, mas as posições de início e fim referenciam o arquivo físico original.
+### CALCMD01
 
-Os sete programas importados e o exemplo inicial passam sem diagnósticos. A suíte inclui testes de integração que executam a CLI com `--json` em cada programa importado e verificações da reconstrução de identificadores divididos entre linhas.
+```bash
+python3 compiler.py examples/oficiais/CALCMD01.cbl -o build/calcmd01
+./build/calcmd01
+```
 
-Em `examples/erros/` há cópias dos sete programas com 15 erros léxicos inseridos, que cobrem os nove códigos de diagnóstico. Um teste de regressão confere código, linha e coluna de cada um. A descrição de cada erro e a recuperação correspondente estão na seção 4 do [relatório](docs/relatorio-lexer.md).
+Digite `1`, `2` e `3` como os três valores e `3` como divisor. O programa mostra o total `00000006,0000` e a média `00000002,0000`. Para guardar o C gerado na compilação, acrescente `--emit-c build/calcmd01.c` ao comando do compilador.
 
-## Decisões a validar com o professor / testes oficiais
+### CAIXAREG
 
-A especificação não detalha todos os seguintes aspectos. Por isso adotamos **decisões de implementação**, sem alegar que constam no documento:
+```bash
+python3 compiler.py examples/oficiais/CAIXAREG.cbl -o build/caixareg
+./build/caixareg
+```
 
-1. **Case-insensitive** para palavras reservadas e identificadores (comportamento habitual do COBOL).
-2. **Linhas de debugging `D`:** ignoradas por padrão e analisadas quando explicitamente habilitadas.
-3. **Continuação:** o indicador `-` une o conteúdo à linha de código anterior, descartando espaços finais e a indentação da continuação. Em strings abertas, aceita a aspa de abertura repetida. Comentários e linhas de debugging desabilitadas podem aparecer entre as partes. Uma continuação sem linha de código anterior gera `UNEXPECTED_CONTINUATION`.
-4. **Aspas duplicadas** geram uma aspa no valor da string.
-5. **Vocabulário ampliado:** palavras como `PROGRAM-ID`, `PIC`, `VALUE` e `COPY` agora são emitidas como `KEYWORD`. Essa extensão e os novos tipos de token atendem aos exemplos importados e vão além da lista explícita da seção 2.2.
-6. **Área A/B:** a posição é registrada como metadado. O parser futuro validará se uma declaração pode aparecer em cada área; o lexer não impõe regras sintáticas sobre divisão/seção/parágrafo.
-7. A palavra com letras/dígitos/hífen/underscore é reconhecida como unidade, inclusive após unir continuações. Identificadores inválidos ou longos geram erro, em vez de fragmentação silenciosa. `PROG007_LOJA` é um identificador único; `_NAME` e `NAME_` geram `INVALID_IDENTIFIER`.
-8. Não implementamos `COPY`/copybooks: a seção 6 os menciona, mas o pré-processamento não faz parte do escopo léxico mínimo definido na seção 2.
-9. **Sinais e operadores:** sinais adjacentes a dígitos, no início do código ou após espaço, parêntese de abertura, vírgula ou operador, pertencem ao literal numérico (`-123.45`, `+8`). Em `COUNT+1`, o `+` é um operador. Hífens internos permanecem parte do identificador; escreva `COUNT - 1` para expressar subtração. Um hífen colado ao início de um nome (`-COUNT`) gera `INVALID_IDENTIFIER`, e a palavra inteira é descartada. Para o menos unário antes de um nome, use `- COUNT`; parênteses também podem delimitar o operador, como em `-(COUNT)` ou `(- COUNT)`.
-10. **Máscaras `PIC`:** os símbolos e as repetições entre parênteses são verificados lexicalmente; repetições devem ser positivas, aceitando zeros à esquerda. Máscaras malformadas geram `INVALID_PICTURE`. A validade semântica da combinação dos símbolos ficará a cargo das etapas seguintes.
+Digite `10,50`, `20,25` e `30,75` para os três itens. Responda `N` à pergunta sobre desconto para obter o total de `61,50`.
 
-As extensões de continuação e máscaras usam como referência o [guia do GnuCOBOL](https://gnucobol.sourceforge.io/HTML/gnucobpg.html), nas seções de formato fixo e `PICTURE`. O projeto continua sendo um subconjunto, sem compatibilidade completa com esse compilador.
+### BUSCA01A
 
-## Estrutura
+Se ainda não tiver `CADASTRO2.dat`, crie-o no editor com a linha abaixo. Cada registro tem 30 posições para o nome, duas para a idade e 11 para o CPF. Preserve os espaços após `Ana` e termine a linha com Enter.
 
 ```text
-cobol_lexer/
-  __init__.py       API para programas Python
-  __main__.py       interface em linha de comando
-  model.py          Token, Diagnostic e LexerResult
-  fixed_format.py   leitor de colunas, indicadores e continuações com mapa de posições
-  scanner.py        reconhecimento de lexemas
-docs/EspecificacaoCOBOL.pdf especificação do professor
-docs/relatorio-lexer.md relatório da entrega e resultados de validação
-examples/hello.cob  exemplo em formato fixo
-examples/ebasso/    sete programas importados, licença e resultados de validação
-examples/erros/     cópias dos programas com erros léxicos inseridos
-tests/test_lexer.py suíte de testes sem dependências
-tests/test_extended_lexer.py testes das extensões e integração pela CLI
+Ana                           2511111111111
 ```
 
-## Limites da entrega
+```bash
+python3 compiler.py examples/oficiais/BUSCA01A.cbl -o build/busca01a
+./build/busca01a
+```
 
-**Não há parser nem análise semântica.** Um conjunto de tokens bem formado não garante que seja um programa COBOL sintaticamente válido. O lexer aceita o subconjunto da seção 2 com as extensões documentadas para os exemplos importados. Outros recursos, como formato livre, comentários inline, diretivas de compilação e expansão de `COPY`, ainda não são implementados.
+Digite `11111111111` para encontrar o CPF do registro de exemplo.
+
+### CAD0005A
+
+Use o fonte corrigido. Para começar uma agenda, crie no editor um arquivo vazio chamado `CADAGENDA.dat`. Para usar uma agenda existente, mantenha o arquivo com seus dados.
+
+```bash
+python3 compiler.py examples/corrigidos/CAD0005A.cbl -o build/cad0005a
+./build/cad0005a
+```
+
+Digite `1`, `Ana` e `12345` para cadastrar um contato. Para listá-lo, execute `./build/cad0005a` novamente e digite `2`.
+
+### PROG024A
+
+Para começar um acervo novo, crie no editor os arquivos vazios `BIBLIOTECA.dat` e `BIBLIOTECA.txt`. O compilador busca `COD001A.cpy` no diretório informado com `-I` e inclui `PROGDATA.cbl` no executável por meio de `--source`.
+
+```bash
+python3 compiler.py examples/oficiais/PROG024A.cbl -I examples/dependencias \
+  --source examples/dependencias/PROGDATA.cbl -o build/prog024a
+./build/prog024a
+```
+
+Para cadastrar um livro, digite `1` no menu, `1` como código, `Livro` como nome e `Autor` como autor. Digite `4` no menu para listar o acervo e `9` para sair.
+
+### CAD0002A
+
+O subprograma recebe `COPY002A-REGISTRO` de um chamador. No editor, salve o exemplo abaixo como `cad0002-driver.cbl` na raiz. Preserve a indentação do formato fixo.
+
+```cobol
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CAD0002-DRIVER.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+           COPY COPY002A.
+       PROCEDURE DIVISION.
+           INITIALIZE COPY002A-REGISTRO
+           CALL 'CAD0002A' USING COPY002A-REGISTRO
+           DISPLAY 'CADASTROS: ' COPY002A-QUANT-REG
+           STOP RUN.
+```
+
+```bash
+python3 compiler.py cad0002-driver.cbl -I examples/dependencias \
+  --source examples/oficiais/CAD0002A.cbl -o build/cad0002a
+./build/cad0002a
+```
+
+Digite `FIM` no campo de nome para sair. Para testar um cadastro antes de sair, informe `Ana`, `25`, `15/05/2000`, `Dev`, `ana@example.com`, `123456789`, `Rua Um`, `Cidade`, `SP` e `12345678`. Quando o programa pedir outro nome, digite `FIM`. O chamador mostra `CADASTROS: 01`.
+
+## COPY, arquivos e módulos
+
+Para compilar somente o objeto do subprograma `CAD0002A`, use `--module`.
+
+```bash
+python3 compiler.py examples/oficiais/CAD0002A.cbl -I examples/dependencias \
+  --module -o build/CAD0002A.o
+```
+
+Para carregar `PROGDATA` como módulo compartilhado, compile-o separadamente. Use os mesmos arquivos de dados do [PROG024A](#prog024a) e digite `9` no menu para sair.
+
+```bash
+python3 compiler.py examples/oficiais/PROG024A.cbl -I examples/dependencias \
+  --dialect gnucobol --module-dir build/modulos -o build/biblioteca
+python3 compiler.py examples/dependencias/PROGDATA.cbl -I examples/dependencias \
+  --module -o build/modulos/PROGDATA.so
+./build/biblioteca
+```
+
+## Observações sobre os programas oficiais
+
+- **CAD0005A.** O [arquivo original fornecido](examples/oficiais/CAD0005A.cbl) contém marcadores de conflito Git não resolvidos que impedem sua compilação. O original foi preservado. Os testes e a validação funcional usam a [versão corrigida](examples/corrigidos/CAD0005A.cbl).
+- **Cláusula `VALUE`.** O [enunciado](docs/enunciado/EspecificacaoCOBOL.md#33-data-division-opcional--estrutural) exige `VALUE` nas declarações elementares, mas alguns programas oficiais omitem a cláusula. Para manter a compatibilidade com os fontes fornecidos, o compilador aceita essa omissão por padrão. A opção `--strict` habilita a exigência.
+
+## Testes e alcance
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+A suíte reúne testes unitários de análise e runtime, testes de integração que compilam C com GCC e cenários funcionais que verificam entrada, saída, código de retorno e arquivos. A comparação com GnuCOBOL ocorre quando o oráculo está disponível. Com o ambiente de comparação instalado, a suíte final passou com **536 testes**.
+
+- **70/70 unidades compiladas** no corpus comparável com GnuCOBOL 3.2. São 63 programas principais e 7 módulos.
+- **Sete programas oficiais compilados e validados**, usando a cópia corrigida de `CAD0005A` para os cenários positivos.
+- **152 cenários funcionais validados** segundo suas expectativas. Em 60 dos 70 originais, os resultados coincidiram nos cenários comparados por inteiro. Os casos restantes incluem diferenças de ABI, comparação parcial do jogo e chamadas externas ausentes ou incompatíveis.
+
+O resultado de compilação vale para o corpus fixado no manifesto. Entre as limitações estão `COPY REPLACING`, arquivos indexados ou relativos, `ALTER`, `SORT`, SQL/CICS embutido e formatos de tela fora do subconjunto. Módulos compartilhados usam a ABI própria do projeto em Linux. A matriz de recursos descreve as diferenças de dialeto e de execução.
+
+Para validar apenas os casos oficiais sem o oráculo ou gerar um relatório comparativo do corpus:
+
+```bash
+python3 -m tools.auditar_funcional --officials --no-oracle
+python3 -m tools.auditar_compatibilidade --write
+```
+
+## Organização
+
+```text
+compiler.py        entrada de compilação
+cobol_lexer/       leitor e analisador léxico
+cobol_compiler/    COPY, AST, semântica, geração C e driver
+runtime/           implementação do runtime e cabeçalho da ABI
+examples/          oficiais, complementares, copybooks e exemplos de diagnóstico
+tests/             suíte, dados de regressão e programas chamadores
+tools/             validadores funcionais e comparador com GnuCOBOL
+docs/              guias técnicos e enunciado da disciplina
+```
+
+## Referências do projeto
+
+- [Relatório do analisador léxico da Entrega 1](docs/relatorio-lexer.md)
+- [Referência da CLI](docs/referencia-cli.md)
+- [Arquitetura e ABI](docs/arquitetura.md)
+- [Recursos suportados e limites](docs/recursos-suportados.md)
+- [Especificação da disciplina](docs/enunciado/EspecificacaoCOBOL.md) e [instruções adicionais](docs/enunciado/InstrucoesAdicionaisCOBOL.md)
+- [Origem, créditos e licenças dos exemplos](examples/README.md) e [manifesto do corpus COBOL Dicas](examples/manifesto-coboldicas.json)

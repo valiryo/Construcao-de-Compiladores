@@ -1,0 +1,653 @@
+{
+  "repository": "https://github.com/Coboldicas/codigo_fonte_cobol",
+  "commit": "1ffb3bf279bbb1e596b1091f1dda1cf7ddf51295",
+  "retrieved_on": "2026-11-17",
+  "method": "git clone --depth 1 (rede liberada após falha DNS no sandbox)",
+  "files": [
+    {
+      "upstream_path": "ASCII001.cbl",
+      "path": "examples/complementares/ASCII001.cbl",
+      "category": "complementares",
+      "sha256": "1e23dd4500f247753ba00bc0a93374d6387b5ebf223845a79b8fc4a49c0f1eec",
+      "git_blob": "92679b5424b6a9ba580ac63484e2136f7b719868"
+    },
+    {
+      "upstream_path": "BUSCA01A.cbl",
+      "path": "examples/oficiais/BUSCA01A.cbl",
+      "category": "oficiais",
+      "sha256": "f0802e5e443e456ff9c04a4016d1eb3f0f68b69e6983b507fe95dd4eb46cb3df",
+      "git_blob": "e9b0bdc56074a78ed0a265a81f8cf575f30d2d3c"
+    },
+    {
+      "upstream_path": "CAD0001A.cbl",
+      "path": "examples/complementares/CAD0001A.cbl",
+      "category": "complementares",
+      "sha256": "e42b893bbf7a7a2076f6329b4538d3b8c36921b8d0ba5ec4164cc244b9025856",
+      "git_blob": "e87a2f86ed7e446fa6c04ca75b65227fc3f0da1e"
+    },
+    {
+      "upstream_path": "CAD0002A.cbl",
+      "path": "examples/oficiais/CAD0002A.cbl",
+      "category": "oficiais",
+      "sha256": "4e1c81cb5e18fe298a51d602f6d331357034a30545873022db8f95b2edfb7bff",
+      "git_blob": "9d9edfb9fc45edc3df8175aa863aaba6b3ad347c"
+    },
+    {
+      "upstream_path": "CAD0004A.cbl",
+      "path": "examples/oficiais/CAD0004A.cbl",
+      "category": "oficiais",
+      "sha256": "4edee4f796a303df8ca8568c84d05ab689f9b0e8c2f779fc613c3d8070d2bf1b",
+      "git_blob": "7d7d6d3234bae8548ab91644fdca4511674e0911"
+    },
+    {
+      "upstream_path": "CAD0005A.cbl",
+      "path": "examples/oficiais/CAD0005A.cbl",
+      "category": "oficiais",
+      "sha256": "379dabe74fa646b0cd48b207a4b63bf5a280ddf84ee1f34336d5e88ec412288e",
+      "git_blob": "cc0244a9dc181dab9c742bb847c80389168a88b1"
+    },
+    {
+      "upstream_path": "CAIXAREG.cbl",
+      "path": "examples/oficiais/CAIXAREG.cbl",
+      "category": "oficiais",
+      "sha256": "6e4294a3f02a09227d7e2faebd9f90e1f3a8361d0d98d9c22abf032dbf423e43",
+      "git_blob": "986cdf0562be74e6c82999f101e839e93fffad27"
+    },
+    {
+      "upstream_path": "CALCMD01.cbl",
+      "path": "examples/oficiais/CALCMD01.cbl",
+      "category": "oficiais",
+      "sha256": "b7d1d4694c6fe9f9f8152ff2c0b9360c9c4e27527dccbce91e80fea1fb968f47",
+      "git_blob": "3fce172b581cfe51891e1dafaa5a5accc4dfb20f"
+    },
+    {
+      "upstream_path": "CBREAKEX.cbl",
+      "path": "examples/complementares/CBREAKEX.cbl",
+      "category": "complementares",
+      "sha256": "1f9362f9a4a2312acf3d451034299429167c1bcb45919eec74b337edeb819936",
+      "git_blob": "5d41007752f5a255ec6161462d778fd859358c0e"
+    },
+    {
+      "upstream_path": "CLIESQL01.cbl",
+      "path": "examples/complementares/CLIESQL01.cbl",
+      "category": "complementares",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "upstream_path": "COD001A.cpy",
+      "path": "examples/dependencias/COD001A.cpy",
+      "category": "dependencias",
+      "sha256": "ca830df93cbb4f45a2444a89ddf2376c7b4ca393e4064c8f948f532599205047",
+      "git_blob": "7f427012c79179a155a9f610963dc6ebbb9d20d7"
+    },
+    {
+      "upstream_path": "COPY002A.cpy",
+      "path": "examples/dependencias/COPY002A.cpy",
+      "category": "dependencias",
+      "sha256": "56b99d3ee335b667a0eeb01115811001ea9055074865e296606571f7dac410c5",
+      "git_blob": "8dad02c833d43d7d182b2d8511ce1dbece29609c"
+    },
+    {
+      "upstream_path": "GAMESNAK.cbl",
+      "path": "examples/complementares/GAMESNAK.cbl",
+      "category": "complementares",
+      "sha256": "5f883a9b0d064781e98664ab15df34640c20b6b5ddeb62dc372cf90f4697618a",
+      "git_blob": "f0ed1cf4b7e9bd53770abc64a3bcdf206dbbd907"
+    },
+    {
+      "upstream_path": "GRAV001A.cbl",
+      "path": "examples/complementares/GRAV001A.cbl",
+      "category": "complementares",
+      "sha256": "8c7990c754a0d593ac6e1c4be7f3ad8ecd87adcdc91d4554a35b87191e743892",
+      "git_blob": "71ead28c2a348906b5febbc0f1fbe76a8a633571"
+    },
+    {
+      "upstream_path": "JCL0003A.jcl",
+      "path": "examples/referencia/JCL0003A.jcl",
+      "category": "referencia",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "upstream_path": "JCLTEST.jcl",
+      "path": "examples/referencia/JCLTEST.jcl",
+      "category": "referencia",
+      "sha256": "68c4ee056f6f022774a29d425a3abc9ccb4346fd019afff17e283ea615f23dae",
+      "git_blob": "f029aa3c4d9e50bb9f890028f964de857e7b1d80"
+    },
+    {
+      "upstream_path": "JOB0001A.jcl",
+      "path": "examples/referencia/JOB0001A.jcl",
+      "category": "referencia",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "upstream_path": "LER0001A.cbl",
+      "path": "examples/complementares/LER0001A.cbl",
+      "category": "complementares",
+      "sha256": "a6a393853336ab63753fe9de492affee159330270c66a39036f8555f511d27d1",
+      "git_blob": "56e9a15446a5bedc2f55cf204f5c6a1dee67a5fe"
+    },
+    {
+      "upstream_path": "LER0002A.cbl",
+      "path": "examples/complementares/LER0002A.cbl",
+      "category": "complementares",
+      "sha256": "b639cd708fe4606fe0a1871ecb4452c06e64c5b6a16819b73f9fc92e671b4283",
+      "git_blob": "060eb04fb8fcf6c20e6924da4bb8be5c610924e0"
+    },
+    {
+      "upstream_path": "LOGIN01A.cbl",
+      "path": "examples/complementares/LOGIN01A.cbl",
+      "category": "complementares",
+      "sha256": "f384902060586698b46b19c038dc7274a48f64324832005f575f0665ccf149cc",
+      "git_blob": "f6aca78920486083cf31465bcf59428b68ad3e6e"
+    },
+    {
+      "upstream_path": "LOGINMAP.bms",
+      "path": "examples/referencia/LOGINMAP.bms",
+      "category": "referencia",
+      "sha256": "ee8ac6eed276107a467db2a2473337402c6ad2de7c712f21f97906098418305a",
+      "git_blob": "07d5f056e55add21d628305355b009fbad705b84"
+    },
+    {
+      "upstream_path": "MINICALC.cbl",
+      "path": "examples/complementares/MINICALC.cbl",
+      "category": "complementares",
+      "sha256": "631b1e2dc208ea47027913aae5060a70514a3f30423c416b8d1b9ba5e783694f",
+      "git_blob": "ba3282e65c4a7a695184e76cc872216ae2123aaf"
+    },
+    {
+      "upstream_path": "NCURSESDEMO.cbl",
+      "path": "examples/complementares/NCURSESDEMO.cbl",
+      "category": "complementares",
+      "sha256": "71b5040e8d409b640bfb1e19252c5db134c20e5c74620a8e0c07a6efb9cb0c42",
+      "git_blob": "4504ab154452e2e93ecdf5ed2e48675e7e8e442b"
+    },
+    {
+      "upstream_path": "PROG001A.cbl",
+      "path": "examples/complementares/PROG001A.cbl",
+      "category": "complementares",
+      "sha256": "3b4c8e611fd0b7d976959974a0e72a5d976aa274a6ce3993eb90ac4d02035ad3",
+      "git_blob": "f4496a03bcbb9e13bf716c08375d8e11f70e42ec"
+    },
+    {
+      "upstream_path": "PROG002A.cbl",
+      "path": "examples/complementares/PROG002A.cbl",
+      "category": "complementares",
+      "sha256": "f8035e3b3e4a7f1fbc3e175101961ab341f62e73e7121a2df2fb5948f4bc7f30",
+      "git_blob": "74db39830b7b43248ab9a7f9e926440646db3e59"
+    },
+    {
+      "upstream_path": "PROG003A.cbl",
+      "path": "examples/complementares/PROG003A.cbl",
+      "category": "complementares",
+      "sha256": "c4090c03142a8fdc5b81fbf04e84c6cd700fc157fcb131d4a416462887e4f4bf",
+      "git_blob": "1eed1703f25d30457b04247643253b5ed570063e"
+    },
+    {
+      "upstream_path": "PROG004A.cbl",
+      "path": "examples/complementares/PROG004A.cbl",
+      "category": "complementares",
+      "sha256": "ccd95080f824b24fca661db58236985955e1464cd86f47cf17ed82d2e59e0817",
+      "git_blob": "acd3844221c2d1a290d4c9f6c46f669411980b0e"
+    },
+    {
+      "upstream_path": "PROG005A.cbl",
+      "path": "examples/complementares/PROG005A.cbl",
+      "category": "complementares",
+      "sha256": "3a0462745632fb4595e6b109da5630ae4e8d3f1627af42f829e5142560e85df9",
+      "git_blob": "e43b665da68cf502d45f800c834deb5a45fdb462"
+    },
+    {
+      "upstream_path": "PROG006A.cbl",
+      "path": "examples/complementares/PROG006A.cbl",
+      "category": "complementares",
+      "sha256": "ee3d3a2407598009fdbaae80bd2f9e108b8c96aa4bcfbd6f8f9f87c0a60312d4",
+      "git_blob": "cb2b409169ac0b9c1733029e96d8cacb1276bbb1"
+    },
+    {
+      "upstream_path": "PROG007A.cbl",
+      "path": "examples/complementares/PROG007A.cbl",
+      "category": "complementares",
+      "sha256": "b302bea7e0308fd9985535977d5e66463e6fb1a980b1418d1f4d972009ad6dbd",
+      "git_blob": "c65b0105ea53fbf03cbd06242d57d3e0296001c2"
+    },
+    {
+      "upstream_path": "PROG008A.cbl",
+      "path": "examples/complementares/PROG008A.cbl",
+      "category": "complementares",
+      "sha256": "ce74ae2add080137dd4320eb1e80c4a41df805e8963fb8d26b692a75b9da5be8",
+      "git_blob": "c835c0f79e82194663db29c72387a21fa9ee78ec"
+    },
+    {
+      "upstream_path": "PROG009A.cbl",
+      "path": "examples/complementares/PROG009A.cbl",
+      "category": "complementares",
+      "sha256": "a7d7777e707a3e5f0a25a6c543e5684bdb07fd8c065de4979e4eeb8f89610536",
+      "git_blob": "a05ac727d788c7ad84b160d4dcbe33d817222ebc"
+    },
+    {
+      "upstream_path": "PROG010A.cbl",
+      "path": "examples/complementares/PROG010A.cbl",
+      "category": "complementares",
+      "sha256": "b09b29d5000f3a1d2ed3a6494dec4fe72c173278c44de10dd680953b732a2711",
+      "git_blob": "1a6ebb01ebfd60c43aa3d3b6f2fb63064dae9ebd"
+    },
+    {
+      "upstream_path": "PROG011A.cbl",
+      "path": "examples/complementares/PROG011A.cbl",
+      "category": "complementares",
+      "sha256": "4e58fff23918a8d4421b5406704bd0326cec39d202c7d8add18cbf61c05e0118",
+      "git_blob": "5d8a3735c2f0b6e0a0c62dc46b6daa4967c9c95c"
+    },
+    {
+      "upstream_path": "PROG012A.cbl",
+      "path": "examples/complementares/PROG012A.cbl",
+      "category": "complementares",
+      "sha256": "2b1724b63cbae34856ab897a29e401ebdc251ab048c83f15e40b61541e0d8765",
+      "git_blob": "85ac4c90274f5dbcda9089d5043aa86f63cd87c9"
+    },
+    {
+      "upstream_path": "PROG014A.cbl",
+      "path": "examples/complementares/PROG014A.cbl",
+      "category": "complementares",
+      "sha256": "814f138d2a7ea8e5e7201f1c602724c20ac7d053cde085e2c08b1a4cc67a1ec1",
+      "git_blob": "1e084720023ed269052b72ba0bec8b5309850d6b"
+    },
+    {
+      "upstream_path": "PROG015A.cbl",
+      "path": "examples/complementares/PROG015A.cbl",
+      "category": "complementares",
+      "sha256": "7d8dd9ea7bcd38a20dd9137b68acfedf17ec7057997c3ea6049233a3e1e92131",
+      "git_blob": "b645ef16d95dc125594c36cc30c3e86a99e446e3"
+    },
+    {
+      "upstream_path": "PROG016A.cbl",
+      "path": "examples/complementares/PROG016A.cbl",
+      "category": "complementares",
+      "sha256": "dcf2fcf97d33c8ea7d2b09e31fb8271d6e0ef9b67ed9bd5e7753abae1b8250f8",
+      "git_blob": "478e5ab713b87e132bc267072ec7d0e28b8c22a8"
+    },
+    {
+      "upstream_path": "PROG017A.cbl",
+      "path": "examples/complementares/PROG017A.cbl",
+      "category": "complementares",
+      "sha256": "7535fad430b4ba6f158b46590677c4bcbe085a80229420d2d4d3dce5386dd590",
+      "git_blob": "7d1dc5671691fbdaa7bec9392049896ebc5f13e9"
+    },
+    {
+      "upstream_path": "PROG018A.cbl",
+      "path": "examples/complementares/PROG018A.cbl",
+      "category": "complementares",
+      "sha256": "68add0d9de307ad375ad564176085850a83ea8d0c33d51ec7efa148fc696748c",
+      "git_blob": "f0a56d1c6380db17cd025fd2ddba60230e97e7b0"
+    },
+    {
+      "upstream_path": "PROG019A.cbl",
+      "path": "examples/complementares/PROG019A.cbl",
+      "category": "complementares",
+      "sha256": "d7ae0cb9d0ec81c07b3a7a6d40bcf2851449d8250bcbd23219ed5c3a8db57625",
+      "git_blob": "4aa2b22615b461a48c96c1bc37c2f404875f76bc"
+    },
+    {
+      "upstream_path": "PROG020A.cbl",
+      "path": "examples/complementares/PROG020A.cbl",
+      "category": "complementares",
+      "sha256": "9c628ff6d3263ed33dffa32c561804b7186dfd755bbc37708cf39e1cc6f81d1e",
+      "git_blob": "54e4de6eba0cfc3b45a69d15ade118cfee73fecf"
+    },
+    {
+      "upstream_path": "PROG021A.cbl",
+      "path": "examples/complementares/PROG021A.cbl",
+      "category": "complementares",
+      "sha256": "d549299e8b24811eb6f2cbdc3b32f43c4743258164a73117a143505226c219c8",
+      "git_blob": "be52f64bcae145713c8797c2c0d3eb82a4ad8b10"
+    },
+    {
+      "upstream_path": "PROG022A.cbl",
+      "path": "examples/complementares/PROG022A.cbl",
+      "category": "complementares",
+      "sha256": "d08cc5ebee201372123d4e4d501521ddadac4f8e067f1db7491699851a604240",
+      "git_blob": "c3127f2dab4065d0d7f41b012c6f4fb391207d74"
+    },
+    {
+      "upstream_path": "PROG023A.cbl",
+      "path": "examples/complementares/PROG023A.cbl",
+      "category": "complementares",
+      "sha256": "659df07d0df9b67e4824dc93642c00fdda483a2b452cf9344cc2a4ddcbf7c27f",
+      "git_blob": "7d4cf3841f3c09c922116626db3544ed9e3ee288"
+    },
+    {
+      "upstream_path": "PROG023B.cbl",
+      "path": "examples/complementares/PROG023B.cbl",
+      "category": "complementares",
+      "sha256": "5c3c9ef99f2236919efcb61527d1935efd0f20ed754743115dfc0a6d10a7b4f2",
+      "git_blob": "f83f640744672f9a1001038d03fcdfdd012d6f0f"
+    },
+    {
+      "upstream_path": "PROG023C.cbl",
+      "path": "examples/complementares/PROG023C.cbl",
+      "category": "complementares",
+      "sha256": "e72a0124777b49133886ddb0d073982d537f03d5e35bc3661b1caf6050465a85",
+      "git_blob": "41ea51048cc132dd341a588cae521853e1c598a2"
+    },
+    {
+      "upstream_path": "PROG023D.cbl",
+      "path": "examples/complementares/PROG023D.cbl",
+      "category": "complementares",
+      "sha256": "8df3667bb1c10a5d463c1bf38c87c5aa9834bef353b0069af95e98490db8a1d3",
+      "git_blob": "0cc88ba8779cf913d266306990e45e74571f22dd"
+    },
+    {
+      "upstream_path": "PROG023E.cbl",
+      "path": "examples/complementares/PROG023E.cbl",
+      "category": "complementares",
+      "sha256": "a2cd7d7118b7fff9a116699f20aa274b9815a99130f1f68b3a188b048409a00e",
+      "git_blob": "9d26a0006fa1462abda291a3df5e23a941fe10b1"
+    },
+    {
+      "upstream_path": "PROG024A.cbl",
+      "path": "examples/oficiais/PROG024A.cbl",
+      "category": "oficiais",
+      "sha256": "551ebc76e49851393d7ad51a88196ead0222226296266cb1b8524cc38649c540",
+      "git_blob": "cc4322bd39f49e1a804faa894db5d404e15d0a8a"
+    },
+    {
+      "upstream_path": "PROG025A.cbl",
+      "path": "examples/complementares/PROG025A.cbl",
+      "category": "complementares",
+      "sha256": "c178308585caaf1dc7e240b0f2a6bd703a779c69bcd91a55183eeba61d41b90e",
+      "git_blob": "c342e921817f8eb02e64b785dc643f2da8a6c5fc"
+    },
+    {
+      "upstream_path": "PROG027A.cbl",
+      "path": "examples/complementares/PROG027A.cbl",
+      "category": "complementares",
+      "sha256": "fc9092e0590c4e94b754c14b86f585ad7809fb7017a939a3b112a10d822c9855",
+      "git_blob": "27e6763d2203c7871a1bcf6bd3715e070c733f7f"
+    },
+    {
+      "upstream_path": "PROG028A.cbl",
+      "path": "examples/complementares/PROG028A.cbl",
+      "category": "complementares",
+      "sha256": "22aae859e31c2bae4f61571628ce7c06c8689231461aa88e302794006c36b30e",
+      "git_blob": "7576030c0f9da8453950ee1520903973cce486f0"
+    },
+    {
+      "upstream_path": "PROG029A.cbl",
+      "path": "examples/complementares/PROG029A.cbl",
+      "category": "complementares",
+      "sha256": "0c7e4e9d5e020f8e121c8d4d5ee0763727535ff398762b82dadd2f9281618220",
+      "git_blob": "a8ef652efcbe727ca55f75cf87db351277c9141d"
+    },
+    {
+      "upstream_path": "PROG033A.cbl",
+      "path": "examples/complementares/PROG033A.cbl",
+      "category": "complementares",
+      "sha256": "5842489e1ea241685a182adba481747c963554e239f3237f073a1f0e3ac9825b",
+      "git_blob": "c056187ff1f9694b37488f8cd8e9fce19eeed1bd"
+    },
+    {
+      "upstream_path": "PROG034A.cbl",
+      "path": "examples/complementares/PROG034A.cbl",
+      "category": "complementares",
+      "sha256": "cdd42e67792540ecac2468aa3b30cfa0e90d83f2e0cf81a89cb4ea097896d2db",
+      "git_blob": "6c37896b70afdf373fab5148093077b25d990e7e"
+    },
+    {
+      "upstream_path": "PROG035A.cbl",
+      "path": "examples/complementares/PROG035A.cbl",
+      "category": "complementares",
+      "sha256": "c64691c0d06112183339a01227b8f6d08660c92a87d4b42500e5f7d73815b87e",
+      "git_blob": "ca075a00e16f270bb356b0f017370519cd3dfe3b"
+    },
+    {
+      "upstream_path": "PROG036A.cbl",
+      "path": "examples/complementares/PROG036A.cbl",
+      "category": "complementares",
+      "sha256": "ae7fdde1a4fcaf2e83c5266e46768c78b5d6cf5a5f95b9c4c7dfc7fcbc39ad89",
+      "git_blob": "bd6e54d85faf6ef550bc53c1cc0dbfa6a51963d4"
+    },
+    {
+      "upstream_path": "PROG037A.cbl",
+      "path": "examples/complementares/PROG037A.cbl",
+      "category": "complementares",
+      "sha256": "fb7e712ef744fe94883e07348c60d1a68ab6621eb9b778eb88ad722a5382986c",
+      "git_blob": "a27c2a80f6eac6b73818421b39f2b71cca747414"
+    },
+    {
+      "upstream_path": "PROG038A.cbl",
+      "path": "examples/complementares/PROG038A.cbl",
+      "category": "complementares",
+      "sha256": "fd10d0b97861a05cae7dc4d4eaa8519a5df47975a950a8a725aeb7afca62f829",
+      "git_blob": "fc12b62d54fb1f758a64b89c0f4839f07c5ec770"
+    },
+    {
+      "upstream_path": "PROG039A.cbl",
+      "path": "examples/complementares/PROG039A.cbl",
+      "category": "complementares",
+      "sha256": "cf9f8c7cc37ed396bbbda70026cb071abb5df7a375f508879d438c599776960f",
+      "git_blob": "49cc51891d0ae796bd5c1fab44e811111b52db72"
+    },
+    {
+      "upstream_path": "PROG040A.cbl",
+      "path": "examples/complementares/PROG040A.cbl",
+      "category": "complementares",
+      "sha256": "ccce2ea9e885e60cdec2a479d8a421577b4ad0c920df4549a3b674fd755ebb9a",
+      "git_blob": "1a425bf0f3ebba1bf58a4203988f546effd09550"
+    },
+    {
+      "upstream_path": "PROG041A.cbl",
+      "path": "examples/complementares/PROG041A.cbl",
+      "category": "complementares",
+      "sha256": "4f5310236a9232d3f4e9f8d88d464812ee605d290ecffee2c2fa4dbaa1b4098d",
+      "git_blob": "7d23dbd3bb2095839c198f3bbea22c1ff19043be"
+    },
+    {
+      "upstream_path": "PROG042A.cbl",
+      "path": "examples/complementares/PROG042A.cbl",
+      "category": "complementares",
+      "sha256": "5fdd2e4ba4bbcff6749e36ec71dcb00244201b8ba5c14818bc250083f8d9eff4",
+      "git_blob": "19e570ee74241ec57268f4abb44c7998dd03db5f"
+    },
+    {
+      "upstream_path": "PROG042B.cbl",
+      "path": "examples/complementares/PROG042B.cbl",
+      "category": "complementares",
+      "sha256": "155e71f569096302a6da313a749b139d01e22d22a3559708abbd52d9d100b05b",
+      "git_blob": "a0c85451a71d3dfa26f745b4e4a1a68da1b677cd"
+    },
+    {
+      "upstream_path": "PROG043A.cbl",
+      "path": "examples/complementares/PROG043A.cbl",
+      "category": "complementares",
+      "sha256": "b4cb6d0803f2abc5f07508d6c367abddeaf14cadf3406bd1e41a8a545275dfcb",
+      "git_blob": "cafe21aa5fe0502448bbda33d99b3166de5bd90f"
+    },
+    {
+      "upstream_path": "PROG044A.cbl",
+      "path": "examples/complementares/PROG044A.cbl",
+      "category": "complementares",
+      "sha256": "d160af2d9a2b77c20ae0e15e134770bba44b9c7d5dd8f2187289ee9aa7b0848f",
+      "git_blob": "e75cd3482708f364a86f943249e81e05fbf5d298"
+    },
+    {
+      "upstream_path": "PROG045A.cbl",
+      "path": "examples/complementares/PROG045A.cbl",
+      "category": "complementares",
+      "sha256": "fa1ee7929b3cdc20ebf9a624bb1ce6000f03865d794c8a4afa1df1642d5ea56a",
+      "git_blob": "2e31a043891a00c0d5085594832692454c28a078"
+    },
+    {
+      "upstream_path": "PROGDATA.cbl",
+      "path": "examples/dependencias/PROGDATA.cbl",
+      "category": "dependencias",
+      "sha256": "6f2fe45a88c62c71ffd40db09b1414303c5db122b100e7a9d2593acbbdd9909d",
+      "git_blob": "01dedf0853e9f2e310612dbb631b25b4123d32a2"
+    },
+    {
+      "upstream_path": "PROGTEST.cbl",
+      "path": "examples/complementares/PROGTEST.cbl",
+      "category": "complementares",
+      "sha256": "310aae54323eab8a615ce09618f8c58cafd69c8793d4fa97829810813d6094db",
+      "git_blob": "a2b75ead7826667ee40cc57c4f25f437821fcc81"
+    },
+    {
+      "upstream_path": "PROGTEST2.cbl",
+      "path": "examples/complementares/PROGTEST2.cbl",
+      "category": "complementares",
+      "sha256": "3825c2775ec8aa37ad1972cb597741f58b752266c5597daafb7daba14b054397",
+      "git_blob": "0349fc47e53f7cfcd4365a6e2dbc93130e187e05"
+    },
+    {
+      "upstream_path": "PROGTEST3.cbl",
+      "path": "examples/complementares/PROGTEST3.cbl",
+      "category": "complementares",
+      "sha256": "291ee7b75f7fa8f27180f7b887c8568d1547e6903a55d4b96218114fe806c048",
+      "git_blob": "d02944ae32a4dc993928931f71055666a7c54bab"
+    },
+    {
+      "upstream_path": "PROGTEST4.cbl",
+      "path": "examples/complementares/PROGTEST4.cbl",
+      "category": "complementares",
+      "sha256": "53d0cf247558a06ba16bd8ed8922dc7b59d338946b162ebfc8dbd0ba30ccef72",
+      "git_blob": "557ba14cac0bdc8a0424edae9c9de672f3973383"
+    },
+    {
+      "upstream_path": "PROGTIME.cbl",
+      "path": "examples/complementares/PROGTIME.cbl",
+      "category": "complementares",
+      "sha256": "e22b4967ec99d1a53735c7cbd6e4a4603f7f1f5ea5952dffc34e0e4ae482f0a0",
+      "git_blob": "8b3cc5bf0d59da349b4a021a87140a9ffb53712c"
+    },
+    {
+      "upstream_path": "PROGVSAM.cbl",
+      "path": "examples/complementares/PROGVSAM.cbl",
+      "category": "complementares",
+      "sha256": "5914a2a2168611383b58aca262b275cead494fdc78506b37820d2144ac038524",
+      "git_blob": "fa348a5c50cf30abff581556979217ddd32442e7"
+    },
+    {
+      "upstream_path": "README.md",
+      "path": "examples/referencia/README.upstream.txt",
+      "category": "referencia",
+      "sha256": "27babbdd09e0a6320ca2df678798863e4dda11e1446f710c0ade1396a8c19428",
+      "git_blob": "c7b29b130b7053ba3005e2c58fdf9ca7276536f5"
+    },
+    {
+      "upstream_path": "REL0001A.cbl",
+      "path": "examples/complementares/REL0001A.cbl",
+      "category": "complementares",
+      "sha256": "2bda21de732daaaaac3063776d690f6c1665da96312eb00ab94a0a0a60127c71",
+      "git_blob": "59ba87e7af8f5b16dd6bb230bb1596007c532977"
+    },
+    {
+      "upstream_path": "REL0002A.cbl",
+      "path": "examples/complementares/REL0002A.cbl",
+      "category": "complementares",
+      "sha256": "f68ab65fc4943008ed6d491db5ad5c93bf8ae5107113dacec467ef6752da2c05",
+      "git_blob": "9f1f1467671b160e60299024ca3e1fadc3b6fbd0"
+    },
+    {
+      "upstream_path": "SAMPGOOD.jcl",
+      "path": "examples/referencia/SAMPGOOD.jcl",
+      "category": "referencia",
+      "sha256": "1d227e8f87ad6fd71a2f0499d4f1e8418af347de40913e9b613a81eb113bc35e",
+      "git_blob": "8f8dec9d543d74766f6ad4924e8b17c59670f9e1"
+    },
+    {
+      "upstream_path": "SORT001A.cbl",
+      "path": "examples/complementares/SORT001A.cbl",
+      "category": "complementares",
+      "sha256": "71aa7fcf1e1333e5999649443c369af94eb099f11a97c0edfab78a7efce44111",
+      "git_blob": "89b4e2fdb4a2107ce5cfab9435567ffc82fe353b"
+    },
+    {
+      "upstream_path": "SORT002A.cbl",
+      "path": "examples/complementares/SORT002A.cbl",
+      "category": "complementares",
+      "sha256": "6e4ed4e810e92f9ef569599925b7df6aae6d44d82ab0d6e9806cd50996595d55",
+      "git_blob": "fe2a3bbade66da72848fdc939ae1ecbcca62a169"
+    },
+    {
+      "upstream_path": "TELABMS.cbl",
+      "path": "examples/complementares/TELABMS.cbl",
+      "category": "complementares",
+      "sha256": "233e13830c7d9c1020bdbd89450c1c9402f4df853ab4ccc14f067b522640322d",
+      "git_blob": "5a5275adb21e29bc6f251ba6a78f7caf8b0810c5"
+    },
+    {
+      "upstream_path": "TESTE002.cbl",
+      "path": "examples/complementares/TESTE002.cbl",
+      "category": "complementares",
+      "sha256": "f53b05252c7c5e2f8fb27a851e1f9bcf03862bc3d2bf8758ff4b669ddbb09e29",
+      "git_blob": "5c1dae854cd9e27c03274897778dbf515720898f"
+    },
+    {
+      "upstream_path": "VALCNPJ.cbl",
+      "path": "examples/complementares/VALCNPJ.cbl",
+      "category": "complementares",
+      "sha256": "58195236cc97d57cb880f13494b09aa2a9853a34b5c5726356c501c2eee8e545",
+      "git_blob": "a69f261d24cad354fd2aec4faa121276d5473b15"
+    },
+    {
+      "upstream_path": "VALCPF01.cbl",
+      "path": "examples/complementares/VALCPF01.cbl",
+      "category": "complementares",
+      "sha256": "3328f6c258b57b9b310471b507b7ffbf98c99325c30d2fbc51aaaa448564fe9a",
+      "git_blob": "5dc1dd626ee88efdc97cfc506494305a2ee1e297"
+    },
+    {
+      "upstream_path": "VALIDA1A.cbl",
+      "path": "examples/complementares/VALIDA1A.cbl",
+      "category": "complementares",
+      "sha256": "0d1b35f60029dcd38afcc50adde4096522908b988e6209670806e90ba58ffe12",
+      "git_blob": "ab5b3ccd1b8cafc256c4fd31f5a3691ba1b17f7e"
+    },
+    {
+      "upstream_path": "VALIDA1B.cbl",
+      "path": "examples/complementares/VALIDA1B.cbl",
+      "category": "complementares",
+      "sha256": "57c7ccce5c2fb85f807815e9c0a796d93e054e4a84514a561828738e58285674",
+      "git_blob": "b7f214979253b3e7f8d328d848e79fcff5e9fde9"
+    },
+    {
+      "upstream_path": "clientes-sql.cbl",
+      "path": "examples/complementares/clientes-sql.cbl",
+      "category": "complementares",
+      "sha256": "07214d6e6d3830269fda0facdf7ffc7569afd4c8a090be29170033afa88b3cd7",
+      "git_blob": "bc7d60602e6944d2b52d089cea8badecd4924ce0"
+    },
+    {
+      "upstream_path": "main.cbl",
+      "path": "examples/complementares/main.cbl",
+      "category": "complementares",
+      "sha256": "1ea8470ae1a40fc824294a43a9372f9e336d9fe31d79494396c2b7958023d1ba",
+      "git_blob": "a7442d7620b5ee6cba07eb03aaa6765c0f77b853"
+    },
+    {
+      "upstream_path": "meu_programa.cob",
+      "path": "examples/complementares/meu_programa.cob",
+      "category": "complementares",
+      "sha256": "ab4d979ec161448bafc66dcb81a7cb4514dee6e828ea11a81a8f4576d73f80db",
+      "git_blob": "8d71ab362e8d251709ad90c5916b881b6cff588a"
+    },
+    {
+      "upstream_path": "ncurses_demo.cbl",
+      "path": "examples/complementares/ncurses_demo.cbl",
+      "category": "complementares",
+      "sha256": "78ad9231305bf88922239be6cc96437806968287ce235bae32faa2927b4a2ac1",
+      "git_blob": "a62183f2c696c9c98c866134b4e6cd6400e4c7bb"
+    }
+  ],
+  "derivatives": [
+    {
+      "path": "examples/corrigidos/CAD0005A.cbl",
+      "original_path": "examples/oficiais/CAD0005A.cbl",
+      "sha256": "19b1d31741229462db14bae6b83c4e014bb20a8902d8b023b7dcdecb3ddf009e",
+      "change": "No bloco original das linhas 97–101, remover os três marcadores de conflito e o segundo DISPLAY idêntico (inclusive seu espaço final). Preservar o primeiro DISPLAY e todos os demais bytes."
+    }
+  ]
+}
