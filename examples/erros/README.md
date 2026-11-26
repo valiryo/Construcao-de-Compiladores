@@ -27,5 +27,4 @@ python -m cobol_lexer examples/erros/prog004_folha_pgto_erros.cob --stream
 
 O teste `test_error_examples_report_every_inserted_error`, em
 `tests/test_extended_lexer.py`, confere o código, a linha e a coluna de cada
-diagnóstico. A explicação de cada erro e da recuperação correspondente está na
-seção 4 do [relatório](../../docs/relatorio-lexer.md).
+diagnóstico.
